@@ -1,0 +1,128 @@
+/* src/app/layout/Sidebar.css */
+.sidebar {
+  width: 240px;
+  background-color: var(--bg-panel);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  transition: width 0.2s ease;
+  z-index: 10;
+}
+
+.sidebar.collapsed {
+  width: 64px;
+}
+
+.sidebar-header {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-4);
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 600;
+  font-size: var(--font-size-lg);
+  color: var(--primary);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-3) 0;
+}
+
+.sidebar-group {
+  margin-bottom: var(--space-4);
+}
+
+.sidebar-group-title {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0 var(--space-4);
+  margin-bottom: var(--space-2);
+  font-weight: 600;
+}
+
+.sidebar.collapsed .sidebar-group-title {
+  text-align: center;
+  padding: 0;
+  opacity: 0.5;
+  font-size: 10px;
+}
+
+.sidebar-nav {
+  list-style: none;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  padding: var(--space-2) var(--space-4);
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: var(--font-size-md);
+  transition: background-color 0.1s, color 0.1s;
+}
+
+.sidebar-link:hover {
+  background-color: var(--bg-panel-hover);
+  color: var(--text-main);
+  text-decoration: none;
+}
+
+.sidebar-link.active {
+  background-color: var(--info-bg);
+  color: var(--primary);
+  font-weight: 500;
+  border-right: 3px solid var(--primary);
+}
+
+.sidebar-icon {
+  margin-right: var(--space-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+}
+
+.sidebar.collapsed .sidebar-icon {
+  margin-right: 0;
+}
+
+.sidebar-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar.collapsed .sidebar-label {
+  display: none;
+}
+
+.sidebar-footer {
+  padding: var(--space-3);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-btn {
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--space-1) var(--space-2);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.toggle-btn:hover {
+  background-color: var(--bg-panel-hover);
+  color: var(--text-main);
+}

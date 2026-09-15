@@ -1,0 +1,99 @@
+/* src/app/components/FilterPanel.css */
+.filter-panel {
+  width: 260px;
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-panel);
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
+}
+
+.filter-panel-header {
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--bg-panel-hover);
+}
+
+.filter-panel-title {
+  font-weight: 600;
+  font-size: var(--font-size-md);
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.filter-panel-content {
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.filter-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.filter-input, .filter-select {
+  width: 100%;
+  padding: var(--space-2);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  background-color: var(--bg-app);
+  color: var(--text-main);
+}
+
+.filter-input:focus, .filter-select:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  background-color: var(--bg-panel);
+}
+
+.filter-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.filter-btn {
+  flex: 1;
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.filter-btn-primary {
+  background-color: var(--primary);
+  color: var(--primary-text);
+}
+
+.filter-btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.filter-btn-secondary {
+  background-color: transparent;
+  border-color: var(--border-color);
+  color: var(--text-main);
+}
+
+.filter-btn-secondary:hover {
+  background-color: var(--bg-panel-hover);
+}

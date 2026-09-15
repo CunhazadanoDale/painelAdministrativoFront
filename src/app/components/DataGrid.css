@@ -1,0 +1,57 @@
+/* src/app/components/DataGrid.css */
+.datagrid-container {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-panel);
+}
+
+.datagrid {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: var(--font-size-md);
+}
+
+.datagrid th,
+.datagrid td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+.datagrid th {
+  background-color: var(--bg-panel-hover);
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.datagrid tbody tr:hover {
+  background-color: var(--info-bg);
+}
+
+.datagrid tbody tr.selected {
+  background-color: #ebecf0;
+}
+
+.datagrid-checkbox {
+  width: 32px;
+  text-align: center;
+}
+
+.datagrid-checkbox input {
+  cursor: pointer;
+}
+
+.datagrid-empty {
+  padding: var(--space-5);
+  text-align: center;
+  color: var(--text-muted);
+}

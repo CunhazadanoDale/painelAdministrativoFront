@@ -1,0 +1,58 @@
+/* src/app/design-system/variables.css */
+:root {
+  /* Colors */
+  --bg-app: #f4f5f7;
+  --bg-panel: #ffffff;
+  --bg-panel-hover: #fafafa;
+  --bg-header: #ffffff;
+  
+  --border-color: #e0e2e6;
+  --border-color-hover: #c9ccd1;
+  --border-focus: #2684FF;
+  
+  --text-main: #172b4d;
+  --text-secondary: #5e6c84;
+  --text-muted: #8993a4;
+  
+  --primary: #0052cc;
+  --primary-hover: #0047b3;
+  --primary-text: #ffffff;
+  
+  /* Semantic Colors */
+  --success-bg: #e3fcef;
+  --success-text: #006644;
+  --warning-bg: #fffae6;
+  --warning-text: #ff8b00;
+  --danger-bg: #ffebe6;
+  --danger-text: #bf2600;
+  --info-bg: #deebff;
+  --info-text: #0747a6;
+  --neutral-bg: #dfe1e6;
+  --neutral-text: #42526e;
+  
+  /* Typography */
+  --font-family: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-md: 13px; /* Default for dense UI */
+  --font-size-lg: 14px;
+  --font-size-xl: 16px;
+  --font-size-xxl: 20px;
+  
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  
+  /* Borders & Radius */
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  
+  /* Shadows */
+  --shadow-panel: 0 1px 3px rgba(9, 30, 66, 0.08), 0 0 1px rgba(9, 30, 66, 0.1);
+  --shadow-dropdown: 0 4px 8px -2px rgba(9, 30, 66, 0.25), 0 0 1px rgba(9, 30, 66, 0.31);
+}
