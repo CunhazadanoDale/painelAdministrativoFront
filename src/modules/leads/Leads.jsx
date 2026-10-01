@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Leads.css';
 import { DataGrid } from '../../app/components/DataGrid';
 import { FilterPanel, FilterGroup } from '../../app/components/FilterPanel';
@@ -18,9 +19,11 @@ import {
   AlertCircle,
   List,
   LayoutGrid,
+  Eye,
 } from 'lucide-react';
 
 export default function Leads() {
+  const navegar = useNavigate();
   const {
     leads,
     funis,
@@ -102,7 +105,24 @@ export default function Leads() {
   };
 
   const colunas = [
-    { label: 'Nome', field: 'nome', width: '20%' },
+    {
+      label: 'Nome',
+      field: 'nome',
+      width: '20%',
+      render: (nome, lead) => (
+        <button
+          type="button"
+          className="leads-nome-link"
+          title="Ver detalhes do lead"
+          onClick={(event) => {
+            event.stopPropagation();
+            navegar(`/leads/${lead.id}`);
+          }}
+        >
+          {nome}
+        </button>
+      ),
+    },
     { label: 'Email', field: 'email', width: '18%' },
     { label: 'Telefone', field: 'telefone', width: '13%' },
     {
@@ -133,6 +153,14 @@ export default function Leads() {
       width: '80px',
       render: (id, lead) => (
         <div className="leads-acoes" onClick={(event) => event.stopPropagation()}>
+          <button
+            type="button"
+            className="leads-acao-btn"
+            title="Ver detalhes"
+            onClick={() => navegar(`/leads/${lead.id}`)}
+          >
+            <Eye size={14} />
+          </button>
           <button
             type="button"
             className="leads-acao-btn"
@@ -232,7 +260,7 @@ export default function Leads() {
               erro={kanban.erro}
               erroMovimento={kanban.erroMovimento}
               onMover={kanban.mover}
-              onEditar={abrirEdicao}
+              onAbrir={(lead) => navegar(`/leads/${lead.id}`)}
               onLimparErroMovimento={kanban.limparErroMovimento}
               onRecarregar={kanban.recarregar}
             />

@@ -111,6 +111,26 @@
   color: var(--danger-text);
 }
 
+/* Nome do lead clicável (abre a tela de detalhes) */
+.leads-nome-link {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--primary);
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.leads-nome-link:hover {
+  text-decoration: underline;
+}
+
 /* Paginação */
 .leads-paginacao {
   display: flex;

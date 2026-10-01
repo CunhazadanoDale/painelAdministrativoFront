@@ -14,6 +14,17 @@ export function formatarData(iso) {
   return data.toLocaleDateString('pt-BR');
 }
 
+/** Formata ISO -> dd/mm/aaaa às hh:mm. */
+export function formatarDataHora(iso) {
+  if (!iso) return '—';
+  const data = new Date(iso);
+  if (Number.isNaN(data.getTime())) return '—';
+  return `${data.toLocaleDateString('pt-BR')} às ${data.toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  })}`;
+}
+
 /**
  * Cor do badge para uma etapa: reconhece nomes comuns do funil
  * (novo, contatado, negociação, perdido...) e, se não reconhecer,

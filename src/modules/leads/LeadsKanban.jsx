@@ -7,11 +7,12 @@ import './Leads.css';
  * Quadro Kanban: uma coluna por etapa do funil selecionado, com cards
  * arrastáveis (HTML5 drag and drop). A coluna de destino responde a
  * dragover/drop e repassa o lead ao hook, que faz o PATCH da etapa.
+ * O clique no card abre a tela de detalhe do lead.
  *
  * @param {{ etapas: object[], colunas: Record<string, object[]>,
  *           carregando: boolean, erro: string|null, erroMovimento: string|null,
  *           onMover: (lead: object, etapaId: string) => Promise<void>,
- *           onEditar: (lead: object) => void, onLimparErroMovimento: () => void,
+ *           onAbrir: (lead: object) => void, onLimparErroMovimento: () => void,
  *           onRecarregar: () => void }} props
  */
 export function LeadsKanban({
@@ -21,7 +22,7 @@ export function LeadsKanban({
   erro,
   erroMovimento,
   onMover,
-  onEditar,
+  onAbrir,
   onLimparErroMovimento,
   onRecarregar,
 }) {
@@ -131,8 +132,8 @@ export function LeadsKanban({
                       setArrastandoId(null);
                       setAlvoSobre(null);
                     }}
-                    onClick={() => onEditar(lead)}
-                    title="Clique para editar"
+                    onClick={() => onAbrir(lead)}
+                    title="Ver detalhes do lead"
                   >
                     <div className="kanban-card-nome">{lead.nome}</div>
                     <div className="kanban-card-contato">
