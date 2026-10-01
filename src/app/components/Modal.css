@@ -1,0 +1,65 @@
+/* src/app/components/Modal.css */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(9, 30, 66, 0.54);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--space-6);
+  z-index: 100;
+}
+
+.modal-caixa {
+  background-color: var(--bg-panel);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-dropdown);
+  margin-top: 8vh;
+  max-width: calc(100vw - var(--space-6) * 2);
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modal-titulo {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.modal-fechar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+}
+
+.modal-fechar:hover {
+  background-color: var(--bg-panel-hover);
+  color: var(--text-main);
+}
+
+.modal-corpo {
+  padding: var(--space-4);
+  overflow-y: auto;
+}
+
+.modal-rodape {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--border-color);
+}
