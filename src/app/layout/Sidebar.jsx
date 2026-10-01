@@ -11,7 +11,8 @@ import {
   ChevronRight,
   Inbox,
   CreditCard,
-  BarChart2
+  BarChart2,
+  Filter
 } from 'lucide-react';
 import './Sidebar.css';
 
@@ -29,6 +30,7 @@ export function Sidebar() {
       title: 'Comercial',
       items: [
         { label: 'Leads', icon: <Users size={18} />, path: '/leads' },
+        { label: 'Funis', icon: <Filter size={18} />, path: '/funis' },
         { label: 'Negociações', icon: <Briefcase size={18} />, path: '/negociacoes' }
       ]
     },

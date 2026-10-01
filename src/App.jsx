@@ -3,6 +3,7 @@ import { AppShell } from './app/layout/AppShell';
 
 import Dashboard from './modules/dashboard/Dashboard';
 import Leads from './modules/leads/Leads';
+import Funis from './modules/funis/Funis';
 
 // Placeholder modules for the ones not implemented yet
 const Negociacoes = () => <div>Negociações Module</div>;
@@ -18,6 +19,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/leads" element={<Leads />} />
+        <Route path="/funis" element={<Funis />} />
         <Route path="/negociacoes" element={<Negociacoes />} />
         <Route path="/pagamentos" element={<Pagamentos />} />
         <Route path="/formularios" element={<Formularios />} />

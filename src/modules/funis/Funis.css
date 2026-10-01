@@ -1,0 +1,301 @@
+/* src/modules/funis/Funis.css */
+.funis-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.funis-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3);
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-panel);
+}
+
+.funis-toolbar-titulo {
+  font-weight: 600;
+  font-size: var(--font-size-xl);
+}
+
+.funis-paineis {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(240px, 320px) 1fr;
+  gap: var(--space-4);
+}
+
+.funis-painel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-panel);
+  overflow: hidden;
+}
+
+.funis-painel-cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.funis-painel-cabecalho h2 {
+  margin: 0;
+  font-size: var(--font-size-md, 14px);
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.funis-status {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  color: var(--text-muted);
+  font-size: var(--font-size-md);
+  text-align: center;
+}
+
+.funis-erro-acao {
+  margin: var(--space-3) var(--space-3) 0;
+}
+
+/* Lista de funis */
+.funis-lista {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  overflow-y: auto;
+}
+
+.funis-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  padding: var(--space-2);
+}
+
+.funis-item:hover {
+  background-color: var(--bg-panel-hover);
+  border-color: var(--border-color);
+}
+
+.funis-item-ativo {
+  background-color: var(--bg-panel-hover);
+  border-color: var(--primary);
+}
+
+.funis-item-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: transparent;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+}
+
+.funis-item-nome {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--text-main);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.funis-tag {
+  font-size: var(--font-size-xs);
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.funis-tag-inativo {
+  border-color: var(--danger-text);
+  color: var(--danger-text);
+  background-color: var(--danger-bg);
+}
+
+/* Lista de etapas */
+.funis-etapas {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  overflow-y: auto;
+}
+
+.funis-etapa {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-panel);
+}
+
+.funis-etapa-ordem {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: var(--bg-panel-hover);
+  border: 1px solid var(--border-color);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.funis-etapa-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.funis-etapa-nome {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--text-main);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.funis-etapa-contagem {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* Ações */
+.funis-acoes {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.funis-acao-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-panel);
+  color: var(--text-secondary);
+}
+
+.funis-acao-btn:hover:not(:disabled) {
+  border-color: var(--border-color-hover);
+  background-color: var(--bg-panel-hover);
+  color: var(--primary);
+}
+
+.funis-acao-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.funis-acao-perigo:hover:not(:disabled) {
+  border-color: var(--danger-text);
+  background-color: var(--danger-bg);
+  color: var(--danger-text);
+}
+
+/* Formulários dos modais */
+.funis-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.funis-form-campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.funis-form-erro {
+  font-size: var(--font-size-xs);
+  color: var(--danger-text);
+}
+
+.funis-form-erro-api {
+  padding: var(--space-2);
+  background-color: var(--danger-bg);
+  color: var(--danger-text);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+.funis-form-check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-md);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.funis-excluir-confirmar {
+  background-color: var(--danger-text);
+  color: var(--primary-text);
+}
+
+.funis-excluir-confirmar:hover {
+  background-color: #9d1f00;
+}
+
+/* Responsivo: painéis empilham */
+@media (max-width: 900px) {
+  .funis-paineis {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+
+  .funis-painel {
+    max-height: 50vh;
+  }
+}

@@ -5,13 +5,25 @@ import { FilterPanel, FilterGroup } from '../../app/components/FilterPanel';
 import { StatusBadge } from '../../app/components/StatusBadge';
 import { Modal } from '../../app/components/Modal';
 import { LeadFormModal } from './LeadFormModal';
+import { LeadsKanban } from './LeadsKanban';
 import { useLeads, TAMANHO_PAGINA } from './useLeads';
+import { useKanban } from './useKanban';
 import { corDaEtapa, formatarData } from './leadsUtils';
-import { Plus, Pencil, Trash2, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  AlertCircle,
+  List,
+  LayoutGrid,
+} from 'lucide-react';
 
 export default function Leads() {
   const {
     leads,
+    funis,
     etapas,
     etapaMap,
     total,
@@ -31,6 +43,10 @@ export default function Leads() {
     excluir,
     recarregar,
   } = useLeads();
+
+  // Visão da tela: lista (paginada) ou kanban (colunas por etapa).
+  const [visao, setVisao] = useState('lista');
+  const kanban = useKanban({ funis, etapas, ativo: visao === 'kanban' });
 
   // Rascunho dos filtros: só aplica em "Aplicar".
   const [buscaRascunho, setBuscaRascunho] = useState('');
@@ -60,6 +76,7 @@ export default function Leads() {
     } else {
       await criar(dados);
     }
+    kanban.recarregar();
   };
 
   const confirmarExclusao = async () => {
@@ -67,6 +84,7 @@ export default function Leads() {
     setErroExclusao(null);
     try {
       await excluir(leadParaExcluir.id);
+      kanban.recarregar();
       setLeadParaExcluir(null);
     } catch (e) {
       setErroExclusao(e.message || 'Erro ao excluir o lead.');
@@ -146,9 +164,44 @@ export default function Leads() {
       <div className="leads-main">
         <div className="leads-toolbar">
           <div style={{ fontWeight: 600, fontSize: 16 }}>
-            Leads {total != null ? `(${total})` : carregando ? '…' : ''}
+            Leads
+            {visao === 'lista' && (total != null ? ` (${total})` : carregando ? ' …' : '')}
           </div>
           <div className="leads-toolbar-actions">
+            <div className="leads-visao-toggle" role="group" aria-label="Visão da lista">
+              <button
+                type="button"
+                className={visao === 'lista' ? 'leads-visao-btn leads-visao-ativo' : 'leads-visao-btn'}
+                onClick={() => setVisao('lista')}
+              >
+                <List size={14} /> Lista
+              </button>
+              <button
+                type="button"
+                className={visao === 'kanban' ? 'leads-visao-btn leads-visao-ativo' : 'leads-visao-btn'}
+                onClick={() => setVisao('kanban')}
+              >
+                <LayoutGrid size={14} /> Kanban
+              </button>
+            </div>
+
+            {visao === 'kanban' && (
+              <select
+                className="filter-select leads-funil-select"
+                value={kanban.funilId}
+                onChange={(event) => kanban.selecionarFunil(event.target.value)}
+                disabled={funis.length === 0}
+                aria-label="Funil do quadro"
+              >
+                {funis.length === 0 && <option value="">Nenhum funil</option>}
+                {funis.map((funil) => (
+                  <option key={funil.funil_id} value={funil.funil_id}>
+                    {funil.nome}
+                  </option>
+                ))}
+              </select>
+            )}
+
             <button
               type="button"
               className="filter-btn filter-btn-primary"
@@ -160,7 +213,7 @@ export default function Leads() {
           </div>
         </div>
 
-        {erro && (
+        {erro && visao === 'lista' && (
           <div className="leads-erro">
             <AlertCircle size={16} />
             <span>{erro}</span>
@@ -171,7 +224,19 @@ export default function Leads() {
         )}
 
         <div className="leads-content">
-          {carregando ? (
+          {visao === 'kanban' ? (
+            <LeadsKanban
+              etapas={kanban.etapas}
+              colunas={kanban.colunas}
+              carregando={kanban.carregando}
+              erro={kanban.erro}
+              erroMovimento={kanban.erroMovimento}
+              onMover={kanban.mover}
+              onEditar={abrirEdicao}
+              onLimparErroMovimento={kanban.limparErroMovimento}
+              onRecarregar={kanban.recarregar}
+            />
+          ) : carregando ? (
             <div className="leads-status">Carregando leads…</div>
           ) : (
             <>
@@ -218,44 +283,46 @@ export default function Leads() {
         </div>
       </div>
 
-      <FilterPanel onApply={aplicar} onClear={limpar}>
-        <FilterGroup label="Pesquisa">
-          <input
-            type="text"
-            className="filter-input"
-            placeholder="Nome, email, telefone..."
-            value={buscaRascunho}
-            onChange={(event) => setBuscaRascunho(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') aplicar();
-            }}
-          />
-        </FilterGroup>
-        <FilterGroup label="Status (etapa)">
-          <select
-            className="filter-select"
-            value={etapaRascunho}
-            onChange={(event) => setEtapaRascunho(event.target.value)}
-          >
-            <option value="">Todas</option>
-            {etapas.map((etapa) => (
-              <option key={etapa.etapa_id} value={etapa.etapa_id}>
-                {etapa.nome}
-              </option>
-            ))}
-          </select>
-        </FilterGroup>
-        <div className="leads-filtros-info">
-          {etapaFiltro && <span>Filtro de etapa ativo</span>}
-          {q && <span>Busca: “{q}”</span>}
-        </div>
-      </FilterPanel>
+      {visao === 'lista' && (
+        <FilterPanel onApply={aplicar} onClear={limpar}>
+          <FilterGroup label="Pesquisa">
+            <input
+              type="text"
+              className="filter-input"
+              placeholder="Nome, email, telefone..."
+              value={buscaRascunho}
+              onChange={(event) => setBuscaRascunho(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') aplicar();
+              }}
+            />
+          </FilterGroup>
+          <FilterGroup label="Status (etapa)">
+            <select
+              className="filter-select"
+              value={etapaRascunho}
+              onChange={(event) => setEtapaRascunho(event.target.value)}
+            >
+              <option value="">Todas</option>
+              {etapas.map((etapa) => (
+                <option key={etapa.etapa_id} value={etapa.etapa_id}>
+                  {etapa.nome}
+                </option>
+              ))}
+            </select>
+          </FilterGroup>
+          <div className="leads-filtros-info">
+            {etapaFiltro && <span>Filtro de etapa ativo</span>}
+            {q && <span>Busca: “{q}”</span>}
+          </div>
+        </FilterPanel>
+      )}
 
       {modalAberto && (
         <LeadFormModal
           key={leadEditando?.id ?? 'novo'}
           lead={leadEditando}
-          etapas={etapas}
+          etapas={visao === 'kanban' ? kanban.etapas : etapas}
           onFechar={() => setModalAberto(false)}
           onSalvar={salvar}
         />
