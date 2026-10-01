@@ -53,3 +53,33 @@ input, select, textarea {
 ::-webkit-scrollbar-thumb:hover {
   background: #a5adba;
 }
+
+/* Banner de erro compartilhado por todas as telas
+   (antes vivia só no Leads.css e outras telas ficavam sem estilo em dev) */
+.leads-erro {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--danger-bg);
+  color: var(--danger-text);
+  border: 1px solid var(--danger-text);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-md);
+}
+
+.leads-erro button {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid var(--danger-text);
+  color: var(--danger-text);
+  border-radius: var(--radius-md);
+  padding: 2px 10px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.leads-erro button:hover {
+  background-color: var(--danger-text);
+  color: var(--primary-text);
+}

@@ -1,68 +1,231 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import './Dashboard.css';
 import { Panel } from '../../app/components/Panel';
-import { BarChart2, Users, Activity, Inbox } from 'lucide-react';
+import { StatusBadge } from '../../app/components/StatusBadge';
+import { useDashboard } from './useDashboard';
+import { corDaEtapa, formatarData } from '../leads/leadsUtils';
+import { BarChart2, Activity, Users, AlertCircle, RefreshCw } from 'lucide-react';
 
+/** Barra horizontal de contagem (percentual em relação ao maior valor). */
+function Barra({ rotulo, total, maximo, sufixo }) {
+  const percentual = maximo > 0 ? Math.round((total / maximo) * 100) : 0;
+  return (
+    <div className="dashboard-barra">
+      <div className="dashboard-barra-topo">
+        <span className="dashboard-barra-rotulo">{rotulo}</span>
+        <span className="dashboard-barra-valor">
+          {total}
+          {sufixo ? ` ${sufixo}` : ''}
+        </span>
+      </div>
+      <div className="dashboard-barra-trilho">
+        <div
+          className="dashboard-barra-preenchimento"
+          style={{ width: `${percentual}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Dashboard com dados reais do backend: KPIs (totais por contagem),
+ * distribuição por funil e por etapa, e últimos leads cadastrados.
+ */
 export default function Dashboard() {
+  const {
+    funis,
+    etapaMap,
+    recentes,
+    totalLeads,
+    funisComContagem,
+    maiorFunil,
+    carregando,
+    erro,
+    recarregar,
+  } = useDashboard();
+
+  const [funilId, setFunilId] = useState('');
+
+  // Funil do painel de etapas: escolha do usuário com fallback para o maior.
+  const funilEfetivoId =
+    funilId && funis.some((funil) => funil.funil_id === funilId)
+      ? funilId
+      : maiorFunil?.funil.funil_id ?? '';
+
+  const etapasDoFunil = funisComContagem.find(
+    (linha) => linha.funil.funil_id === funilEfetivoId
+  );
+  const maximoEtapas = Math.max(1, ...(etapasDoFunil?.etapas ?? []).map((linha) => linha.total));
+  const maximoFunis = Math.max(1, ...funisComContagem.map((linha) => linha.total));
+
   return (
     <div className="dashboard-container">
       <div className="dashboard-toolbar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontWeight: 500 }}>Período:</span>
-          <select style={{ padding: '4px 8px', borderRadius: 4, border: '1px solid #ccc' }}>
-            <option>Este Mês</option>
-            <option>Mês Passado</option>
-          </select>
-        </div>
-        <button className="filter-btn filter-btn-secondary" style={{ width: 'auto', padding: '4px 12px' }}>Atualizar</button>
+        <div style={{ fontWeight: 600, fontSize: 16 }}>Dashboard</div>
+        <button
+          type="button"
+          className="filter-btn filter-btn-secondary"
+          style={{ width: 'auto', padding: '4px 12px', display: 'flex', alignItems: 'center', gap: 4 }}
+          onClick={recarregar}
+        >
+          <RefreshCw size={14} /> Atualizar
+        </button>
       </div>
 
-      <div className="summary-cards">
-        <div className="summary-card">
-          <span className="summary-card-title">Leads</span>
-          <span className="summary-card-value">142</span>
+      {erro && (
+        <div className="leads-erro">
+          <AlertCircle size={16} />
+          <span>{erro}</span>
+          <button type="button" onClick={recarregar}>
+            Tentar novamente
+          </button>
         </div>
-        <div className="summary-card">
-          <span className="summary-card-title">Oportunidades</span>
-          <span className="summary-card-value">38</span>
-        </div>
-        <div className="summary-card">
-          <span className="summary-card-title">Clientes Novos</span>
-          <span className="summary-card-value">12</span>
-        </div>
-        <div className="summary-card">
-          <span className="summary-card-title">Conversão</span>
-          <span className="summary-card-value">8.4%</span>
-        </div>
-      </div>
+      )}
 
-      <div className="dashboard-grid">
-        <Panel title="Funil de Vendas" icon={<BarChart2 size={16} />}>
-          <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-            [Gráfico de Funil]
+      {carregando ? (
+        <div className="dashboard-status">Carregando painel…</div>
+      ) : (
+        <>
+          <div className="summary-cards">
+            <div className="summary-card">
+              <span className="summary-card-title">Leads</span>
+              <span className="summary-card-value">{totalLeads}</span>
+            </div>
+            <div className="summary-card">
+              <span className="summary-card-title">Funis ativos</span>
+              <span className="summary-card-value">{funis.length}</span>
+            </div>
+            <div className="summary-card">
+              <span className="summary-card-title">Etapas</span>
+              <span className="summary-card-value">{funisComContagem.reduce(
+                (soma, linha) => soma + linha.etapas.length,
+                0
+              )}</span>
+            </div>
+            <div className="summary-card">
+              <span className="summary-card-title">Funil com mais leads</span>
+              <span className="summary-card-value summary-card-texto" title={maiorFunil?.funil.nome}>
+                {maiorFunil ? maiorFunil.funil.nome : '—'}
+              </span>
+              {maiorFunil && (
+                <span className="summary-card-subtitulo">{maiorFunil.total} lead(s)</span>
+              )}
+            </div>
           </div>
-        </Panel>
 
-        <Panel title="Atividades Recentes" icon={<Activity size={16} />}>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            <li style={{ padding: '8px 0', borderBottom: '1px solid var(--border-color)' }}>Ligação para João Silva - Hoje, 14:00</li>
-            <li style={{ padding: '8px 0', borderBottom: '1px solid var(--border-color)' }}>Reunião com Empresa ABC - Ontem, 16:30</li>
-            <li style={{ padding: '8px 0' }}>Proposta enviada - 12/09/2026</li>
-          </ul>
-        </Panel>
+          <div className="dashboard-grid">
+            <Panel title="Leads por funil" icon={<BarChart2 size={16} />}>
+              {funisComContagem.length === 0 ? (
+                <div className="dashboard-vazio">
+                  Nenhum funil cadastrado.{' '}
+                  <Link to="/funis">Criar funis e etapas</Link>
+                </div>
+              ) : (
+                <div className="dashboard-barras">
+                  {funisComContagem.map((linha) => (
+                    <Barra
+                      key={linha.funil.funil_id}
+                      rotulo={linha.funil.nome}
+                      total={linha.total}
+                      maximo={maximoFunis}
+                      sufixo="lead(s)"
+                    />
+                  ))}
+                </div>
+              )}
+            </Panel>
 
-        <Panel title="Novos Leads" icon={<Users size={16} />}>
-          <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-            [Tabela Compacta de Leads]
+            <Panel
+              title="Leads por etapa"
+              icon={<Activity size={16} />}
+              actions={
+                funis.length > 1 ? (
+                  <select
+                    className="filter-select dashboard-funil-select"
+                    value={funilEfetivoId}
+                    onChange={(event) => setFunilId(event.target.value)}
+                    aria-label="Funil"
+                  >
+                    {funis.map((funil) => (
+                      <option key={funil.funil_id} value={funil.funil_id}>
+                        {funil.nome}
+                      </option>
+                    ))}
+                  </select>
+                ) : null
+              }
+            >
+              {!etapasDoFunil || etapasDoFunil.etapas.length === 0 ? (
+                <div className="dashboard-vazio">
+                  Este funil ainda não tem etapas.{' '}
+                  <Link to="/funis">Gerenciar etapas</Link>
+                </div>
+              ) : (
+                <div className="dashboard-barras">
+                  {etapasDoFunil.etapas.map(({ etapa, total }) => (
+                    <div className="dashboard-etapa-linha" key={etapa.etapa_id}>
+                      <Barra
+                        rotulo={
+                          <StatusBadge
+                            status={corDaEtapa(etapa)}
+                            label={etapa.nome}
+                          />
+                        }
+                        total={total}
+                        maximo={maximoEtapas}
+                        sufixo="lead(s)"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Panel>
+
+            <div className="dashboard-grid-amplo">
+              <Panel title="Últimos leads" icon={<Users size={16} />}>
+                {recentes.length === 0 ? (
+                  <div className="dashboard-vazio">
+                    Nenhum lead cadastrado ainda.{' '}
+                    <Link to="/leads">Ir para Leads</Link>
+                  </div>
+                ) : (
+                  <ul className="dashboard-leads">
+                    {recentes.map((lead) => {
+                      const etapa = etapaMap[lead.etapa_id];
+                      return (
+                        <li key={lead.id} className="dashboard-lead-item">
+                          <Link
+                            to={`/leads/${lead.id}`}
+                            className="dashboard-lead-nome"
+                          >
+                            {lead.nome}
+                          </Link>
+                          <span className="dashboard-lead-contato">
+                            {lead.email || lead.telefone || '—'}
+                          </span>
+                          {etapa ? (
+                            <StatusBadge
+                              status={corDaEtapa(etapa)}
+                              label={etapa.nome}
+                            />
+                          ) : (
+                            <StatusBadge status="neutral" label="—" />
+                          )}
+                          <span className="dashboard-lead-data">
+                            {formatarData(lead.criado_em)}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </Panel>
+            </div>
           </div>
-        </Panel>
-
-        <Panel title="Formulários Recebidos" icon={<Inbox size={16} />}>
-          <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-            [Tabela de Formulários]
-          </div>
-        </Panel>
-      </div>
+        </>
+      )}
     </div>
   );
 }
