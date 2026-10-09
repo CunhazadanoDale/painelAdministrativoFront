@@ -1,23 +1,27 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Users, 
-  Briefcase, 
-  FileText, 
-  Package, 
+import {
+  LayoutDashboard,
+  Users,
+  Briefcase,
+  Package,
   Settings,
   ChevronLeft,
   ChevronRight,
   Inbox,
   CreditCard,
   BarChart2,
-  Filter
+  Filter,
+  UserCog,
+  BadgeCheck,
+  ShieldCheck
 } from 'lucide-react';
+import { useAutenticacao } from '../autenticacao/useAutenticacao';
 import './Sidebar.css';
 
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
+  const { administrador } = useAutenticacao();
 
   const navGroups = [
     {
@@ -37,7 +41,8 @@ export function Sidebar() {
     {
       title: 'Financeiro',
       items: [
-        { label: 'Solicitações', icon: <CreditCard size={18} />, path: '/pagamentos' }
+        { label: 'Solicitações', icon: <CreditCard size={18} />, path: '/solicitacoes' },
+        { label: 'Aprovadores', icon: <ShieldCheck size={18} />, path: '/aprovadores', admin: true }
       ]
     },
     {
@@ -51,19 +56,28 @@ export function Sidebar() {
       title: 'Sistema',
       items: [
         { label: 'Relatórios', icon: <BarChart2 size={18} />, path: '/relatorios' },
+        { label: 'Usuários', icon: <UserCog size={18} />, path: '/usuarios', admin: true },
+        { label: 'Cargos', icon: <BadgeCheck size={18} />, path: '/cargos', admin: true },
         { label: 'Configurações', icon: <Settings size={18} />, path: '/configuracoes' }
       ]
     }
   ];
+
+  const gruposVisiveis = navGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => !item.admin || administrador)
+    }))
+    .filter((group) => group.items.length > 0);
 
   return (
     <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-header">
         {collapsed ? 'M' : 'MiaConstrutora'}
       </div>
-      
+
       <div className="sidebar-content">
-        {navGroups.map((group, idx) => (
+        {gruposVisiveis.map((group, idx) => (
           <div key={idx} className="sidebar-group">
             <div className="sidebar-group-title">
               {collapsed ? '...' : group.title}
@@ -71,8 +85,8 @@ export function Sidebar() {
             <ul className="sidebar-nav">
               {group.items.map((item, itemIdx) => (
                 <li key={itemIdx}>
-                  <NavLink 
-                    to={item.path} 
+                  <NavLink
+                    to={item.path}
                     className={({ isActive }) => isActive ? 'sidebar-link active' : 'sidebar-link'}
                   >
                     <span className="sidebar-icon">{item.icon}</span>

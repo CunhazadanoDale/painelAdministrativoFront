@@ -1,6 +1,6 @@
 import React from 'react';
 import './Panel.css';
-import { MoreVertical, Minimize2, Maximize2 } from 'lucide-react';
+import { Minimize2, Maximize2 } from 'lucide-react';
 
 export function Panel({ title, children, icon, noPadding = false, actions }) {
   const [minimized, setMinimized] = React.useState(false);
