@@ -122,7 +122,7 @@ export default function Cargos() {
         <button
           type="button"
           className="filter-btn filter-btn-primary"
-          style={{ width: 'auto', padding: '4px 12px', display: 'flex', alignItems: 'center', gap: 4 }}
+          style={{ flex: 'none', width: 'auto', padding: '4px 12px', display: 'flex', alignItems: 'center', gap: 4 }}
           onClick={abrirNovoCargo}
         >
           <Plus size={16} /> Novo Cargo

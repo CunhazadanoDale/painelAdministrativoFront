@@ -19,6 +19,7 @@
 }
 
 .lead-detalhe-voltar {
+  flex: none;
   width: auto;
   display: flex;
   align-items: center;

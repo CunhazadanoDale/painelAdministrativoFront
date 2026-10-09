@@ -93,6 +93,7 @@ export default function LeadDetalhe() {
             type="button"
             className="filter-btn filter-btn-primary"
             style={{
+              flex: 'none',
               width: 'auto',
               padding: '4px 12px',
               display: 'flex',

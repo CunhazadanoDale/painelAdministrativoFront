@@ -92,7 +92,7 @@ export default function Funis() {
         <button
           type="button"
           className="filter-btn filter-btn-primary"
-          style={{ width: 'auto', padding: '4px 12px', display: 'flex', alignItems: 'center', gap: 4 }}
+          style={{ flex: 'none', width: 'auto', padding: '4px 12px', display: 'flex', alignItems: 'center', gap: 4 }}
           onClick={abrirNovoFunil}
         >
           <Plus size={16} /> Novo Funil
@@ -172,7 +172,7 @@ export default function Funis() {
               <button
                 type="button"
                 className="filter-btn filter-btn-primary"
-                style={{ width: 'auto', padding: '4px 12px', display: 'flex', alignItems: 'center', gap: 4 }}
+                style={{ flex: 'none', width: 'auto', padding: '4px 12px', display: 'flex', alignItems: 'center', gap: 4 }}
                 onClick={abrirNovaEtapa}
               >
                 <Plus size={14} /> Nova Etapa

@@ -67,7 +67,7 @@ export default function Dashboard() {
         <button
           type="button"
           className="filter-btn filter-btn-secondary"
-          style={{ width: 'auto', padding: '4px 12px', display: 'flex', alignItems: 'center', gap: 4 }}
+          style={{ flex: 'none', width: 'auto', padding: '4px 12px', display: 'flex', alignItems: 'center', gap: 4 }}
           onClick={recarregar}
         >
           <RefreshCw size={14} /> Atualizar

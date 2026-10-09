@@ -43,7 +43,7 @@ export class ErrorBoundary extends React.Component {
               <button
                 type="button"
                 className="filter-btn filter-btn-primary"
-                style={{ width: 'auto', padding: '8px 16px' }}
+                style={{ flex: 'none', width: 'auto', padding: '8px 16px' }}
                 onClick={() => window.location.reload()}
               >
                 Recarregar página
@@ -51,7 +51,7 @@ export class ErrorBoundary extends React.Component {
               <button
                 type="button"
                 className="filter-btn filter-btn-secondary"
-                style={{ width: 'auto', padding: '8px 16px' }}
+                style={{ flex: 'none', width: 'auto', padding: '8px 16px' }}
                 onClick={() => {
                   window.location.href = '/';
                 }}
