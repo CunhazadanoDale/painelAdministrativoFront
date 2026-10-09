@@ -12,6 +12,7 @@ import {
   CreditCard,
   BarChart2,
   Filter,
+  FolderTree,
   UserCog,
   BadgeCheck,
   ShieldCheck
@@ -49,6 +50,7 @@ export function Sidebar() {
       title: 'Site & Catálogo',
       items: [
         { label: 'Formulários', icon: <Inbox size={18} />, path: '/formularios' },
+        { label: 'Categorias', icon: <FolderTree size={18} />, path: '/categorias' },
         { label: 'Produtos', icon: <Package size={18} />, path: '/produtos' }
       ]
     },
