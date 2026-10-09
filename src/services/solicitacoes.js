@@ -1,0 +1,43 @@
+import { montarConsulta, requisitar } from '../lib/api';
+
+const CAMINHO = '/api/v1/solicitacoes';
+
+export function listarSolicitacoes({ pagina = 1, tamanho = 20, escopo = '', status = '' } = {}) {
+  return requisitar(`${CAMINHO}${montarConsulta({ pagina, tamanho, escopo, status })}`);
+}
+
+export function obterSolicitacao(id) {
+  return requisitar(`${CAMINHO}/${id}`);
+}
+
+export function criarSolicitacao(dados) {
+  return requisitar(CAMINHO, { metodo: 'POST', corpo: dados });
+}
+
+export function aprovar(id) {
+  return requisitar(`${CAMINHO}/${id}/aprovar`, { metodo: 'POST', corpo: {} });
+}
+
+export function rejeitar(id, motivo) {
+  return requisitar(`${CAMINHO}/${id}/rejeitar`, { metodo: 'POST', corpo: { motivo } });
+}
+
+export function cancelar(id) {
+  return requisitar(`${CAMINHO}/${id}/cancelar`, { metodo: 'POST', corpo: {} });
+}
+
+export function registrarPagamento(id, dados) {
+  return requisitar(`${CAMINHO}/${id}/pagamento`, { metodo: 'POST', corpo: dados });
+}
+
+export function obterPagamento(id) {
+  return requisitar(`${CAMINHO}/${id}/pagamento`);
+}
+
+export function listarHistorico(id, { pagina = 1, tamanho = 100 } = {}) {
+  return requisitar(`${CAMINHO}/${id}/historico${montarConsulta({ pagina, tamanho })}`);
+}
+
+export function listarArquivos(id, { pagina = 1, tamanho = 100 } = {}) {
+  return requisitar(`${CAMINHO}/${id}/arquivos${montarConsulta({ pagina, tamanho })}`);
+}
