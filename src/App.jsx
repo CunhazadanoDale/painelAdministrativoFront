@@ -1,15 +1,20 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AppShell } from './app/layout/AppShell';
 import { ErrorBoundary } from './app/components/ErrorBoundary';
+import { useAutenticacao } from './app/autenticacao/useAutenticacao';
 
+import Login from './modules/login/Login';
 import Dashboard from './modules/dashboard/Dashboard';
 import Leads from './modules/leads/Leads';
 import LeadDetalhe from './modules/leads/LeadDetalhe';
 import Funis from './modules/funis/Funis';
+import Solicitacoes from './modules/solicitacoes/Solicitacoes';
+import SolicitacaoDetalhe from './modules/solicitacoes/SolicitacaoDetalhe';
+import Usuarios from './modules/usuarios/Usuarios';
+import Cargos from './modules/cargos/Cargos';
+import Aprovadores from './modules/aprovadores/Aprovadores';
 
-// Placeholder modules for the ones not implemented yet
 const Negociacoes = () => <div>Negociações Module</div>;
-const Pagamentos = () => <div>Pagamentos Module</div>;
 const Formularios = () => <div>Formulários Module</div>;
 const Produtos = () => <div>Produtos Module</div>;
 const Relatorios = () => <div>Relatórios Module</div>;
@@ -17,22 +22,45 @@ const Configuracoes = () => <div>Configurações Module</div>;
 
 function App() {
   const localizacao = useLocation();
+  const { autenticado, administrador } = useAutenticacao();
 
-  // Boundary externo: pega falhas do shell (sidebar/topbar) e mostra o
-  // fallback de página cheia. O interno envolve só as rotas e usa `key`
-  // para recriar o estado a cada navegação (erro de uma rota não fica
-  // preso nas demais).
+  if (!autenticado) {
+    return (
+      <ErrorBoundary>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </ErrorBoundary>
+    );
+  }
+
   return (
     <ErrorBoundary>
       <AppShell>
         <ErrorBoundary key={localizacao.pathname}>
           <Routes>
+            <Route path="/login" element={<Navigate to="/" replace />} />
             <Route path="/" element={<Dashboard />} />
             <Route path="/leads" element={<Leads />} />
             <Route path="/leads/:id" element={<LeadDetalhe />} />
             <Route path="/funis" element={<Funis />} />
             <Route path="/negociacoes" element={<Negociacoes />} />
-            <Route path="/pagamentos" element={<Pagamentos />} />
+            <Route path="/solicitacoes" element={<Solicitacoes />} />
+            <Route path="/solicitacoes/:id" element={<SolicitacaoDetalhe />} />
+            <Route path="/pagamentos" element={<Navigate to="/solicitacoes" replace />} />
+            <Route
+              path="/usuarios"
+              element={administrador ? <Usuarios /> : <Navigate to="/" replace />}
+            />
+            <Route
+              path="/cargos"
+              element={administrador ? <Cargos /> : <Navigate to="/" replace />}
+            />
+            <Route
+              path="/aprovadores"
+              element={administrador ? <Aprovadores /> : <Navigate to="/" replace />}
+            />
             <Route path="/formularios" element={<Formularios />} />
             <Route path="/produtos" element={<Produtos />} />
             <Route path="/relatorios" element={<Relatorios />} />
