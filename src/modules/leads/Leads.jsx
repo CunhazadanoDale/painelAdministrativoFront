@@ -52,7 +52,7 @@ export default function Leads() {
   const kanban = useKanban({ funis, etapas, ativo: visao === 'kanban' });
 
   // Rascunho dos filtros: só aplica em "Aplicar".
-  const [buscaRascunho, setBuscaRascunho] = useState('');
+  const [buscaRascunho, setBuscaRascunho] = useState(q);
   const [etapaRascunho, setEtapaRascunho] = useState('');
 
   const [modalAberto, setModalAberto] = useState(false);

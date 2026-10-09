@@ -13,10 +13,13 @@ import SolicitacaoDetalhe from './modules/solicitacoes/SolicitacaoDetalhe';
 import Usuarios from './modules/usuarios/Usuarios';
 import Cargos from './modules/cargos/Cargos';
 import Aprovadores from './modules/aprovadores/Aprovadores';
+import Produtos from './modules/produtos/Produtos';
+import ProdutoDetalhe from './modules/produtos/ProdutoDetalhe';
+import Categorias from './modules/produtos/Categorias';
+import Perfil from './modules/perfil/Perfil';
 
 const Negociacoes = () => <div>Negociações Module</div>;
 const Formularios = () => <div>Formulários Module</div>;
-const Produtos = () => <div>Produtos Module</div>;
 const Relatorios = () => <div>Relatórios Module</div>;
 const Configuracoes = () => <div>Configurações Module</div>;
 
@@ -63,8 +66,11 @@ function App() {
             />
             <Route path="/formularios" element={<Formularios />} />
             <Route path="/produtos" element={<Produtos />} />
+            <Route path="/produtos/:id" element={<ProdutoDetalhe />} />
+            <Route path="/categorias" element={<Categorias />} />
             <Route path="/relatorios" element={<Relatorios />} />
             <Route path="/configuracoes" element={<Configuracoes />} />
+            <Route path="/perfil" element={<Perfil />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </ErrorBoundary>

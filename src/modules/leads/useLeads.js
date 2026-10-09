@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import * as leadsService from '../../services/leads';
 import * as funisService from '../../services/funis';
 import { filtrarLeadsPorTexto } from './leadsUtils';
@@ -18,6 +19,9 @@ export const TAMANHO_PAGINA = 20;
  * (página/busca/etapa/recarga) em vez de setState dentro do effect.
  */
 export function useLeads() {
+  const [parametros, setParametros] = useSearchParams();
+  const q = parametros.get('q') ?? '';
+
   const [funis, setFunis] = useState([]);
   const [etapas, setEtapas] = useState([]);
   const [estruturaOk, setEstruturaOk] = useState(false);
@@ -26,7 +30,6 @@ export function useLeads() {
   const [total, setTotal] = useState(null);
   const [temProxima, setTemProxima] = useState(false);
   const [pagina, setPagina] = useState(1);
-  const [q, setQ] = useState('');
   const [etapaFiltro, setEtapaFiltro] = useState('');
 
   const [recarga, setRecarga] = useState(0);
@@ -149,17 +152,35 @@ export function useLeads() {
 
   const recarregar = useCallback(() => setRecarga((valor) => valor + 1), []);
 
-  const aplicarFiltros = useCallback(({ q: busca, etapaId }) => {
-    setQ(String(busca ?? '').trim());
-    setEtapaFiltro(etapaId ?? '');
-    setPagina(1);
-  }, []);
+  const definirBusca = useCallback(
+    (busca) => {
+      const limpo = String(busca ?? '').trim();
+      setParametros((atual) => {
+        const novos = new URLSearchParams(atual);
+        if (limpo) {
+          novos.set('q', limpo);
+        } else {
+          novos.delete('q');
+        }
+        return novos;
+      });
+      setPagina(1);
+    },
+    [setParametros]
+  );
+
+  const aplicarFiltros = useCallback(
+    ({ q: busca, etapaId }) => {
+      definirBusca(busca);
+      setEtapaFiltro(etapaId ?? '');
+    },
+    [definirBusca]
+  );
 
   const limparFiltros = useCallback(() => {
-    setQ('');
+    definirBusca('');
     setEtapaFiltro('');
-    setPagina(1);
-  }, []);
+  }, [definirBusca]);
 
   const irParaAnterior = useCallback(() => setPagina((valor) => Math.max(1, valor - 1)), []);
   const irParaProxima = useCallback(() => setPagina((valor) => valor + 1), []);

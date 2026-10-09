@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Search, Bell, HelpCircle, LogOut } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAutenticacao } from '../autenticacao/useAutenticacao';
 import './TopBar.css';
 
 export function TopBar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { usuario, administrador, encerrar } = useAutenticacao();
+  const [termo, setTermo] = useState('');
 
   const pathParts = location.pathname.split('/').filter(Boolean);
   const currentModule =
@@ -22,16 +24,28 @@ export function TopBar() {
     .map((parte) => parte.charAt(0).toUpperCase())
     .join('');
 
+  const pesquisar = (evento) => {
+    evento.preventDefault();
+    const busca = termo.trim();
+    navigate(busca ? `/leads?q=${encodeURIComponent(busca)}` : '/leads');
+  };
+
   return (
     <header className="topbar">
       <div className="topbar-left">
         <div className="topbar-module-title">{currentModule}</div>
       </div>
 
-      <div className="topbar-search">
+      <form className="topbar-search" onSubmit={pesquisar}>
         <Search className="topbar-search-icon" size={16} />
-        <input type="text" className="topbar-search-input" placeholder="Pesquisar..." />
-      </div>
+        <input
+          type="text"
+          className="topbar-search-input"
+          placeholder="Pesquisar leads..."
+          value={termo}
+          onChange={(evento) => setTermo(evento.target.value)}
+        />
+      </form>
 
       <div className="topbar-right">
         <button className="topbar-action-btn" title="Ajuda">
@@ -43,13 +57,13 @@ export function TopBar() {
         <button className="topbar-action-btn" title="Sair" onClick={encerrar}>
           <LogOut size={18} />
         </button>
-        <div className="topbar-user">
+        <Link className="topbar-user" to="/perfil" title="Meu perfil">
           <div className="user-info">
             <span className="user-name">{nome}</span>
             <span className="user-role">{administrador ? 'Administrador' : 'Usuário'}</span>
           </div>
           <div className="user-avatar">{iniciais}</div>
-        </div>
+        </Link>
       </div>
     </header>
   );
