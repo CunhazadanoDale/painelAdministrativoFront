@@ -5,7 +5,7 @@ import { defineConfig } from 'vite'
 // Em desenvolvimento, /api e /health são encaminhados para a API Go,
 // evitando problemas de CORS no navegador.
 // A porta da API vem do .env do backend (PORT); default 8080.
-const API_ALVO = process.env.VITE_API_PROXY || 'http://localhost:8082'
+const API_ALVO = process.env.VITE_API_PROXY || 'http://localhost:8080'
 
 export default defineConfig({
   plugins: [react()],
