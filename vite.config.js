@@ -15,4 +15,8 @@ export default defineConfig({
       '/health': { target: API_ALVO, changeOrigin: true },
     },
   },
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.js'],
+  },
 })
