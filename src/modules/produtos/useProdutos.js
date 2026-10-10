@@ -31,20 +31,37 @@ export function useProdutos() {
   useEffect(() => {
     let cancelado = false;
 
-    (async () => {
+    const carregarCategorias = async () => {
       try {
-        const [respostaProdutos, respostaCategorias, respostaResumo] = await Promise.all([
-          produtosService.listarProdutos({
-            pagina,
-            tamanho: TAMANHO_PAGINA + 1,
-            ...filtros,
-          }),
-          categoriasService.listarCategorias({ pagina: 1, tamanho: 100 }),
-          produtosService.obterResumo(),
-        ]);
-        const itens = respostaProdutos?.dados ?? [];
+        const resposta = await categoriasService.listarCategorias({ pagina: 1, tamanho: 100 });
+        if (cancelado) return;
+        setCategorias(resposta?.dados ?? []);
+      } catch {
+        // Painel e filtros seguem funcionando com a lista vazia de categorias.
+      }
+    };
+
+    const carregarResumo = async () => {
+      try {
+        const resposta = await produtosService.obterResumo();
+        if (cancelado) return;
+        setResumo(resposta?.dados ?? null);
+      } catch {
+        // Os cartões de resumo são decorativos; falha não afeta a listagem.
+      }
+    };
+
+    const carregarProdutos = async () => {
+      try {
+        const resposta = await produtosService.listarProdutos({
+          pagina,
+          tamanho: TAMANHO_PAGINA + 1,
+          ...filtros,
+        });
 
         if (cancelado) return;
+
+        const itens = Array.isArray(resposta?.dados) ? resposta.dados : [];
 
         if (itens.length === 0 && pagina > 1) {
           setPagina(pagina - 1);
@@ -53,15 +70,19 @@ export function useProdutos() {
 
         setProdutos(itens.slice(0, TAMANHO_PAGINA));
         setTemProxima(itens.length > TAMANHO_PAGINA);
-        setCategorias(respostaCategorias?.dados ?? []);
-        setResumo(respostaResumo?.dados ?? null);
         setChaveDados(chave);
         setFalha(null);
       } catch (e) {
         if (cancelado) return;
+        setProdutos([]);
+        setTemProxima(false);
         setFalha({ chave, mensagem: e.message || 'Erro ao carregar os produtos.' });
       }
-    })();
+    };
+
+    carregarProdutos();
+    carregarCategorias();
+    carregarResumo();
 
     return () => {
       cancelado = true;

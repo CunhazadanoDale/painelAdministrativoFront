@@ -129,8 +129,22 @@ describe('requisitar', () => {
     );
   });
 
-  it('devolve null quando a resposta não é JSON', async () => {
-    fetchMock.mockResolvedValue({ ok: true, status: 200, text: async () => '<html></html>' });
+  it('sinaliza erro quando a API responde 200 com HTML do fallback do SPA', async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => '<!doctype html><html><body>index.html</body></html>',
+    });
+
+    const erro = await requisitar('/api/v1/produtos').catch((e) => e);
+
+    expect(erro).toBeInstanceOf(ErroApi);
+    expect(erro.status).toBe(200);
+    expect(erro.message).toContain('não devolveu JSON');
+  });
+
+  it('devolve null em corpo vazio com status 200', async () => {
+    fetchMock.mockResolvedValue({ ok: true, status: 200, text: async () => '' });
 
     await expect(requisitar('/api/v1/teste')).resolves.toBeNull();
   });

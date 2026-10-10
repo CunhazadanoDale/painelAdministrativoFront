@@ -336,7 +336,7 @@ export default function Produtos() {
         {carregando ? (
           <div className="produtos-status">Carregando produtos…</div>
         ) : produtos.length === 0 ? (
-          erro ? null : <div className="produtos-status">Nenhum produto encontrado.</div>
+          <div className="produtos-status">Nenhum produto encontrado.</div>
         ) : (
           <>
             <DataGrid
