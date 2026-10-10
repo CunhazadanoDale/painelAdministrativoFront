@@ -81,6 +81,7 @@ export default function Perfil() {
           usuario={usuario}
           onFechar={() => setSenhaAberta(false)}
           onSalvar={trocarSenha}
+          exigirSenhaAtual
         />
       )}
     </div>

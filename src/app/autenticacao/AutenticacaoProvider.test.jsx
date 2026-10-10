@@ -2,6 +2,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { obterToken } from '../../lib/api';
 import * as autenticacaoService from '../../services/autenticacao';
+import * as sessaoService from '../../services/sessao';
 import * as solicitacoesService from '../../services/solicitacoes';
 import { AutenticacaoProvider } from './AutenticacaoProvider';
 import { useAutenticacao } from './useAutenticacao';
@@ -14,8 +15,13 @@ vi.mock('../../services/solicitacoes', () => ({
   listarSolicitacoes: vi.fn(),
 }));
 
+vi.mock('../../services/sessao', () => ({
+  encerrarSessao: vi.fn(),
+}));
+
 const { autenticar } = autenticacaoService;
 const { listarSolicitacoes } = solicitacoesService;
+const { encerrarSessao } = sessaoService;
 
 const CHAVE_SESSAO = 'mia.sessao';
 const EXPIRA_FUTURA = new Date(Date.now() + 60 * 60 * 1000).toISOString();
@@ -44,6 +50,7 @@ beforeEach(() => {
   localStorage.clear();
   vi.clearAllMocks();
   listarSolicitacoes.mockResolvedValue({ dados: [] });
+  encerrarSessao.mockResolvedValue(null);
 });
 
 describe('AutenticacaoProvider', () => {
@@ -153,5 +160,57 @@ describe('AutenticacaoProvider', () => {
     expect(result.current.permissoes).toEqual(SEM_PERMISSAO);
     expect(obterToken()).toBeNull();
     expect(localStorage.getItem(CHAVE_SESSAO)).toBeNull();
+  });
+
+  it('sair encerra a sessão no servidor e limpa a local', async () => {
+    gravarSessao();
+    const { result } = renderAutenticacao();
+
+    await act(async () => {
+      await result.current.sair();
+    });
+
+    expect(encerrarSessao).toHaveBeenCalledTimes(1);
+    expect(result.current.autenticado).toBe(false);
+    expect(localStorage.getItem(CHAVE_SESSAO)).toBeNull();
+  });
+
+  it('sair limpa a sessão local mesmo com falha no servidor', async () => {
+    gravarSessao();
+    encerrarSessao.mockRejectedValue(new Error('offline'));
+    const { result } = renderAutenticacao();
+
+    await act(async () => {
+      await result.current.sair();
+    });
+
+    expect(result.current.autenticado).toBe(false);
+    expect(obterToken()).toBeNull();
+  });
+
+  it('encerrarComAviso guarda o aviso até o próximo login', async () => {
+    gravarSessao();
+    autenticar.mockResolvedValue({
+      dados: {
+        token: 'token-novo',
+        expira_em: EXPIRA_FUTURA,
+        administrador: false,
+        usuario: { id: 'u1', nome: 'Ana' },
+      },
+    });
+    const { result } = renderAutenticacao();
+
+    act(() => {
+      result.current.encerrarComAviso('Senha alterada.');
+    });
+
+    expect(result.current.autenticado).toBe(false);
+    expect(result.current.aviso).toBe('Senha alterada.');
+
+    await act(async () => {
+      await result.current.entrar('ana@exemplo.com', 'senhaNova123');
+    });
+
+    expect(result.current.aviso).toBeNull();
   });
 });

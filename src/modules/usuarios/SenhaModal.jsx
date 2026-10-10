@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Modal } from '../../app/components/Modal';
 import './Usuarios.css';
 
-export function SenhaModal({ usuario, onFechar, onSalvar }) {
+export function SenhaModal({ usuario, onFechar, onSalvar, exigirSenhaAtual = false }) {
+  const [senhaAtual, setSenhaAtual] = useState('');
   const [senha, setSenha] = useState('');
   const [confirmacao, setConfirmacao] = useState('');
   const [erros, setErros] = useState({});
@@ -11,6 +12,10 @@ export function SenhaModal({ usuario, onFechar, onSalvar }) {
 
   const validar = () => {
     const novosErros = {};
+
+    if (exigirSenhaAtual && !senhaAtual) {
+      novosErros.senhaAtual = 'Informe a senha atual.';
+    }
 
     if (!senha) {
       novosErros.senha = 'Informe a nova senha.';
@@ -35,7 +40,7 @@ export function SenhaModal({ usuario, onFechar, onSalvar }) {
     setSalvando(true);
     setErroApi(null);
     try {
-      await onSalvar(senha);
+      await onSalvar(senha, senhaAtual);
       onFechar();
     } catch (e) {
       setErroApi(e.message || 'Erro ao trocar a senha.');
@@ -80,6 +85,25 @@ export function SenhaModal({ usuario, onFechar, onSalvar }) {
           {usuario?.nome} {usuario?.email ? `(${usuario.email})` : ''}
         </p>
 
+        {exigirSenhaAtual && (
+          <div className="usuarios-form-campo">
+            <label className="filter-label" htmlFor="senha-atual">
+              Senha atual *
+            </label>
+            <input
+              id="senha-atual"
+              className="filter-input"
+              type="password"
+              autoComplete="current-password"
+              value={senhaAtual}
+              onChange={(evento) => setSenhaAtual(evento.target.value)}
+              autoFocus
+              disabled={salvando}
+            />
+            {erros.senhaAtual && <span className="usuarios-form-erro">{erros.senhaAtual}</span>}
+          </div>
+        )}
+
         <div className="usuarios-form-campo">
           <label className="filter-label" htmlFor="senha-nova">
             Nova senha *
@@ -89,9 +113,10 @@ export function SenhaModal({ usuario, onFechar, onSalvar }) {
             className="filter-input"
             type="password"
             placeholder="Mínimo de 8 caracteres"
+            autoComplete="new-password"
             value={senha}
             onChange={(evento) => setSenha(evento.target.value)}
-            autoFocus
+            autoFocus={!exigirSenhaAtual}
             disabled={salvando}
           />
           {erros.senha && <span className="usuarios-form-erro">{erros.senha}</span>}
@@ -106,6 +131,7 @@ export function SenhaModal({ usuario, onFechar, onSalvar }) {
             className="filter-input"
             type="password"
             placeholder="Repita a nova senha"
+            autoComplete="new-password"
             value={confirmacao}
             onChange={(evento) => setConfirmacao(evento.target.value)}
             disabled={salvando}

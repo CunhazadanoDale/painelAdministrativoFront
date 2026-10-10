@@ -6,6 +6,13 @@ export function obterSessao() {
   return requisitar(CAMINHO);
 }
 
-export function trocarSenhaPropria(novaSenha) {
-  return requisitar(`${CAMINHO}/senha`, { metodo: 'POST', corpo: { nova_senha: novaSenha } });
+export function trocarSenhaPropria(senhaAtual, novaSenha) {
+  return requisitar(`${CAMINHO}/senha`, {
+    metodo: 'POST',
+    corpo: { senha_atual: senhaAtual, nova_senha: novaSenha },
+  });
+}
+
+export function encerrarSessao() {
+  return requisitar(`${CAMINHO}/encerrar`, { metodo: 'POST' });
 }

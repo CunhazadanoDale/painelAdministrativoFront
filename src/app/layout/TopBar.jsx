@@ -7,7 +7,7 @@ import './TopBar.css';
 export function TopBar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { usuario, administrador, encerrar } = useAutenticacao();
+  const { usuario, administrador, sair } = useAutenticacao();
   const [termo, setTermo] = useState('');
 
   const pathParts = location.pathname.split('/').filter(Boolean);
@@ -54,7 +54,7 @@ export function TopBar() {
         <button className="topbar-action-btn" title="Notificações">
           <Bell size={18} />
         </button>
-        <button className="topbar-action-btn" title="Sair" onClick={encerrar}>
+        <button className="topbar-action-btn" title="Sair" onClick={sair}>
           <LogOut size={18} />
         </button>
         <Link className="topbar-user" to="/perfil" title="Meu perfil">

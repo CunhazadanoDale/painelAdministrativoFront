@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import * as sessaoService from '../../services/sessao';
 import * as cargosService from '../../services/cargos';
+import { useAutenticacao } from '../../app/autenticacao/useAutenticacao';
 
 export function usePerfil() {
+  const { encerrarComAviso } = useAutenticacao();
   const [usuario, setUsuario] = useState(null);
   const [cargos, setCargos] = useState([]);
 
@@ -48,11 +50,11 @@ export function usePerfil() {
   const recarregar = useCallback(() => setRecarga((valor) => valor + 1), []);
 
   const trocarSenha = useCallback(
-    async (novaSenha) => {
-      await sessaoService.trocarSenhaPropria(novaSenha);
-      recarregar();
+    async (novaSenha, senhaAtual) => {
+      await sessaoService.trocarSenhaPropria(senhaAtual, novaSenha);
+      encerrarComAviso('Senha alterada. Entre novamente com a nova senha.');
     },
-    [recarregar]
+    [encerrarComAviso]
   );
 
   return {

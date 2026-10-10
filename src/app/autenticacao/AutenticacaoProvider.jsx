@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { aoFalharSessao, definirToken } from '../../lib/api';
 import * as autenticacaoService from '../../services/autenticacao';
+import * as sessaoService from '../../services/sessao';
 import * as solicitacoesService from '../../services/solicitacoes';
 import { AutenticacaoContexto } from './autenticacaoContexto';
 
@@ -39,6 +40,7 @@ function gravarSessao(sessao) {
 export function AutenticacaoProvider({ children }) {
   const [sessao, setSessao] = useState(carregarSessao);
   const [permissoes, setPermissoes] = useState(SEM_PERMISSAO);
+  const [aviso, setAviso] = useState(null);
 
   definirToken(sessao ? sessao.token : null);
 
@@ -67,12 +69,30 @@ export function AutenticacaoProvider({ children }) {
     };
   }, [sessao]);
 
-  const encerrar = useCallback(() => {
+  const limpar = useCallback(() => {
     gravarSessao(null);
     definirToken(null);
     setPermissoes(SEM_PERMISSAO);
     setSessao(null);
   }, []);
+
+  const encerrar = useCallback(() => {
+    setAviso(null);
+    limpar();
+  }, [limpar]);
+
+  const encerrarComAviso = useCallback(
+    (mensagem) => {
+      setAviso(mensagem);
+      limpar();
+    },
+    [limpar]
+  );
+
+  const sair = useCallback(async () => {
+    await sessaoService.encerrarSessao().catch(() => null);
+    encerrar();
+  }, [encerrar]);
 
   useEffect(() => aoFalharSessao(encerrar), [encerrar]);
 
@@ -90,6 +110,7 @@ export function AutenticacaoProvider({ children }) {
     };
     gravarSessao(novaSessao);
     setPermissoes(SEM_PERMISSAO);
+    setAviso(null);
     setSessao(novaSessao);
     return novaSessao;
   }, []);
@@ -101,10 +122,13 @@ export function AutenticacaoProvider({ children }) {
       autenticado: !!sessao,
       administrador: !!(sessao && sessao.administrador),
       permissoes: sessao ? permissoes : SEM_PERMISSAO,
+      aviso,
       entrar,
       encerrar,
+      encerrarComAviso,
+      sair,
     }),
-    [sessao, permissoes, entrar, encerrar]
+    [sessao, permissoes, aviso, entrar, encerrar, encerrarComAviso, sair]
   );
 
   return (

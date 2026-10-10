@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAutenticacao } from '../../app/autenticacao/useAutenticacao';
-import { AlertCircle, LogIn } from 'lucide-react';
+import { AlertCircle, Info, LogIn } from 'lucide-react';
 import './Login.css';
 
 export default function Login() {
-  const { entrar } = useAutenticacao();
+  const { entrar, aviso } = useAutenticacao();
   const navegar = useNavigate();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
@@ -41,6 +41,13 @@ export default function Login() {
           <span className="login-marca-nome">MiaConstrutora</span>
         </div>
         <h1 className="login-titulo">Entrar no painel</h1>
+
+        {aviso && !erro && (
+          <div className="login-aviso" role="status">
+            <Info size={16} />
+            <span>{aviso}</span>
+          </div>
+        )}
 
         {erro && (
           <div className="login-erro">
