@@ -4,6 +4,7 @@ import './Dashboard.css';
 import { Panel } from '../../app/components/Panel';
 import { StatusBadge } from '../../app/components/StatusBadge';
 import { useDashboard } from './useDashboard';
+import { useAutenticacao } from '../../app/autenticacao/useAutenticacao';
 import { corDaEtapa, formatarData } from '../leads/leadsUtils';
 import { BarChart2, Activity, Users, AlertCircle, RefreshCw } from 'lucide-react';
 
@@ -34,6 +35,25 @@ function Barra({ rotulo, total, maximo, sufixo }) {
  * distribuição por funil e por etapa, e últimos leads cadastrados.
  */
 export default function Dashboard() {
+  const { comercial, usuario } = useAutenticacao();
+
+  if (!comercial) {
+    return (
+      <div className="dashboard-container">
+        <Panel title="Bem-vindo">
+          <p className="dashboard-boas-vindas">
+            Olá{usuario?.nome ? `, ${usuario.nome}` : ''}. Use o menu ao lado para acessar os
+            módulos liberados para o seu perfil.
+          </p>
+        </Panel>
+      </div>
+    );
+  }
+
+  return <PainelComercial />;
+}
+
+function PainelComercial() {
   const {
     funis,
     etapaMap,

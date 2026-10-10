@@ -162,6 +162,25 @@ describe('AutenticacaoProvider', () => {
     expect(localStorage.getItem(CHAVE_SESSAO)).toBeNull();
   });
 
+  it('expõe o perfil comercial da sessão e o herda do administrador', () => {
+    gravarSessao({ comercial: true });
+    const { result, unmount } = renderAutenticacao();
+
+    expect(result.current.comercial).toBe(true);
+    expect(result.current.administrador).toBe(false);
+    unmount();
+
+    localStorage.clear();
+    gravarSessao({ administrador: true });
+    const administrador = renderAutenticacao();
+    expect(administrador.result.current.comercial).toBe(true);
+
+    localStorage.clear();
+    gravarSessao();
+    const comum = renderAutenticacao();
+    expect(comum.result.current.comercial).toBe(false);
+  });
+
   it('sair encerra a sessão no servidor e limpa a local', async () => {
     gravarSessao();
     const { result } = renderAutenticacao();

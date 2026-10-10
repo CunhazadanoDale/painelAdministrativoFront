@@ -106,6 +106,7 @@ export function AutenticacaoProvider({ children }) {
       token: dados.token,
       expira_em: dados.expira_em,
       administrador: !!dados.administrador,
+      comercial: !!dados.comercial,
       usuario: dados.usuario,
     };
     gravarSessao(novaSessao);
@@ -121,6 +122,7 @@ export function AutenticacaoProvider({ children }) {
       usuario: sessao ? sessao.usuario : null,
       autenticado: !!sessao,
       administrador: !!(sessao && sessao.administrador),
+      comercial: !!(sessao && (sessao.comercial || sessao.administrador)),
       permissoes: sessao ? permissoes : SEM_PERMISSAO,
       aviso,
       entrar,

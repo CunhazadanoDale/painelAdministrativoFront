@@ -25,7 +25,7 @@ const Configuracoes = () => <div>Configurações Module</div>;
 
 function App() {
   const localizacao = useLocation();
-  const { autenticado, administrador } = useAutenticacao();
+  const { autenticado, administrador, comercial } = useAutenticacao();
 
   if (!autenticado) {
     return (
@@ -45,9 +45,12 @@ function App() {
           <Routes>
             <Route path="/login" element={<Navigate to="/" replace />} />
             <Route path="/" element={<Dashboard />} />
-            <Route path="/leads" element={<Leads />} />
-            <Route path="/leads/:id" element={<LeadDetalhe />} />
-            <Route path="/funis" element={<Funis />} />
+            <Route path="/leads" element={comercial ? <Leads /> : <Navigate to="/" replace />} />
+            <Route
+              path="/leads/:id"
+              element={comercial ? <LeadDetalhe /> : <Navigate to="/" replace />}
+            />
+            <Route path="/funis" element={comercial ? <Funis /> : <Navigate to="/" replace />} />
             <Route path="/negociacoes" element={<Negociacoes />} />
             <Route path="/solicitacoes" element={<Solicitacoes />} />
             <Route path="/solicitacoes/:id" element={<SolicitacaoDetalhe />} />

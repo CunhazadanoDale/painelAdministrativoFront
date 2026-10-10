@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Modal } from '../../app/components/Modal';
+import { useAutenticacao } from '../../app/autenticacao/useAutenticacao';
 import { useFunis } from './useFunis';
 import { FunilFormModal } from './FunilFormModal';
 import { EtapaFormModal } from './EtapaFormModal';
@@ -19,6 +20,7 @@ import './Funis.css';
  * com reordenação por setas (PUT /funils/{id}/etapas/ordem).
  */
 export default function Funis() {
+  const { administrador } = useAutenticacao();
   const {
     funis,
     funilSelecionado,
@@ -89,14 +91,16 @@ export default function Funis() {
         <div className="funis-toolbar-titulo">
           Funis {carregandoFunis ? '…' : `(${funis.length})`}
         </div>
-        <button
-          type="button"
-          className="filter-btn filter-btn-primary"
-          style={{ flex: 'none', width: 'auto', padding: '4px 12px', display: 'flex', alignItems: 'center', gap: 4 }}
-          onClick={abrirNovoFunil}
-        >
-          <Plus size={16} /> Novo Funil
-        </button>
+        {administrador && (
+          <button
+            type="button"
+            className="filter-btn filter-btn-primary"
+            style={{ flex: 'none', width: 'auto', padding: '4px 12px', display: 'flex', alignItems: 'center', gap: 4 }}
+            onClick={abrirNovoFunil}
+          >
+            <Plus size={16} /> Novo Funil
+          </button>
+        )}
       </div>
 
       {erroFunis && (
@@ -137,27 +141,29 @@ export default function Funis() {
                     <span className="funis-item-nome">{funil.nome}</span>
                     {!funil.ativo && <span className="funis-tag funis-tag-inativo">Inativo</span>}
                   </button>
-                  <div className="funis-acoes">
-                    <button
-                      type="button"
-                      className="funis-acao-btn"
-                      title="Editar funil"
-                      onClick={() => abrirEdicaoFunil(funil)}
-                    >
-                      <Pencil size={14} />
-                    </button>
-                    <button
-                      type="button"
-                      className="funis-acao-btn funis-acao-perigo"
-                      title="Excluir funil"
-                      onClick={() => {
-                        setErroExclusao(null);
-                        setExcluirAlvo({ tipo: 'funil', item: funil });
-                      }}
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
+                  {administrador && (
+                    <div className="funis-acoes">
+                      <button
+                        type="button"
+                        className="funis-acao-btn"
+                        title="Editar funil"
+                        onClick={() => abrirEdicaoFunil(funil)}
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        className="funis-acao-btn funis-acao-perigo"
+                        title="Excluir funil"
+                        onClick={() => {
+                          setErroExclusao(null);
+                          setExcluirAlvo({ tipo: 'funil', item: funil });
+                        }}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>
@@ -168,7 +174,7 @@ export default function Funis() {
         <section className="funis-painel">
           <header className="funis-painel-cabecalho">
             <h2>{funilSelecionado ? `Etapas — ${funilSelecionado.nome}` : 'Etapas'}</h2>
-            {funilSelecionado && (
+            {funilSelecionado && administrador && (
               <button
                 type="button"
                 className="filter-btn filter-btn-primary"
@@ -220,45 +226,47 @@ export default function Funis() {
                       {contagens[etapa.etapa_id] ?? 0} lead(s)
                     </span>
                   </div>
-                  <div className="funis-acoes">
-                    <button
-                      type="button"
-                      className="funis-acao-btn"
-                      title="Mover para cima"
-                      disabled={indice === 0}
-                      onClick={() => executarAcao(() => moverEtapa(etapa, -1))}
-                    >
-                      <ArrowUp size={14} />
-                    </button>
-                    <button
-                      type="button"
-                      className="funis-acao-btn"
-                      title="Mover para baixo"
-                      disabled={indice === etapas.length - 1}
-                      onClick={() => executarAcao(() => moverEtapa(etapa, 1))}
-                    >
-                      <ArrowDown size={14} />
-                    </button>
-                    <button
-                      type="button"
-                      className="funis-acao-btn"
-                      title="Editar etapa"
-                      onClick={() => abrirEdicaoEtapa(etapa)}
-                    >
-                      <Pencil size={14} />
-                    </button>
-                    <button
-                      type="button"
-                      className="funis-acao-btn funis-acao-perigo"
-                      title="Excluir etapa"
-                      onClick={() => {
-                        setErroExclusao(null);
-                        setExcluirAlvo({ tipo: 'etapa', item: etapa });
-                      }}
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
+                  {administrador && (
+                    <div className="funis-acoes">
+                      <button
+                        type="button"
+                        className="funis-acao-btn"
+                        title="Mover para cima"
+                        disabled={indice === 0}
+                        onClick={() => executarAcao(() => moverEtapa(etapa, -1))}
+                      >
+                        <ArrowUp size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        className="funis-acao-btn"
+                        title="Mover para baixo"
+                        disabled={indice === etapas.length - 1}
+                        onClick={() => executarAcao(() => moverEtapa(etapa, 1))}
+                      >
+                        <ArrowDown size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        className="funis-acao-btn"
+                        title="Editar etapa"
+                        onClick={() => abrirEdicaoEtapa(etapa)}
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        className="funis-acao-btn funis-acao-perigo"
+                        title="Excluir etapa"
+                        onClick={() => {
+                          setErroExclusao(null);
+                          setExcluirAlvo({ tipo: 'etapa', item: etapa });
+                        }}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  )}
                 </li>
               ))}
             </ol>

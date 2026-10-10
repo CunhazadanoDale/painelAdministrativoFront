@@ -22,7 +22,7 @@ import './Sidebar.css';
 
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
-  const { administrador } = useAutenticacao();
+  const { administrador, comercial } = useAutenticacao();
 
   const navGroups = [
     {
@@ -34,8 +34,8 @@ export function Sidebar() {
     {
       title: 'Comercial',
       items: [
-        { label: 'Leads', icon: <Users size={18} />, path: '/leads' },
-        { label: 'Funis', icon: <Filter size={18} />, path: '/funis' },
+        { label: 'Leads', icon: <Users size={18} />, path: '/leads', comercial: true },
+        { label: 'Funis', icon: <Filter size={18} />, path: '/funis', comercial: true },
         { label: 'Negociações', icon: <Briefcase size={18} />, path: '/negociacoes' }
       ]
     },
@@ -68,7 +68,9 @@ export function Sidebar() {
   const gruposVisiveis = navGroups
     .map((group) => ({
       ...group,
-      items: group.items.filter((item) => !item.admin || administrador)
+      items: group.items.filter(
+        (item) => (!item.admin || administrador) && (!item.comercial || comercial)
+      )
     }))
     .filter((group) => group.items.length > 0);
 

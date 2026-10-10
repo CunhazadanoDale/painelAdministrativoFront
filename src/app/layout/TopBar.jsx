@@ -7,7 +7,7 @@ import './TopBar.css';
 export function TopBar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { usuario, administrador, sair } = useAutenticacao();
+  const { usuario, administrador, comercial, sair } = useAutenticacao();
   const [termo, setTermo] = useState('');
 
   const pathParts = location.pathname.split('/').filter(Boolean);
@@ -36,16 +36,20 @@ export function TopBar() {
         <div className="topbar-module-title">{currentModule}</div>
       </div>
 
-      <form className="topbar-search" onSubmit={pesquisar}>
-        <Search className="topbar-search-icon" size={16} />
-        <input
-          type="text"
-          className="topbar-search-input"
-          placeholder="Pesquisar leads..."
-          value={termo}
-          onChange={(evento) => setTermo(evento.target.value)}
-        />
-      </form>
+      {comercial ? (
+        <form className="topbar-search" onSubmit={pesquisar}>
+          <Search className="topbar-search-icon" size={16} />
+          <input
+            type="text"
+            className="topbar-search-input"
+            placeholder="Pesquisar leads..."
+            value={termo}
+            onChange={(evento) => setTermo(evento.target.value)}
+          />
+        </form>
+      ) : (
+        <div className="topbar-search" />
+      )}
 
       <div className="topbar-right">
         <button className="topbar-action-btn" title="Ajuda">

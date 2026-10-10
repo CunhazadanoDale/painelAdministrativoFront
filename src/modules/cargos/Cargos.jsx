@@ -70,6 +70,9 @@ export default function Cargos() {
         if (cargo.financeiro) {
           perfis.push(<StatusBadge key="financeiro" status="warning" label="Financeiro" />);
         }
+        if (cargo.comercial) {
+          perfis.push(<StatusBadge key="comercial" status="success" label="Comercial" />);
+        }
         if (perfis.length === 0) return '—';
         return <span className="cargos-perfis">{perfis}</span>;
       },

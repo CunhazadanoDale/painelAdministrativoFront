@@ -8,6 +8,7 @@ export function CargoFormModal({ cargo, onFechar, onSalvar }) {
     descricao: cargo?.descricao ?? '',
     administrador: cargo?.administrador ?? false,
     financeiro: cargo?.financeiro ?? false,
+    comercial: cargo?.comercial ?? false,
     ativo: cargo?.ativo ?? true,
   }));
   const [erros, setErros] = useState({});
@@ -39,6 +40,7 @@ export function CargoFormModal({ cargo, onFechar, onSalvar }) {
         descricao: form.descricao.trim(),
         administrador: form.administrador,
         financeiro: form.financeiro,
+        comercial: form.comercial,
         ativo: form.ativo,
       });
       onFechar();
@@ -132,6 +134,17 @@ export function CargoFormModal({ cargo, onFechar, onSalvar }) {
               disabled={salvando}
             />
             Financeiro
+          </label>
+
+          <label className="cargos-form-check" htmlFor="cargo-comercial">
+            <input
+              id="cargo-comercial"
+              type="checkbox"
+              checked={form.comercial}
+              onChange={marcar('comercial')}
+              disabled={salvando}
+            />
+            Comercial
           </label>
 
           {cargo && (
