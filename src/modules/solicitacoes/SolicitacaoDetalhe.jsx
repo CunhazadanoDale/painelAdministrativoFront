@@ -107,11 +107,12 @@ export default function SolicitacaoDetalhe() {
 
   const ehSolicitante = !!usuario && solicitacao.solicitante_id === usuario.id;
   const pendente = solicitacao.status === 'pendente_aprovacao';
-  const podeAprovar = pendente && (permissoes.aprovacao || administrador);
+  const podeRejeitar = pendente && (permissoes.aprovacao || administrador);
+  const podeAprovar = podeRejeitar && !ehSolicitante;
   const podeCancelar =
     (pendente || solicitacao.status === 'aprovado') && (administrador || ehSolicitante);
   const podePagar = solicitacao.status === 'aprovado' && (permissoes.financeiro || administrador);
-  const temAcao = podeAprovar || podeCancelar || podePagar;
+  const temAcao = podeRejeitar || podeCancelar || podePagar;
 
   const nomeSolicitante = usuarios[solicitacao.solicitante_id]
     ? usuarios[solicitacao.solicitante_id].nome
@@ -206,7 +207,7 @@ export default function SolicitacaoDetalhe() {
               <Check size={14} /> {acao === 'aprovar' ? 'Aprovando…' : 'Aprovar'}
             </button>
           )}
-          {podeAprovar && (
+          {podeRejeitar && (
             <button
               type="button"
               className="filter-btn solicitacoes-acao-perigo"
