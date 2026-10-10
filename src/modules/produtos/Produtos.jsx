@@ -257,121 +257,123 @@ export default function Produtos() {
         </div>
       )}
 
-      <FilterPanel
-        title="FILTROS DE ESTOQUE"
-        onApply={aplicar}
-        onClear={limpar}
-      >
-        <FilterGroup label="Categoria">
-          <select
-            className="filter-input"
-            value={filtrosRascunho.categoria_id}
-            onChange={alterarFiltroRascunho('categoria_id')}
-          >
-            <option value="">Todas</option>
-            {subcategorias.map((categoria) => (
-              <option key={categoria.id} value={categoria.id}>
-                {categoriaMapa[categoria.categoria_pai_id]?.nome
-                  ? `${categoriaMapa[categoria.categoria_pai_id].nome} › ${categoria.nome}`
-                  : categoria.nome}
-              </option>
-            ))}
-          </select>
-        </FilterGroup>
-        <FilterGroup label="Situação">
-          <select
-            className="filter-input"
-            value={filtrosRascunho.ativo}
-            onChange={alterarFiltroRascunho('ativo')}
-          >
-            <option value="">Todos</option>
-            <option value="true">Ativos</option>
-            <option value="false">Inativos</option>
-          </select>
-        </FilterGroup>
-        <FilterGroup label="Destaque">
-          <select
-            className="filter-input"
-            value={filtrosRascunho.destaque}
-            onChange={alterarFiltroRascunho('destaque')}
-          >
-            <option value="">Todos</option>
-            <option value="true">Somente destaques</option>
-            <option value="false">Sem destaque</option>
-          </select>
-        </FilterGroup>
-        <FilterGroup label="Estoque">
-          <select
-            className="filter-input"
-            value={filtrosRascunho.estoque_baixo}
-            onChange={alterarFiltroRascunho('estoque_baixo')}
-          >
-            <option value="">Todos</option>
-            <option value="true">Somente estoque baixo</option>
-          </select>
-        </FilterGroup>
-      </FilterPanel>
+      <div className="produtos-corpo">
+        <FilterPanel
+          title="FILTROS DE ESTOQUE"
+          onApply={aplicar}
+          onClear={limpar}
+        >
+          <FilterGroup label="Categoria">
+            <select
+              className="filter-input"
+              value={filtrosRascunho.categoria_id}
+              onChange={alterarFiltroRascunho('categoria_id')}
+            >
+              <option value="">Todas</option>
+              {subcategorias.map((categoria) => (
+                <option key={categoria.id} value={categoria.id}>
+                  {categoriaMapa[categoria.categoria_pai_id]?.nome
+                    ? `${categoriaMapa[categoria.categoria_pai_id].nome} › ${categoria.nome}`
+                    : categoria.nome}
+                </option>
+              ))}
+            </select>
+          </FilterGroup>
+          <FilterGroup label="Situação">
+            <select
+              className="filter-input"
+              value={filtrosRascunho.ativo}
+              onChange={alterarFiltroRascunho('ativo')}
+            >
+              <option value="">Todos</option>
+              <option value="true">Ativos</option>
+              <option value="false">Inativos</option>
+            </select>
+          </FilterGroup>
+          <FilterGroup label="Destaque">
+            <select
+              className="filter-input"
+              value={filtrosRascunho.destaque}
+              onChange={alterarFiltroRascunho('destaque')}
+            >
+              <option value="">Todos</option>
+              <option value="true">Somente destaques</option>
+              <option value="false">Sem destaque</option>
+            </select>
+          </FilterGroup>
+          <FilterGroup label="Estoque">
+            <select
+              className="filter-input"
+              value={filtrosRascunho.estoque_baixo}
+              onChange={alterarFiltroRascunho('estoque_baixo')}
+            >
+              <option value="">Todos</option>
+              <option value="true">Somente estoque baixo</option>
+            </select>
+          </FilterGroup>
+        </FilterPanel>
 
-      {erro && (
-        <div className="leads-erro">
-          <AlertCircle size={16} />
-          <span>{erro}</span>
-          <button type="button" onClick={recarregar}>
-            Tentar novamente
-          </button>
+        <div className="produtos-conteudo">
+          {erro && (
+            <div className="leads-erro">
+              <AlertCircle size={16} />
+              <span>{erro}</span>
+              <button type="button" onClick={recarregar}>
+                Tentar novamente
+              </button>
+            </div>
+          )}
+
+          {erroAcao && (
+            <div className="leads-erro produtos-erro-acao">
+              <AlertCircle size={16} />
+              <span>{erroAcao}</span>
+              <button type="button" onClick={() => setErroAcao(null)}>
+                Fechar
+              </button>
+            </div>
+          )}
+
+          {carregando ? (
+            <div className="produtos-status">Carregando produtos…</div>
+          ) : produtos.length === 0 ? (
+            <div className="produtos-status">Nenhum produto encontrado.</div>
+          ) : (
+            <>
+              <DataGrid
+                key={chaveDados ?? 'produtos'}
+                columns={colunas}
+                data={produtos}
+                selectable={false}
+              />
+              {(produtos.length > 0 || pagina > 1) && (
+                <div className="produtos-paginacao">
+                  <button
+                    type="button"
+                    className="filter-btn filter-btn-secondary"
+                    style={{ flex: 'none', padding: '4px 10px' }}
+                    title="Página anterior"
+                    onClick={irParaAnterior}
+                    disabled={pagina <= 1}
+                  >
+                    <ChevronLeft size={14} />
+                  </button>
+                  <span className="produtos-paginacao-texto">Página {pagina}</span>
+                  <button
+                    type="button"
+                    className="filter-btn filter-btn-secondary"
+                    style={{ flex: 'none', padding: '4px 10px' }}
+                    title="Próxima página"
+                    onClick={irParaProxima}
+                    disabled={!temProxima}
+                  >
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
+              )}
+            </>
+          )}
         </div>
-      )}
-
-      {erroAcao && (
-        <div className="leads-erro produtos-erro-acao">
-          <AlertCircle size={16} />
-          <span>{erroAcao}</span>
-          <button type="button" onClick={() => setErroAcao(null)}>
-            Fechar
-          </button>
-        </div>
-      )}
-
-      <div className="produtos-conteudo">
-        {carregando ? (
-          <div className="produtos-status">Carregando produtos…</div>
-        ) : produtos.length === 0 ? (
-          <div className="produtos-status">Nenhum produto encontrado.</div>
-        ) : (
-          <>
-            <DataGrid
-              key={chaveDados ?? 'produtos'}
-              columns={colunas}
-              data={produtos}
-              selectable={false}
-            />
-            {(produtos.length > 0 || pagina > 1) && (
-              <div className="produtos-paginacao">
-                <button
-                  type="button"
-                  className="filter-btn filter-btn-secondary"
-                  style={{ flex: 'none', padding: '4px 10px' }}
-                  title="Página anterior"
-                  onClick={irParaAnterior}
-                  disabled={pagina <= 1}
-                >
-                  <ChevronLeft size={14} />
-                </button>
-                <span className="produtos-paginacao-texto">Página {pagina}</span>
-                <button
-                  type="button"
-                  className="filter-btn filter-btn-secondary"
-                  style={{ flex: 'none', padding: '4px 10px' }}
-                  title="Próxima página"
-                  onClick={irParaProxima}
-                  disabled={!temProxima}
-                >
-                  <ChevronRight size={14} />
-                </button>
-              </div>
-            )}
-          </>
-        )}
       </div>
 
       {produtoModal !== undefined && (
