@@ -1,37 +1,115 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { AvisoConflito } from '../../app/components/AvisoConflito';
 import { Modal } from '../../app/components/Modal';
-import { TIPOS_MOVIMENTO, aceitaQuantidadeNegativa } from './produtosUtils';
+import { SeletorLocal } from '../../app/components/SeletorLocal';
+import { useNomesEmpresas } from '../../app/empresas/useNomesEmpresas';
+import { ehConflitoDeConcorrencia } from '../../lib/api';
+import { paraCentavos } from '../../lib/formatar';
+import * as produtosService from '../../services/produtos';
+import {
+  TIPOS_MOVIMENTO,
+  aceitaQuantidadeNegativa,
+  consomeSaldo,
+  custoNoMovimento,
+} from './produtosUtils';
 import './Produtos.css';
 
 export function MovimentoModal({ produto, onFechar, onSalvar }) {
   const [form, setForm] = useState({
     tipo: 'entrada',
+    local_id: '',
     quantidade: '',
+    custo: '',
     documento_ref: '',
     observacao: '',
   });
   const [erros, setErros] = useState({});
   const [erroApi, setErroApi] = useState(null);
   const [salvando, setSalvando] = useState(false);
+  const [saldo, setSaldo] = useState(null);
+  const [recargaSaldo, setRecargaSaldo] = useState(0);
+  const [conflito, setConflito] = useState(null);
+  const [recarregando, setRecarregando] = useState(false);
+  const nomeEmpresa = useNomesEmpresas();
+  const produtoId = produto ? produto.id : null;
+
+  useEffect(() => {
+    if (!produtoId) return undefined;
+    let cancelado = false;
+
+    produtosService
+      .obterSaldo(produtoId)
+      .then((resposta) => {
+        if (cancelado) return;
+        setSaldo((resposta && resposta.dados) || null);
+        setConflito(null);
+      })
+      .catch(() => {
+        if (!cancelado) setSaldo(null);
+      })
+      .finally(() => {
+        if (!cancelado) setRecarregando(false);
+      });
+
+    return () => {
+      cancelado = true;
+    };
+  }, [produtoId, recargaSaldo]);
+
+  const recarregarSaldo = () => {
+    setRecarregando(true);
+    setRecargaSaldo((valor) => valor + 1);
+  };
 
   const alterar = (campo) => (event) =>
     setForm((atual) => ({ ...atual, [campo]: event.target.value }));
 
+  const alterarLocal = useCallback(
+    (localId) => setForm((atual) => ({ ...atual, local_id: localId })),
+    []
+  );
+
+  const quantidade = Number(form.quantidade);
   const quantidadeNegativa = aceitaQuantidadeNegativa(form.tipo);
-  const saldoAtual = produto ? produto.saldo : 0;
+  const consome = consomeSaldo(form.tipo, quantidade);
+  const custo = custoNoMovimento(form.tipo, quantidade);
+  const implantacao = form.tipo === 'implantacao';
+  const aceitaLocalInativo = form.tipo === 'saida' || form.tipo === 'perda';
+
+  const saldoDoLocal =
+    saldo && form.local_id
+      ? (saldo.locais || []).find((item) => item.local_id === form.local_id) || {
+          quantidade: 0,
+          disponivel: 0,
+        }
+      : null;
 
   const validar = () => {
     const novosErros = {};
 
-    const quantidade = Number(form.quantidade);
+    if (!form.local_id) {
+      novosErros.local_id = 'Selecione o local do estoque.';
+    }
+
     if (!form.quantidade.trim()) {
       novosErros.quantidade = 'Informe a quantidade.';
     } else if (!Number.isInteger(quantidade) || quantidade === 0) {
       novosErros.quantidade = 'Informe um valor inteiro diferente de zero.';
     } else if (!quantidadeNegativa && quantidade < 0) {
       novosErros.quantidade = 'Informe uma quantidade positiva para este tipo.';
-    } else if ((form.tipo === 'saida' || form.tipo === 'perda') && quantidade > saldoAtual) {
-      novosErros.quantidade = `Quantidade maior que o saldo atual (${saldoAtual}).`;
+    } else if (consome && saldoDoLocal && Math.abs(quantidade) > saldoDoLocal.disponivel) {
+      novosErros.quantidade = `Quantidade maior que o disponível no local (${saldoDoLocal.disponivel}).`;
+    } else if (implantacao && saldo && quantidade > saldo.nao_alocado) {
+      novosErros.quantidade = `Quantidade maior que o saldo não alocado (${saldo.nao_alocado}).`;
+    }
+
+    if (custo !== 'proibido') {
+      const centavos = paraCentavos(form.custo);
+      if (!form.custo.trim()) {
+        if (custo === 'obrigatorio') novosErros.custo = 'Informe o custo unitário da entrada.';
+      } else if (!Number.isFinite(centavos) || centavos < 0) {
+        novosErros.custo = 'Informe um custo válido, zero ou maior.';
+      }
     }
 
     if (form.observacao.trim().length > 1000) {
@@ -46,18 +124,29 @@ export function MovimentoModal({ produto, onFechar, onSalvar }) {
     event.preventDefault();
     if (!validar()) return;
 
+    const dados = {
+      local_id: form.local_id,
+      tipo: form.tipo,
+      quantidade,
+      documento_ref: form.documento_ref.trim() || null,
+      observacao: form.observacao.trim(),
+    };
+    if (custo !== 'proibido' && form.custo.trim()) {
+      dados.custo_unitario_centavos = paraCentavos(form.custo);
+    }
+
     setSalvando(true);
     setErroApi(null);
+    setConflito(null);
     try {
-      await onSalvar({
-        tipo: form.tipo,
-        quantidade: Number(form.quantidade),
-        documento_ref: form.documento_ref.trim() || null,
-        observacao: form.observacao.trim(),
-      });
+      await onSalvar(dados);
       onFechar();
     } catch (e) {
-      setErroApi(e.message || 'Erro ao registrar a movimentação.');
+      if (ehConflitoDeConcorrencia(e)) {
+        setConflito(e.message);
+      } else {
+        setErroApi(e.message || 'Erro ao registrar a movimentação.');
+      }
     } finally {
       setSalvando(false);
     }
@@ -94,10 +183,25 @@ export function MovimentoModal({ produto, onFechar, onSalvar }) {
     >
       <form id="movimento-form" className="produtos-form" onSubmit={salvar} noValidate>
         {erroApi && <div className="produtos-form-erro-api">{erroApi}</div>}
+        {conflito && (
+          <AvisoConflito
+            mensagem={conflito}
+            onRecarregar={recarregarSaldo}
+            recarregando={recarregando}
+          />
+        )}
 
         <p className="produtos-movimento-produto">
-          {produto?.nome} — saldo atual: <strong>{saldoAtual}</strong>
+          {produto?.nome} — saldo total: <strong>{saldo ? saldo.saldo : produto?.saldo}</strong>
         </p>
+        {saldoDoLocal && (
+          <p className="produtos-movimento-produto">
+            {`Disponível neste local: ${saldoDoLocal.disponivel}`}
+          </p>
+        )}
+        {implantacao && saldo && (
+          <p className="produtos-movimento-produto">{`Não alocado: ${saldo.nao_alocado}`}</p>
+        )}
 
         <div className="produtos-form-linha">
           <div className="produtos-form-campo">
@@ -137,6 +241,42 @@ export function MovimentoModal({ produto, onFechar, onSalvar }) {
             {erros.quantidade && <span className="produtos-form-erro">{erros.quantidade}</span>}
           </div>
         </div>
+
+        <div className="produtos-form-campo">
+          <label className="filter-label" htmlFor="movimento-local">
+            Local *
+          </label>
+          <SeletorLocal
+            id="movimento-local"
+            className="filter-input"
+            valor={form.local_id}
+            onAlterar={alterarLocal}
+            apenasAtivos={!aceitaLocalInativo}
+            nomeEmpresa={nomeEmpresa}
+            disabled={salvando}
+            invalido={!!erros.local_id}
+          />
+          {erros.local_id && <span className="produtos-form-erro">{erros.local_id}</span>}
+        </div>
+
+        {custo !== 'proibido' && (
+          <div className="produtos-form-campo">
+            <label className="filter-label" htmlFor="movimento-custo">
+              {custo === 'obrigatorio' ? 'Custo unitário *' : 'Custo unitário (opcional)'}
+            </label>
+            <input
+              id="movimento-custo"
+              className="filter-input"
+              type="text"
+              inputMode="decimal"
+              placeholder={custo === 'obrigatorio' ? 'Ex.: 25,90' : 'Vazio = custo desconhecido'}
+              value={form.custo}
+              onChange={alterar('custo')}
+              disabled={salvando}
+            />
+            {erros.custo && <span className="produtos-form-erro">{erros.custo}</span>}
+          </div>
+        )}
 
         <div className="produtos-form-campo">
           <label className="filter-label" htmlFor="movimento-documento">

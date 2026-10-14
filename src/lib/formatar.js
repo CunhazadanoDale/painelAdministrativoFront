@@ -7,7 +7,10 @@ const formatoData = new Intl.DateTimeFormat('pt-BR', {
   day: '2-digit',
   month: '2-digit',
   year: 'numeric',
+  timeZone: 'UTC',
 });
+
+const PADRAO_MILHAR = /^[1-9]\d{0,2}(\.\d{3})+$/;
 
 const formatoDataHora = new Intl.DateTimeFormat('pt-BR', {
   day: '2-digit',
@@ -51,9 +54,12 @@ export function paraCentavos(texto) {
     .replace(/\s/g, '')
     .trim();
   if (!limpo) return NaN;
-  const normalizado = limpo.includes(',')
-    ? limpo.replace(/\./g, '').replace(',', '.')
-    : limpo;
+  let normalizado = limpo;
+  if (limpo.includes(',')) {
+    normalizado = limpo.replace(/\./g, '').replace(',', '.');
+  } else if (PADRAO_MILHAR.test(limpo)) {
+    normalizado = limpo.replace(/\./g, '');
+  }
   const numero = Number(normalizado);
   if (!Number.isFinite(numero)) return NaN;
   return Math.round(numero * 100);

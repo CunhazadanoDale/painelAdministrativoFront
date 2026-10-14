@@ -4,6 +4,8 @@ import {
   TIPOS_MOVIMENTO,
   UNIDADES_MEDIDA,
   aceitaQuantidadeNegativa,
+  consomeSaldo,
+  custoNoMovimento,
   ehEstoqueMinimoValido,
   ehPesoValido,
   imagemPermitida,
@@ -34,6 +36,7 @@ describe('constantes', () => {
       'ajuste',
       'perda',
       'devolucao',
+      'implantacao',
     ]);
   });
 
@@ -59,6 +62,8 @@ describe('rotuloTipoMovimento', () => {
   it('traduz tipos conhecidos', () => {
     expect(rotuloTipoMovimento('entrada')).toBe('Entrada');
     expect(rotuloTipoMovimento('devolucao')).toBe('Devolução');
+    expect(rotuloTipoMovimento('implantacao')).toBe('Implantação');
+    expect(rotuloTipoMovimento('transferencia')).toBe('Transferência');
   });
 
   it('devolve o próprio valor ou travessa quando desconhecido', () => {
@@ -74,6 +79,36 @@ describe('aceitaQuantidadeNegativa', () => {
     expect(aceitaQuantidadeNegativa('saida')).toBe(false);
     expect(aceitaQuantidadeNegativa('perda')).toBe(false);
     expect(aceitaQuantidadeNegativa('devolucao')).toBe(false);
+    expect(aceitaQuantidadeNegativa('implantacao')).toBe(false);
+  });
+});
+
+describe('custoNoMovimento', () => {
+  it('exige custo na entrada', () => {
+    expect(custoNoMovimento('entrada', 10)).toBe('obrigatorio');
+  });
+
+  it('deixa o custo opcional no que cria lote', () => {
+    expect(custoNoMovimento('devolucao', 2)).toBe('opcional');
+    expect(custoNoMovimento('implantacao', 4)).toBe('opcional');
+    expect(custoNoMovimento('ajuste', 3)).toBe('opcional');
+  });
+
+  it('não aceita custo no que consome lote', () => {
+    expect(custoNoMovimento('saida', 1)).toBe('proibido');
+    expect(custoNoMovimento('perda', 1)).toBe('proibido');
+    expect(custoNoMovimento('ajuste', -3)).toBe('proibido');
+  });
+});
+
+describe('consomeSaldo', () => {
+  it('identifica os movimentos que tiram do local', () => {
+    expect(consomeSaldo('saida', 2)).toBe(true);
+    expect(consomeSaldo('perda', 2)).toBe(true);
+    expect(consomeSaldo('ajuste', -2)).toBe(true);
+    expect(consomeSaldo('ajuste', 2)).toBe(false);
+    expect(consomeSaldo('entrada', 2)).toBe(false);
+    expect(consomeSaldo('implantacao', 2)).toBe(false);
   });
 });
 

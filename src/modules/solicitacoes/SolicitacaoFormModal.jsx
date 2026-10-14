@@ -1,5 +1,6 @@
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Modal } from '../../app/components/Modal';
+import { SeletorEmpresa } from '../../app/components/SeletorEmpresa';
 import { AlertCircle, Trash2 } from 'lucide-react';
 import { formatarTamanho, paraCentavos } from '../../lib/formatar';
 import * as arquivosService from '../../services/arquivos';
@@ -7,6 +8,7 @@ import { FORMAS_PAGAMENTO, arquivoPermitido, hojeISO } from './solicitacoesUtils
 import './Solicitacoes.css';
 
 const FORM_VAZIO = {
+  empresa_id: '',
   valor: '',
   prazo_pagamento: '',
   forma_pagamento: 'pix',
@@ -23,6 +25,11 @@ export function SolicitacaoFormModal({ onFechar, onSalvar }) {
 
   const alterar = (campo) => (event) =>
     setForm((atual) => ({ ...atual, [campo]: event.target.value }));
+
+  const alterarEmpresa = useCallback(
+    (empresaId) => setForm((atual) => ({ ...atual, empresa_id: empresaId })),
+    []
+  );
 
   const alterarArquivo = (chave, mudanca) =>
     setArquivos((atual) =>
@@ -83,6 +90,9 @@ export function SolicitacaoFormModal({ onFechar, onSalvar }) {
 
   const validar = () => {
     const novosErros = {};
+    if (!form.empresa_id) {
+      novosErros.empresa_id = 'Selecione a empresa da solicitação.';
+    }
     const centavos = paraCentavos(form.valor);
     if (!form.valor.trim()) {
       novosErros.valor = 'Informe o valor da solicitação.';
@@ -116,6 +126,7 @@ export function SolicitacaoFormModal({ onFechar, onSalvar }) {
     setErroApi(null);
     try {
       await onSalvar({
+        empresa_id: form.empresa_id,
         valor_centavos: paraCentavos(form.valor),
         prazo_pagamento: form.prazo_pagamento,
         observacao: form.observacao.trim(),
@@ -161,6 +172,20 @@ export function SolicitacaoFormModal({ onFechar, onSalvar }) {
     >
       <form id="solicitacao-form" className="solicitacoes-form" onSubmit={enviar} noValidate>
         {erroApi && <div className="solicitacoes-form-erro-api">{erroApi}</div>}
+
+        <div className="solicitacoes-form-campo solicitacoes-form-campo-full">
+          <label className="filter-label" htmlFor="solicitacao-empresa">
+            Empresa *
+          </label>
+          <SeletorEmpresa
+            id="solicitacao-empresa"
+            valor={form.empresa_id}
+            onAlterar={alterarEmpresa}
+            disabled={salvando}
+            invalido={!!erros.empresa_id}
+          />
+          {erros.empresa_id && <span className="solicitacoes-form-erro">{erros.empresa_id}</span>}
+        </div>
 
         <div className="solicitacoes-form-campo">
           <label className="filter-label" htmlFor="solicitacao-valor">

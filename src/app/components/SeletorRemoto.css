@@ -1,0 +1,27 @@
+.seletor-remoto-erro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  background-color: var(--danger-bg);
+  color: var(--danger-text);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+.seletor-remoto-tentar {
+  flex: none;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid currentColor;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: inherit;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.seletor-remoto-tentar:disabled {
+  cursor: default;
+  opacity: 0.6;
+}

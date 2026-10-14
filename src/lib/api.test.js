@@ -1,5 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ErroApi, aoFalharSessao, definirToken, montarConsulta, obterToken, requisitar } from './api';
+import {
+  ErroApi,
+  aoFalharSessao,
+  definirToken,
+  ehConflitoDeConcorrencia,
+  listarTodas,
+  montarConsulta,
+  obterToken,
+  requisitar,
+} from './api';
 
 function resposta(status, corpo) {
   return {
@@ -147,6 +156,75 @@ describe('requisitar', () => {
     fetchMock.mockResolvedValue({ ok: true, status: 200, text: async () => '' });
 
     await expect(requisitar('/api/v1/teste')).resolves.toBeNull();
+  });
+});
+
+describe('listarTodas', () => {
+  function pagina(quantidade, inicio = 0) {
+    return resposta(200, {
+      dados: Array.from({ length: quantidade }, (_, indice) => ({ id: inicio + indice })),
+    });
+  }
+
+  it('percorre as páginas até receber uma incompleta', async () => {
+    fetchMock
+      .mockResolvedValueOnce(pagina(100))
+      .mockResolvedValueOnce(pagina(100, 100))
+      .mockResolvedValueOnce(pagina(3, 200));
+
+    const itens = await listarTodas('/api/v1/empresas', { ativas: true });
+
+    expect(itens).toHaveLength(203);
+    expect(itens[202]).toEqual({ id: 202 });
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock.mock.calls[0][0]).toContain('/api/v1/empresas?ativas=true&pagina=1&tamanho=100');
+    expect(fetchMock.mock.calls[2][0]).toContain('pagina=3&tamanho=100');
+  });
+
+  it('para na primeira página vazia', async () => {
+    fetchMock.mockResolvedValueOnce(pagina(0));
+
+    await expect(listarTodas('/api/v1/empresas')).resolves.toEqual([]);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('repassa o sinal de cancelamento', async () => {
+    fetchMock.mockResolvedValueOnce(pagina(1));
+    const controle = new AbortController();
+
+    await listarTodas('/api/v1/empresas', {}, { sinal: controle.signal });
+
+    expect(fetchMock.mock.calls[0][1].signal).toBe(controle.signal);
+  });
+
+  it('recusa lista maior que o limite em vez de cortá-la', async () => {
+    fetchMock.mockImplementation(async () => pagina(100));
+
+    await expect(listarTodas('/api/v1/empresas')).rejects.toThrow('mais de 5000 registros');
+  });
+});
+
+describe('ehConflitoDeConcorrencia', () => {
+  it('reconhece o 409 de versão e o de operação concorrente', () => {
+    expect(
+      ehConflitoDeConcorrencia(
+        new ErroApi(409, 'o fornecedor foi alterado por outra pessoa; recarregue e tente de novo')
+      )
+    ).toBe(true);
+    expect(
+      ehConflitoDeConcorrencia(
+        new ErroApi(409, 'estoque do produto alterado por outra operação, recarregue e tente novamente')
+      )
+    ).toBe(true);
+  });
+
+  it('não confunde com duplicidade, transição inválida ou outro status', () => {
+    expect(ehConflitoDeConcorrencia(new ErroApi(409, 'já existe um fornecedor com este documento'))).toBe(false);
+    expect(
+      ehConflitoDeConcorrencia(new ErroApi(409, 'não é possível mudar a solicitação de "pago" para "aprovado"'))
+    ).toBe(false);
+    expect(ehConflitoDeConcorrencia(new ErroApi(400, 'erro de validação: recarregue'))).toBe(false);
+    expect(ehConflitoDeConcorrencia(null)).toBe(false);
   });
 });
 

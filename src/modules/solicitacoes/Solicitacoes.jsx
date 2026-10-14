@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DataGrid } from '../../app/components/DataGrid';
+import { SeletorEmpresa } from '../../app/components/SeletorEmpresa';
 import { StatusBadge } from '../../app/components/StatusBadge';
+import { useNomesEmpresas } from '../../app/empresas/useNomesEmpresas';
 import { AlertCircle, Eye, Plus } from 'lucide-react';
 import { formatarData, formatarMoeda } from '../../lib/formatar';
 import { useSolicitacoes } from './useSolicitacoes';
@@ -20,23 +22,27 @@ export default function Solicitacoes() {
     escopos,
     escopo,
     status,
+    empresa,
     pagina,
     temProxima,
     carregando,
     erro,
     trocarEscopo,
     trocarStatus,
+    trocarEmpresa,
     irParaAnterior,
     irParaProxima,
     criar,
     recarregar,
   } = useSolicitacoes();
+  const nomeEmpresa = useNomesEmpresas();
   const navegar = useNavigate();
   const [modalAberto, setModalAberto] = useState(false);
 
   const opcoesStatus = statusPermitidosNoEscopo(escopo);
 
   const colunas = [
+    { label: 'Empresa', field: 'empresa_id', width: '140px', render: (valor) => nomeEmpresa(valor) },
     { label: 'Valor', field: 'valor_centavos', width: '130px', render: (valor) => formatarMoeda(valor) },
     { label: 'Prazo', field: 'prazo_pagamento', width: '110px', render: (valor) => formatarData(valor) },
     {
@@ -99,6 +105,17 @@ export default function Solicitacoes() {
           </button>
         ))}
         <div className="solicitacoes-status-filtro">
+          <label className="filter-label" htmlFor="solicitacoes-empresa">
+            Empresa
+          </label>
+          <SeletorEmpresa
+            id="solicitacoes-empresa"
+            valor={empresa}
+            onAlterar={trocarEmpresa}
+            apenasAtivas={false}
+            selecionarUnica={false}
+            placeholder="Todas"
+          />
           <label className="filter-label" htmlFor="solicitacoes-status">
             Status
           </label>

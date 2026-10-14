@@ -11,6 +11,7 @@ export function useSolicitacoes() {
   const [pagina, setPagina] = useState(1);
   const [escopo, setEscopo] = useState('minhas');
   const [status, setStatus] = useState('');
+  const [empresa, setEmpresa] = useState('');
   const [recarga, setRecarga] = useState(0);
   const [chaveDados, setChaveDados] = useState(null);
   const [falha, setFalha] = useState(null);
@@ -27,7 +28,7 @@ export function useSolicitacoes() {
   );
 
   const escopoAtivo = escopos.some((item) => item.valor === escopo) ? escopo : 'minhas';
-  const chave = `${pagina}|${escopoAtivo}|${status}|${recarga}`;
+  const chave = `${pagina}|${escopoAtivo}|${status}|${empresa}|${recarga}`;
   const erro = falha && falha.chave === chave ? falha.mensagem : null;
   const carregando = !erro && chaveDados !== chave;
 
@@ -41,6 +42,7 @@ export function useSolicitacoes() {
           tamanho: TAMANHO_PAGINA + 1,
           escopo: escopoAtivo,
           status,
+          empresa,
         });
         const daPagina = (resposta && resposta.dados) || [];
 
@@ -64,7 +66,7 @@ export function useSolicitacoes() {
     return () => {
       cancelado = true;
     };
-  }, [pagina, escopoAtivo, status, recarga, chave]);
+  }, [pagina, escopoAtivo, status, empresa, recarga, chave]);
 
   const recarregar = useCallback(() => setRecarga((valor) => valor + 1), []);
 
@@ -76,6 +78,11 @@ export function useSolicitacoes() {
 
   const trocarStatus = useCallback((valor) => {
     setStatus(valor);
+    setPagina(1);
+  }, []);
+
+  const trocarEmpresa = useCallback((valor) => {
+    setEmpresa(valor);
     setPagina(1);
   }, []);
 
@@ -98,12 +105,14 @@ export function useSolicitacoes() {
     escopos,
     escopo: escopoAtivo,
     status,
+    empresa,
     pagina,
     temProxima,
     carregando,
     erro,
     trocarEscopo,
     trocarStatus,
+    trocarEmpresa,
     irParaAnterior,
     irParaProxima,
     criar,
