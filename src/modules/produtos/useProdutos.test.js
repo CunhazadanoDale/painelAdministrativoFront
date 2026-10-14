@@ -50,6 +50,7 @@ describe('useProdutos', () => {
     expect(result.current.produtos).toHaveLength(2);
     expect(result.current.erro).toBeNull();
     expect(result.current.resumo).toBeNull();
+    await waitFor(() => expect(result.current.erroResumo).toBe('resumo indisponivel'));
   });
 
   it('mantem a lista de produtos mesmo quando as categorias falham', async () => {
@@ -64,6 +65,66 @@ describe('useProdutos', () => {
     expect(result.current.produtos).toHaveLength(2);
     expect(result.current.categorias).toEqual([]);
     expect(result.current.erro).toBeNull();
+    await waitFor(() => expect(result.current.erroCategorias).toBe('categorias fora'));
+  });
+
+  it('recarregarAuxiliares busca de novo categorias e resumo que falharam', async () => {
+    vi.spyOn(produtosService, 'listarProdutos').mockResolvedValue({ dados: listaDeProdutos(2) });
+    const categorias = vi
+      .spyOn(categoriasService, 'listarCategorias')
+      .mockRejectedValueOnce(new Error('categorias fora'))
+      .mockResolvedValue({ dados: [{ id: 'c1', nome: 'Cimento' }] });
+    vi.spyOn(produtosService, 'obterResumo')
+      .mockRejectedValueOnce(new Error('resumo indisponivel'))
+      .mockResolvedValue({ dados: { total_produtos: 2 } });
+
+    const { result } = renderHook(() => useProdutos());
+
+    await waitFor(() => expect(result.current.erroCategorias).toBe('categorias fora'));
+    await waitFor(() => expect(result.current.erroResumo).toBe('resumo indisponivel'));
+
+    act(() => result.current.recarregarAuxiliares());
+
+    await waitFor(() => expect(result.current.categorias).toHaveLength(1));
+    await waitFor(() => expect(result.current.resumo).toEqual({ total_produtos: 2 }));
+    expect(result.current.erroCategorias).toBeNull();
+    expect(result.current.erroResumo).toBeNull();
+    expect(categorias).toHaveBeenCalledTimes(2);
+  });
+
+  it('nao busca categorias e resumo de novo ao trocar de pagina ou filtro', async () => {
+    const listar = vi
+      .spyOn(produtosService, 'listarProdutos')
+      .mockResolvedValue({ dados: listaDeProdutos(TAMANHO_PAGINA + 1) });
+    const categorias = vi.spyOn(categoriasService, 'listarCategorias').mockResolvedValue({ dados: [] });
+    const resumo = vi.spyOn(produtosService, 'obterResumo').mockResolvedValue({ dados: null });
+
+    const { result } = renderHook(() => useProdutos());
+
+    await waitFor(() => expect(result.current.carregando).toBe(false));
+    act(() => result.current.irParaProxima());
+    await waitFor(() => expect(result.current.carregando).toBe(false));
+    act(() => result.current.aplicarFiltros({ busca: 'cimento' }));
+    await waitFor(() => expect(result.current.carregando).toBe(false));
+
+    expect(listar).toHaveBeenCalledTimes(3);
+    expect(categorias).toHaveBeenCalledTimes(1);
+    expect(resumo).toHaveBeenCalledTimes(1);
+  });
+
+  it('recarregar depois de uma alteracao atualiza o resumo', async () => {
+    vi.spyOn(produtosService, 'listarProdutos').mockResolvedValue({ dados: listaDeProdutos(2) });
+    vi.spyOn(categoriasService, 'listarCategorias').mockResolvedValue({ dados: [] });
+    const resumo = vi.spyOn(produtosService, 'obterResumo').mockResolvedValue({ dados: null });
+    vi.spyOn(produtosService, 'ativarProduto').mockResolvedValue(null);
+
+    const { result } = renderHook(() => useProdutos());
+
+    await waitFor(() => expect(result.current.carregando).toBe(false));
+    await act(() => result.current.alternarAtivo({ id: 'id-1', ativo: false }));
+    await waitFor(() => expect(result.current.carregando).toBe(false));
+
+    await waitFor(() => expect(resumo).toHaveBeenCalledTimes(2));
   });
 
   it('expoe o erro quando a listagem de produtos falha', async () => {

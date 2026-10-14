@@ -20,8 +20,11 @@ export function useProdutos() {
   const [pagina, setPagina] = useState(1);
   const [filtros, setFiltros] = useState(FILTROS_PADRAO);
   const [recarga, setRecarga] = useState(0);
+  const [recargaAuxiliar, setRecargaAuxiliar] = useState(0);
   const [chaveDados, setChaveDados] = useState(null);
   const [falha, setFalha] = useState(null);
+  const [erroCategorias, setErroCategorias] = useState(null);
+  const [erroResumo, setErroResumo] = useState(null);
 
   const chave = `${pagina}|${filtros.busca}|${filtros.categoria_id}|${filtros.ativo}|${filtros.destaque}|${filtros.estoque_baixo}|${recarga}`;
 
@@ -31,27 +34,47 @@ export function useProdutos() {
   useEffect(() => {
     let cancelado = false;
 
-    const carregarCategorias = async () => {
+    (async () => {
       try {
         const resposta = await categoriasService.listarCategorias({ pagina: 1, tamanho: 100 });
         if (cancelado) return;
         setCategorias(resposta?.dados ?? []);
-      } catch {
-        // Painel e filtros seguem funcionando com a lista vazia de categorias.
+        setErroCategorias(null);
+      } catch (e) {
+        if (cancelado) return;
+        setErroCategorias(e.message || 'Erro ao carregar as categorias.');
       }
-    };
+    })();
 
-    const carregarResumo = async () => {
+    return () => {
+      cancelado = true;
+    };
+  }, [recargaAuxiliar]);
+
+  useEffect(() => {
+    let cancelado = false;
+
+    (async () => {
       try {
         const resposta = await produtosService.obterResumo();
         if (cancelado) return;
         setResumo(resposta?.dados ?? null);
-      } catch {
-        // Os cartões de resumo são decorativos; falha não afeta a listagem.
+        setErroResumo(null);
+      } catch (e) {
+        if (cancelado) return;
+        setErroResumo(e.message || 'Erro ao carregar o resumo do estoque.');
       }
-    };
+    })();
 
-    const carregarProdutos = async () => {
+    return () => {
+      cancelado = true;
+    };
+  }, [recarga, recargaAuxiliar]);
+
+  useEffect(() => {
+    let cancelado = false;
+
+    (async () => {
       try {
         const resposta = await produtosService.listarProdutos({
           pagina,
@@ -78,16 +101,12 @@ export function useProdutos() {
         setTemProxima(false);
         setFalha({ chave, mensagem: e.message || 'Erro ao carregar os produtos.' });
       }
-    };
-
-    carregarProdutos();
-    carregarCategorias();
-    carregarResumo();
+    })();
 
     return () => {
       cancelado = true;
     };
-  }, [chave, pagina, filtros, recarga]);
+  }, [chave, pagina, filtros]);
 
   const subcategorias = useMemo(
     () => categorias.filter((categoria) => categoria.categoria_pai_id),
@@ -100,6 +119,7 @@ export function useProdutos() {
   );
 
   const recarregar = useCallback(() => setRecarga((valor) => valor + 1), []);
+  const recarregarAuxiliares = useCallback(() => setRecargaAuxiliar((valor) => valor + 1), []);
 
   const aplicarFiltros = useCallback((novosFiltros) => {
     setFiltros({ ...FILTROS_PADRAO, ...novosFiltros });
@@ -164,7 +184,10 @@ export function useProdutos() {
     carregando,
     erro,
     chaveDados,
+    erroCategorias,
+    erroResumo,
     recarregar,
+    recarregarAuxiliares,
     aplicarFiltros,
     limparFiltros,
     irParaAnterior,

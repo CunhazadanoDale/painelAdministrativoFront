@@ -34,7 +34,10 @@ export default function Produtos() {
     carregando,
     erro,
     chaveDados,
+    erroCategorias,
+    erroResumo,
     recarregar,
+    recarregarAuxiliares,
     aplicarFiltros,
     limparFiltros,
     irParaAnterior,
@@ -324,6 +327,23 @@ export default function Produtos() {
             </div>
           )}
 
+          {(erroCategorias || erroResumo) && (
+            <div className="leads-erro produtos-erro-acao">
+              <AlertCircle size={16} />
+              <span>
+                {[
+                  erroCategorias && `Não foi possível carregar as categorias: ${erroCategorias}`,
+                  erroResumo && `Não foi possível carregar o resumo do estoque: ${erroResumo}`,
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              </span>
+              <button type="button" onClick={recarregarAuxiliares}>
+                Tentar novamente
+              </button>
+            </div>
+          )}
+
           {erroAcao && (
             <div className="leads-erro produtos-erro-acao">
               <AlertCircle size={16} />
@@ -334,7 +354,7 @@ export default function Produtos() {
             </div>
           )}
 
-          {carregando ? (
+          {erro ? null : carregando ? (
             <div className="produtos-status">Carregando produtos…</div>
           ) : produtos.length === 0 ? (
             <div className="produtos-status">Nenhum produto encontrado.</div>
