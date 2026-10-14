@@ -28,6 +28,11 @@ describe('formatarData', () => {
     expect(formatarData('2026-10-09T12:00:00')).toBe('09/10/2026');
   });
 
+  it('mantém o dia de campo só-data vindo à meia-noite UTC', () => {
+    expect(formatarData('2026-10-15T00:00:00Z')).toBe('15/10/2026');
+    expect(formatarData('2026-10-15')).toBe('15/10/2026');
+  });
+
   it('devolve travessa em data vazia ou inválida', () => {
     expect(formatarData('')).toBe('—');
     expect(formatarData('não é data')).toBe('—');
@@ -37,6 +42,10 @@ describe('formatarData', () => {
 describe('formatarDataHora', () => {
   it('formata data e hora ISO', () => {
     expect(formatarDataHora('2026-10-09T13:45:00')).toBe('09/10/2026, 13:45');
+  });
+
+  it('converte instante UTC para o fuso local', () => {
+    expect(formatarDataHora('2026-10-15T01:30:00Z')).toBe('14/10/2026, 22:30');
   });
 
   it('devolve travessa em data inválida', () => {
@@ -72,6 +81,20 @@ describe('paraCentavos', () => {
   it('converte valor com ponto decimal', () => {
     expect(paraCentavos('1234.56')).toBe(123456);
     expect(paraCentavos('10')).toBe(1000);
+    expect(paraCentavos('1.5')).toBe(150);
+    expect(paraCentavos('1.50')).toBe(150);
+    expect(paraCentavos('0.500')).toBe(50);
+  });
+
+  it('trata ponto como milhar quando não há vírgula e o padrão é de milhar', () => {
+    expect(paraCentavos('1.500')).toBe(150000);
+    expect(paraCentavos('R$ 12.345')).toBe(1234500);
+    expect(paraCentavos('1.500.000')).toBe(150000000);
+  });
+
+  it('devolve NaN em pontuação inválida', () => {
+    expect(paraCentavos('1.2.3')).toBeNaN();
+    expect(paraCentavos('1,2,3')).toBeNaN();
   });
 
   it('devolve NaN em texto vazio ou não numérico', () => {
