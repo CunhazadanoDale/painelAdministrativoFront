@@ -20,13 +20,13 @@ export function useAprovadores() {
 
     (async () => {
       try {
-        const [respostaAprovadores, respostaUsuarios] = await Promise.all([
-          aprovadoresService.listarAprovadores({ pagina: 1, tamanho: 100 }),
-          usuariosService.listarUsuarios({ pagina: 1, tamanho: 100 }),
+        const [listaAprovadores, listaUsuarios] = await Promise.all([
+          aprovadoresService.listarTodosAprovadores(),
+          usuariosService.listarTodosUsuarios(),
         ]);
         if (cancelado) return;
-        setAprovadores(respostaAprovadores?.dados ?? []);
-        setUsuarios(respostaUsuarios?.dados ?? []);
+        setAprovadores(listaAprovadores);
+        setUsuarios(listaUsuarios);
         setChaveDados(chave);
         setFalha(null);
       } catch (e) {

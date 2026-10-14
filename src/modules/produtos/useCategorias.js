@@ -17,9 +17,9 @@ export function useCategorias() {
 
     (async () => {
       try {
-        const resposta = await categoriasService.listarCategorias({ pagina: 1, tamanho: 100 });
+        const lista = await categoriasService.listarTodasCategorias();
         if (cancelado) return;
-        setCategorias(resposta?.dados ?? []);
+        setCategorias(lista);
         setChaveDados(chave);
         setFalha(null);
       } catch (e) {

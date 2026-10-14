@@ -50,8 +50,7 @@ export function useLeads() {
 
     (async () => {
       try {
-        const resFunis = await funisService.listarFunis({ pagina: 1, tamanho: 50, ativos: true });
-        const listaFunis = resFunis?.dados ?? [];
+        const listaFunis = await funisService.listarTodosFunis({ ativos: true });
         const respostasEtapas = await Promise.all(
           listaFunis.map((funil) => funisService.listarEtapasDoFunil(funil.funil_id))
         );

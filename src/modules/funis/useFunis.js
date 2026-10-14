@@ -44,12 +44,7 @@ export function useFunis() {
 
     (async () => {
       try {
-        const resposta = await funisService.listarFunis({
-          pagina: 1,
-          tamanho: 100,
-          ativos: false,
-        });
-        const lista = resposta?.dados ?? [];
+        const lista = await funisService.listarTodosFunis({ ativos: false });
         if (cancelado) return;
         setFunis(lista);
         setChaveFunisOk(chaveFunis);

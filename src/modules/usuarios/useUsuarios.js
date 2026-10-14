@@ -24,13 +24,13 @@ export function useUsuarios() {
 
     (async () => {
       try {
-        const [respostaUsuarios, respostaCargos] = await Promise.all([
+        const [respostaUsuarios, listaCargos] = await Promise.all([
           usuariosService.listarUsuarios({
             pagina,
             tamanho: TAMANHO_PAGINA + 1,
             q,
           }),
-          cargosService.listarCargos({ pagina: 1, tamanho: 100 }),
+          cargosService.listarTodosCargos(),
         ]);
         const itens = respostaUsuarios?.dados ?? [];
 
@@ -43,7 +43,7 @@ export function useUsuarios() {
 
         setUsuarios(itens.slice(0, TAMANHO_PAGINA));
         setTemProxima(itens.length > TAMANHO_PAGINA);
-        setCargos(respostaCargos?.dados ?? []);
+        setCargos(listaCargos);
         setChaveDados(chave);
         setFalha(null);
       } catch (e) {

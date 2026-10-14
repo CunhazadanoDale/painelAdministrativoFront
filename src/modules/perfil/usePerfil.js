@@ -22,13 +22,13 @@ export function usePerfil() {
 
     (async () => {
       try {
-        const [respostaSessao, respostaCargos] = await Promise.all([
+        const [respostaSessao, listaCargos] = await Promise.all([
           sessaoService.obterSessao(),
-          cargosService.listarCargos({ pagina: 1, tamanho: 100 }),
+          cargosService.listarTodosCargos(),
         ]);
         if (cancelado) return;
         setUsuario(respostaSessao?.dados ?? null);
-        setCargos(respostaCargos?.dados ?? []);
+        setCargos(listaCargos);
         setChaveDados(chave);
         setFalha(null);
       } catch (e) {

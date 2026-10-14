@@ -1,4 +1,4 @@
-import { montarConsulta, requisitar } from '../lib/api';
+import { listarTodas, montarConsulta, requisitar } from '../lib/api';
 
 const CAMINHO = '/api/v1/solicitacoes';
 
@@ -40,10 +40,10 @@ export function obterPagamento(id) {
   return requisitar(`${CAMINHO}/${id}/pagamento`);
 }
 
-export function listarHistorico(id, { pagina = 1, tamanho = 100 } = {}) {
-  return requisitar(`${CAMINHO}/${id}/historico${montarConsulta({ pagina, tamanho })}`);
+export function listarHistorico(id, { sinal } = {}) {
+  return listarTodas(`${CAMINHO}/${id}/historico`, {}, { sinal });
 }
 
-export function listarArquivos(id, { pagina = 1, tamanho = 100 } = {}) {
-  return requisitar(`${CAMINHO}/${id}/arquivos${montarConsulta({ pagina, tamanho })}`);
+export function listarArquivos(id, { sinal } = {}) {
+  return listarTodas(`${CAMINHO}/${id}/arquivos`, {}, { sinal });
 }

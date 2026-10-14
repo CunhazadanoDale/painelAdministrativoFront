@@ -33,12 +33,7 @@ export function useDashboard() {
 
     (async () => {
       try {
-        const respostaFunis = await funisService.listarFunis({
-          pagina: 1,
-          tamanho: 50,
-          ativos: true,
-        });
-        const listaFunis = respostaFunis?.dados ?? [];
+        const listaFunis = await funisService.listarTodosFunis({ ativos: true });
 
         const respostasEtapas = await Promise.all(
           listaFunis.map((funil) => funisService.listarEtapasDoFunil(funil.funil_id))

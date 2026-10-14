@@ -26,9 +26,9 @@ export function useProdutoDetalhe(id) {
 
     (async () => {
       try {
-        const [respostaProduto, respostaCategorias, respostaMovimentos] = await Promise.all([
+        const [respostaProduto, listaCategorias, respostaMovimentos] = await Promise.all([
           produtosService.obterProduto(id),
-          categoriasService.listarCategorias({ pagina: 1, tamanho: 100 }),
+          categoriasService.listarTodasCategorias(),
           produtosService.listarMovimentos(id, {
             pagina: paginaMovimentos,
             tamanho: TAMANHO_PAGINA_MOVIMENTOS + 1,
@@ -44,7 +44,7 @@ export function useProdutoDetalhe(id) {
         }
 
         setProduto(respostaProduto?.dados ?? null);
-        setCategorias(respostaCategorias?.dados ?? []);
+        setCategorias(listaCategorias);
         setMovimentos(itens.slice(0, TAMANHO_PAGINA_MOVIMENTOS));
         setTemProximaMovimentos(itens.length > TAMANHO_PAGINA_MOVIMENTOS);
         setChaveDados(chave);

@@ -1,5 +1,5 @@
 // Services de Funil e Etapa — espelham /api/v1/funils e /api/v1/etapas do backend Go.
-import { montarConsulta, requisitar } from '../lib/api';
+import { listarTodas, montarConsulta, requisitar } from '../lib/api';
 
 const CAMINHO_FUNIL = '/api/v1/funils';
 
@@ -11,6 +11,10 @@ export function listarFunis({ pagina = 1, tamanho = 50, ativos = true } = {}) {
   return requisitar(
     `${CAMINHO_FUNIL}${montarConsulta({ pagina, tamanho, ativos: ativos ? 'true' : '' })}`
   );
+}
+
+export function listarTodosFunis({ ativos = true, sinal } = {}) {
+  return listarTodas(CAMINHO_FUNIL, { ativos: ativos ? 'true' : '' }, { sinal });
 }
 
 export function criarFunil(dados) {

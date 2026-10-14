@@ -1,9 +1,13 @@
-import { montarConsulta, requisitar } from '../lib/api';
+import { listarTodas, montarConsulta, requisitar } from '../lib/api';
 
 const CAMINHO = '/api/v1/usuarios';
 
 export function listarUsuarios({ pagina = 1, tamanho = 20, q = '', ativos = '' } = {}) {
   return requisitar(`${CAMINHO}${montarConsulta({ pagina, tamanho, q, ativos })}`);
+}
+
+export function listarTodosUsuarios({ ativos = '', sinal } = {}) {
+  return listarTodas(CAMINHO, { ativos }, { sinal });
 }
 
 export function obterUsuario(id) {

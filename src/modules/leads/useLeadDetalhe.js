@@ -51,12 +51,7 @@ export function useLeadDetalhe(leadId) {
 
     (async () => {
       try {
-        const respostaFunis = await funisService.listarFunis({
-          pagina: 1,
-          tamanho: 100,
-          ativos: false,
-        });
-        const listaFunis = respostaFunis?.dados ?? [];
+        const listaFunis = await funisService.listarTodosFunis({ ativos: false });
         const respostasEtapas = await Promise.all(
           listaFunis.map((funil) => funisService.listarEtapasDoFunil(funil.funil_id))
         );

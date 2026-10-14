@@ -30,7 +30,7 @@ export function useSolicitacaoDetalhe(id) {
         const dados = resposta ? resposta.dados : null;
         if (!dados) throw new Error('Solicitação não encontrada.');
 
-        const [respostaHistorico, respostaArquivos] = await Promise.all([
+        const [listaHistorico, listaArquivos] = await Promise.all([
           solicitacoesService.listarHistorico(id),
           solicitacoesService.listarArquivos(id),
         ]);
@@ -46,10 +46,8 @@ export function useSolicitacaoDetalhe(id) {
         let mapaUsuarios = {};
         if (administrador) {
           try {
-            const respostaUsuarios = await usuariosService.listarUsuarios({ pagina: 1, tamanho: 100 });
-            mapaUsuarios = Object.fromEntries(
-              (respostaUsuarios ? respostaUsuarios.dados : []).map((item) => [item.id, item])
-            );
+            const listaUsuarios = await usuariosService.listarTodosUsuarios();
+            mapaUsuarios = Object.fromEntries(listaUsuarios.map((item) => [item.id, item]));
           } catch {
             mapaUsuarios = {};
           }
@@ -57,8 +55,8 @@ export function useSolicitacaoDetalhe(id) {
 
         if (cancelado) return;
         setSolicitacao(dados);
-        setHistorico(respostaHistorico ? respostaHistorico.dados ?? [] : []);
-        setArquivos(respostaArquivos ? respostaArquivos.dados ?? [] : []);
+        setHistorico(listaHistorico);
+        setArquivos(listaArquivos);
         setPagamento(dadosPagamento);
         setUsuarios(mapaUsuarios);
         setChaveDados(chave);
