@@ -17,7 +17,10 @@ export const TIPOS_MOVIMENTO = [
   { valor: 'ajuste', rotulo: 'Ajuste' },
   { valor: 'perda', rotulo: 'Perda' },
   { valor: 'devolucao', rotulo: 'Devolução' },
+  { valor: 'implantacao', rotulo: 'Implantação' },
 ];
+
+const ROTULOS_SO_DO_HISTORICO = { transferencia: 'Transferência' };
 
 export function rotuloUnidade(valor) {
   const unidade = UNIDADES_MEDIDA.find((item) => item.valor === valor);
@@ -26,11 +29,24 @@ export function rotuloUnidade(valor) {
 
 export function rotuloTipoMovimento(valor) {
   const tipo = TIPOS_MOVIMENTO.find((item) => item.valor === valor);
-  return tipo ? tipo.rotulo : valor || '—';
+  if (tipo) return tipo.rotulo;
+  return ROTULOS_SO_DO_HISTORICO[valor] || valor || '—';
 }
 
 export function aceitaQuantidadeNegativa(tipo) {
   return tipo === 'ajuste';
+}
+
+export function consomeSaldo(tipo, quantidade) {
+  if (tipo === 'saida' || tipo === 'perda') return true;
+  return tipo === 'ajuste' && quantidade < 0;
+}
+
+export function custoNoMovimento(tipo, quantidade) {
+  if (tipo === 'entrada') return 'obrigatorio';
+  if (consomeSaldo(tipo, quantidade)) return 'proibido';
+  if (tipo === 'ajuste' && !(quantidade > 0)) return 'proibido';
+  return 'opcional';
 }
 
 export const LIMITE_ARQUIVO = 10 * 1024 * 1024;
