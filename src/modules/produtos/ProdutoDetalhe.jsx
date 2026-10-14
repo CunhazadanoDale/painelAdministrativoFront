@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { DataGrid } from '../../app/components/DataGrid';
 import { StatusBadge } from '../../app/components/StatusBadge';
 import { Panel } from '../../app/components/Panel';
+import { ImagemArquivo } from '../../app/components/ImagemArquivo';
 import { useAutenticacao } from '../../app/autenticacao/useAutenticacao';
 import { obterUrlBase } from '../../lib/api';
 import { formatarDataHora, formatarMoeda, formatarTamanho } from '../../lib/formatar';
@@ -276,10 +277,14 @@ export default function ProdutoDetalhe() {
             )}
             {(produto.imagens || []).map((imagem) => (
               <div key={imagem.id} className="produtos-imagens-item">
-                <img
-                  src={`${obterUrlBase()}/api/v1/publico/imagens/${imagem.id}`}
-                  alt={imagem.alt || produto.nome}
-                />
+                {administrador ? (
+                  <ImagemArquivo arquivoId={imagem.arquivo_id} alt={imagem.alt || produto.nome} />
+                ) : (
+                  <img
+                    src={`${obterUrlBase()}/api/v1/publico/imagens/${imagem.id}`}
+                    alt={imagem.alt || produto.nome}
+                  />
+                )}
                 {administrador && (
                   <button
                     type="button"

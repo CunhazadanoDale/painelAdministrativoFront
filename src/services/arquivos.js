@@ -57,11 +57,18 @@ export function removerArquivo(id) {
   return requisitar(`${CAMINHO}/${id}`, { metodo: 'DELETE' });
 }
 
-export async function baixarArquivo(id, nome) {
+export async function obterArquivoBlob(id, { sinal } = {}) {
   const token = obterToken();
-  const resposta = await fetch(`${obterUrlBase()}${CAMINHO}/${id}`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-  });
+  let resposta;
+  try {
+    resposta = await fetch(`${obterUrlBase()}${CAMINHO}/${id}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      signal: sinal,
+    });
+  } catch (e) {
+    if (e && e.name === 'AbortError') throw e;
+    throw new ErroApi(0, 'Não foi possível conectar ao servidor. Verifique se a API está em execução.');
+  }
 
   if (!resposta.ok) {
     let dados = null;
@@ -76,7 +83,11 @@ export async function baixarArquivo(id, nome) {
     throw new ErroApi(resposta.status, mensagem);
   }
 
-  const blob = await resposta.blob();
+  return resposta.blob();
+}
+
+export async function baixarArquivo(id, nome) {
+  const blob = await obterArquivoBlob(id);
   const url = URL.createObjectURL(blob);
   const ancora = document.createElement('a');
   ancora.href = url;
