@@ -1,0 +1,31 @@
+.aviso-conflito {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  background-color: var(--warning-bg);
+  color: var(--text-main);
+  border: 1px solid var(--warning-text);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+.aviso-conflito-btn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-panel);
+  color: var(--text-main);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.aviso-conflito-btn:disabled {
+  cursor: default;
+  opacity: 0.6;
+}

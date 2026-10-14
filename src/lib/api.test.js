@@ -3,6 +3,7 @@ import {
   ErroApi,
   aoFalharSessao,
   definirToken,
+  ehConflitoDeConcorrencia,
   listarTodas,
   montarConsulta,
   obterToken,
@@ -200,6 +201,30 @@ describe('listarTodas', () => {
     fetchMock.mockImplementation(async () => pagina(100));
 
     await expect(listarTodas('/api/v1/empresas')).rejects.toThrow('mais de 5000 registros');
+  });
+});
+
+describe('ehConflitoDeConcorrencia', () => {
+  it('reconhece o 409 de versão e o de operação concorrente', () => {
+    expect(
+      ehConflitoDeConcorrencia(
+        new ErroApi(409, 'o fornecedor foi alterado por outra pessoa; recarregue e tente de novo')
+      )
+    ).toBe(true);
+    expect(
+      ehConflitoDeConcorrencia(
+        new ErroApi(409, 'estoque do produto alterado por outra operação, recarregue e tente novamente')
+      )
+    ).toBe(true);
+  });
+
+  it('não confunde com duplicidade, transição inválida ou outro status', () => {
+    expect(ehConflitoDeConcorrencia(new ErroApi(409, 'já existe um fornecedor com este documento'))).toBe(false);
+    expect(
+      ehConflitoDeConcorrencia(new ErroApi(409, 'não é possível mudar a solicitação de "pago" para "aprovado"'))
+    ).toBe(false);
+    expect(ehConflitoDeConcorrencia(new ErroApi(400, 'erro de validação: recarregue'))).toBe(false);
+    expect(ehConflitoDeConcorrencia(null)).toBe(false);
   });
 });
 

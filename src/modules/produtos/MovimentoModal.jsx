@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { AvisoConflito } from '../../app/components/AvisoConflito';
 import { Modal } from '../../app/components/Modal';
 import { SeletorLocal } from '../../app/components/SeletorLocal';
 import { useNomesEmpresas } from '../../app/empresas/useNomesEmpresas';
+import { ehConflitoDeConcorrencia } from '../../lib/api';
 import { paraCentavos } from '../../lib/formatar';
 import * as produtosService from '../../services/produtos';
 import {
@@ -25,6 +27,9 @@ export function MovimentoModal({ produto, onFechar, onSalvar }) {
   const [erroApi, setErroApi] = useState(null);
   const [salvando, setSalvando] = useState(false);
   const [saldo, setSaldo] = useState(null);
+  const [recargaSaldo, setRecargaSaldo] = useState(0);
+  const [conflito, setConflito] = useState(null);
+  const [recarregando, setRecarregando] = useState(false);
   const nomeEmpresa = useNomesEmpresas();
   const produtoId = produto ? produto.id : null;
 
@@ -35,16 +40,26 @@ export function MovimentoModal({ produto, onFechar, onSalvar }) {
     produtosService
       .obterSaldo(produtoId)
       .then((resposta) => {
-        if (!cancelado) setSaldo((resposta && resposta.dados) || null);
+        if (cancelado) return;
+        setSaldo((resposta && resposta.dados) || null);
+        setConflito(null);
       })
       .catch(() => {
         if (!cancelado) setSaldo(null);
+      })
+      .finally(() => {
+        if (!cancelado) setRecarregando(false);
       });
 
     return () => {
       cancelado = true;
     };
-  }, [produtoId]);
+  }, [produtoId, recargaSaldo]);
+
+  const recarregarSaldo = () => {
+    setRecarregando(true);
+    setRecargaSaldo((valor) => valor + 1);
+  };
 
   const alterar = (campo) => (event) =>
     setForm((atual) => ({ ...atual, [campo]: event.target.value }));
@@ -122,11 +137,16 @@ export function MovimentoModal({ produto, onFechar, onSalvar }) {
 
     setSalvando(true);
     setErroApi(null);
+    setConflito(null);
     try {
       await onSalvar(dados);
       onFechar();
     } catch (e) {
-      setErroApi(e.message || 'Erro ao registrar a movimentação.');
+      if (ehConflitoDeConcorrencia(e)) {
+        setConflito(e.message);
+      } else {
+        setErroApi(e.message || 'Erro ao registrar a movimentação.');
+      }
     } finally {
       setSalvando(false);
     }
@@ -163,6 +183,13 @@ export function MovimentoModal({ produto, onFechar, onSalvar }) {
     >
       <form id="movimento-form" className="produtos-form" onSubmit={salvar} noValidate>
         {erroApi && <div className="produtos-form-erro-api">{erroApi}</div>}
+        {conflito && (
+          <AvisoConflito
+            mensagem={conflito}
+            onRecarregar={recarregarSaldo}
+            recarregando={recarregando}
+          />
+        )}
 
         <p className="produtos-movimento-produto">
           {produto?.nome} — saldo total: <strong>{saldo ? saldo.saldo : produto?.saldo}</strong>

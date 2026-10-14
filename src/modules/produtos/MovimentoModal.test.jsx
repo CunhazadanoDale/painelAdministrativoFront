@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ErroApi } from '../../lib/api';
 import * as empresasService from '../../services/empresas';
 import * as locaisService from '../../services/locais';
 import * as produtosService from '../../services/produtos';
@@ -165,6 +166,51 @@ describe('MovimentoModal', () => {
     await waitFor(() => expect(onSalvar).toHaveBeenCalledTimes(1));
     expect(onSalvar.mock.calls[0][0]).toMatchObject({ tipo: 'implantacao', quantidade: 4 });
     expect(onSalvar.mock.calls[0][0]).not.toHaveProperty('custo_unitario_centavos');
+  });
+
+  it('no conflito de concorrência avisa, recarrega o saldo e mantém o formulário', async () => {
+    const onSalvar = vi
+      .fn()
+      .mockRejectedValueOnce(
+        new ErroApi(409, 'estoque do produto alterado por outra operação, recarregue e tente novamente')
+      )
+      .mockResolvedValueOnce(null);
+    const onFechar = vi.fn();
+    render(<MovimentoModal produto={PRODUTO} onFechar={onFechar} onSalvar={onSalvar} />);
+    await aguardarLocais();
+    escolher('Local *', 'l-cabedelo');
+    escolher('Quantidade *', '2');
+    escolher('Custo unitário *', '25,90');
+    fireEvent.click(screen.getByRole('button', { name: 'Registrar' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('alterado por outra operação');
+    expect(onFechar).not.toHaveBeenCalled();
+    expect(obterSaldo).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Recarregar dados' }));
+
+    await waitFor(() => expect(obterSaldo).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument());
+    expect(screen.getByLabelText('Quantidade *')).toHaveValue(2);
+    expect(screen.getByLabelText('Custo unitário *')).toHaveValue('25,90');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Registrar' }));
+    await waitFor(() => expect(onFechar).toHaveBeenCalled());
+  });
+
+  it('mostra outros erros da API sem o botão de recarregar', async () => {
+    const onSalvar = vi
+      .fn()
+      .mockRejectedValue(new ErroApi(400, 'erro de validação: local inativo não recebe entrada de estoque'));
+    abrir(onSalvar);
+    await aguardarLocais();
+    escolher('Local *', 'l-cabedelo');
+    escolher('Quantidade *', '2');
+    escolher('Custo unitário *', '1');
+    fireEvent.click(screen.getByRole('button', { name: 'Registrar' }));
+
+    expect(await screen.findByText(/local inativo não recebe entrada/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Recarregar dados' })).not.toBeInTheDocument();
   });
 
   it('no ajuste o custo só aparece quando a quantidade é positiva', async () => {

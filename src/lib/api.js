@@ -11,6 +11,12 @@ export class ErroApi extends Error {
   }
 }
 
+const SINAL_DE_CONCORRENCIA = /recarregue/i;
+
+export function ehConflitoDeConcorrencia(erro) {
+  return !!erro && erro.status === 409 && SINAL_DE_CONCORRENCIA.test(String(erro.message || ''));
+}
+
 export function definirToken(token) {
   tokenAtual = token || null;
 }
