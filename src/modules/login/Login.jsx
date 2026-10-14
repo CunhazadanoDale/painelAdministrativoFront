@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAutenticacao } from '../../app/autenticacao/useAutenticacao';
 import { AlertCircle, Info, LogIn } from 'lucide-react';
@@ -11,9 +11,25 @@ export default function Login() {
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState(null);
   const [entrando, setEntrando] = useState(false);
+  const [liberaEm, setLiberaEm] = useState(0);
+  const [agora, setAgora] = useState(() => Date.now());
+
+  const segundosRestantes = Math.max(0, Math.ceil((liberaEm - agora) / 1000));
+  const bloqueado = segundosRestantes > 0;
+
+  useEffect(() => {
+    if (!liberaEm) return undefined;
+    const intervalo = setInterval(() => {
+      const instante = Date.now();
+      setAgora(instante);
+      if (instante >= liberaEm) setLiberaEm(0);
+    }, 250);
+    return () => clearInterval(intervalo);
+  }, [liberaEm]);
 
   const enviar = async (event) => {
     event.preventDefault();
+    if (bloqueado) return;
     if (!email.trim() || !senha) {
       setErro('Informe o e-mail e a senha.');
       return;
@@ -26,6 +42,11 @@ export default function Login() {
       navegar('/', { replace: true });
     } catch (e) {
       setErro(e.message || 'Erro ao entrar.');
+      if (e.status === 429 && e.esperaSegundos > 0) {
+        const instante = Date.now();
+        setAgora(instante);
+        setLiberaEm(instante + e.esperaSegundos * 1000);
+      }
     } finally {
       setEntrando(false);
     }
@@ -87,8 +108,8 @@ export default function Login() {
           />
         </div>
 
-        <button type="submit" className="filter-btn filter-btn-primary login-entrar" disabled={entrando}>
-          {entrando ? 'Entrando…' : 'Entrar'}
+        <button type="submit" className="filter-btn filter-btn-primary login-entrar" disabled={entrando || bloqueado}>
+          {entrando ? 'Entrando…' : bloqueado ? `Aguarde ${segundosRestantes} s` : 'Entrar'}
         </button>
       </form>
     </div>

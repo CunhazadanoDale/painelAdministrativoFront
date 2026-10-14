@@ -4,11 +4,18 @@ let tokenAtual = null;
 const ouvintesSessao = [];
 
 export class ErroApi extends Error {
-  constructor(status, mensagem) {
+  constructor(status, mensagem, { esperaSegundos = null } = {}) {
     super(mensagem);
     this.name = 'ErroApi';
     this.status = status;
+    this.esperaSegundos = esperaSegundos;
   }
+}
+
+function lerEsperaSegundos(resposta) {
+  const valor = resposta.headers && resposta.headers.get ? resposta.headers.get('Retry-After') : null;
+  if (!valor || !/^\d+$/.test(valor.trim())) return null;
+  return Number(valor.trim());
 }
 
 const SINAL_DE_CONCORRENCIA = /recarregue/i;
@@ -86,7 +93,7 @@ export async function requisitar(caminho, { metodo = 'GET', corpo, sinal } = {})
   if (!resposta.ok) {
     if (resposta.status === 401) comunicarFalhaSessao();
     const mensagem = (dados && dados.erro && dados.erro.mensagem) || `Falha na requisição (status ${resposta.status})`;
-    throw new ErroApi(resposta.status, mensagem);
+    throw new ErroApi(resposta.status, mensagem, { esperaSegundos: lerEsperaSegundos(resposta) });
   }
 
   // Resposta 200 com corpo que não é JSON: acontece quando a API não está no
