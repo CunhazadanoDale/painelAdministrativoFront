@@ -18,6 +18,9 @@ function lerEsperaSegundos(resposta) {
   return Number(valor.trim());
 }
 
+export const MENSAGEM_SEM_JSON =
+  'A API não devolveu JSON. Confirme se VITE_API_BASE_URL aponta para a API Go e se ela está em execução.';
+
 const SINAL_DE_CONCORRENCIA = /recarregue/i;
 
 export function ehConflitoDeConcorrencia(erro) {
@@ -102,10 +105,7 @@ export async function requisitar(caminho, { metodo = 'GET', corpo, sinal } = {})
   // Devolver null aqui faz a tela mostrar "nenhum registro" mesmo havendo dados,
   // então o problema precisa virar erro explícito.
   if (dados === null && texto.trim() !== '') {
-    throw new ErroApi(
-      resposta.status,
-      'A API não devolveu JSON. Confirme se VITE_API_BASE_URL aponta para a API Go e se ela está em execução.'
-    );
+    throw new ErroApi(resposta.status, MENSAGEM_SEM_JSON);
   }
 
   return dados;

@@ -1,4 +1,4 @@
-import { ErroApi, montarConsulta, obterToken, obterUrlBase, requisitar } from '../lib/api';
+import { ErroApi, MENSAGEM_SEM_JSON, montarConsulta, obterToken, obterUrlBase, requisitar } from '../lib/api';
 
 const CAMINHO = '/api/v1/arquivos';
 
@@ -32,7 +32,11 @@ export function enviarArquivo(arquivo, { aoProgresso } = {}) {
         }
       }
       if (requisicao.status >= 200 && requisicao.status < 300) {
-        resolve(dados ? dados.dados : null);
+        if (dados && dados.dados) {
+          resolve(dados.dados);
+        } else {
+          reject(new ErroApi(requisicao.status, MENSAGEM_SEM_JSON));
+        }
         return;
       }
       const mensagem =
