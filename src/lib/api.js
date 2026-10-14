@@ -97,3 +97,21 @@ export async function requisitar(caminho, { metodo = 'GET', corpo, sinal } = {})
 
   return dados;
 }
+
+const TAMANHO_MAXIMO_PAGINA = 100;
+const LIMITE_PAGINAS = 50;
+
+export async function listarTodas(caminho, params = {}, { sinal } = {}) {
+  const itens = [];
+  for (let pagina = 1; pagina <= LIMITE_PAGINAS; pagina += 1) {
+    const consulta = montarConsulta({ ...params, pagina, tamanho: TAMANHO_MAXIMO_PAGINA });
+    const resposta = await requisitar(`${caminho}${consulta}`, { sinal });
+    const dados = (resposta && resposta.dados) || [];
+    itens.push(...dados);
+    if (dados.length < TAMANHO_MAXIMO_PAGINA) return itens;
+  }
+  throw new ErroApi(
+    0,
+    `A lista tem mais de ${TAMANHO_MAXIMO_PAGINA * LIMITE_PAGINAS} registros; refine a busca.`
+  );
+}
