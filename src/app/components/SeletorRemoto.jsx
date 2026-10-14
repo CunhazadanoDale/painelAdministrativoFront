@@ -13,6 +13,7 @@ export function SeletorRemoto({
   className = 'filter-select',
   disabled = false,
   invalido = false,
+  selecionarUnica = true,
 }) {
   const [recarga, setRecarga] = useState(0);
   const [estado, setEstado] = useState({ fonte: null, recarga: -1, itens: null, erro: null });
@@ -49,10 +50,10 @@ export function SeletorRemoto({
     const existe = opcoes.some((opcao) => opcao.valor === valor);
     if (valor && !existe) {
       onAlterar('');
-    } else if (!valor && opcoes.length === 1) {
+    } else if (!valor && selecionarUnica && opcoes.length === 1) {
       onAlterar(opcoes[0].valor);
     }
-  }, [itens, opcoes, valor, onAlterar]);
+  }, [itens, opcoes, valor, onAlterar, selecionarUnica]);
 
   if (erro) {
     return (

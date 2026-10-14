@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { Modal } from '../../app/components/Modal';
 import { StatusBadge } from '../../app/components/StatusBadge';
 import { useAutenticacao } from '../../app/autenticacao/useAutenticacao';
+import { useNomesEmpresas } from '../../app/empresas/useNomesEmpresas';
 import {
   AlertCircle,
   Ban,
@@ -23,6 +24,7 @@ import './Solicitacoes.css';
 export default function SolicitacaoDetalhe() {
   const { id } = useParams();
   const { usuario, administrador, permissoes } = useAutenticacao();
+  const nomeEmpresa = useNomesEmpresas();
   const {
     solicitacao,
     historico,
@@ -123,6 +125,7 @@ export default function SolicitacaoDetalhe() {
     : null;
 
   const dados = [
+    { rotulo: 'Empresa', valor: nomeEmpresa(solicitacao.empresa_id) },
     { rotulo: 'Valor', valor: formatarMoeda(solicitacao.valor_centavos) },
     { rotulo: 'Prazo', valor: formatarData(solicitacao.prazo_pagamento) },
     { rotulo: 'Forma', valor: rotuloFormaPagamento(solicitacao.forma_pagamento) },

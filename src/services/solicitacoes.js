@@ -2,8 +2,14 @@ import { montarConsulta, requisitar } from '../lib/api';
 
 const CAMINHO = '/api/v1/solicitacoes';
 
-export function listarSolicitacoes({ pagina = 1, tamanho = 20, escopo = '', status = '' } = {}) {
-  return requisitar(`${CAMINHO}${montarConsulta({ pagina, tamanho, escopo, status })}`);
+export function listarSolicitacoes({
+  pagina = 1,
+  tamanho = 20,
+  escopo = '',
+  status = '',
+  empresa = '',
+} = {}) {
+  return requisitar(`${CAMINHO}${montarConsulta({ pagina, tamanho, escopo, status, empresa })}`);
 }
 
 export function obterSolicitacao(id) {

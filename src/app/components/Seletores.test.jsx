@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React, { useState } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as empresasService from '../../services/empresas';
@@ -66,6 +66,27 @@ describe('SeletorEmpresa', () => {
     await waitFor(() => expect(screen.getByTestId('valor')).toHaveTextContent('e-mia'));
   });
 
+  it('não seleciona sozinha quando usada como filtro', async () => {
+    listarTodasEmpresas.mockResolvedValue([MIA]);
+
+    render(
+      <Controlado
+        Componente={SeletorEmpresa}
+        apenasAtivas={false}
+        selecionarUnica={false}
+        placeholder="Todas"
+      />
+    );
+
+    expect(await screen.findByRole('option', { name: 'MIA' })).toBeInTheDocument();
+    await act(async () => {
+      await new Promise((resolver) => setTimeout(resolver, 20));
+    });
+    expect(screen.getByRole('option', { name: 'Todas' })).toBeInTheDocument();
+    expect(screen.getByTestId('valor')).toBeEmptyDOMElement();
+    expect(listarTodasEmpresas).toHaveBeenCalledWith(expect.objectContaining({ ativas: '' }));
+  });
+
   it('avisa quando não há empresa no acesso', async () => {
     listarTodasEmpresas.mockResolvedValue([]);
 
@@ -95,7 +116,7 @@ describe('SeletorEmpresa', () => {
     render(<Controlado Componente={SeletorEmpresa} inicial="e-inativa" />);
 
     await screen.findByRole('option', { name: 'MIA' });
-    await waitFor(() => expect(screen.getByTestId('valor')).toHaveTextContent(''));
+    await waitFor(() => expect(screen.getByTestId('valor')).toBeEmptyDOMElement());
   });
 });
 
@@ -126,7 +147,7 @@ describe('SeletorLocal', () => {
     rerender(<Controlado Componente={SeletorLocal} empresaId="e-gigante" inicial="l-cabedelo" />);
 
     expect(await screen.findByRole('option', { name: 'Recife' })).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByTestId('valor')).toHaveTextContent(''));
+    await waitFor(() => expect(screen.getByTestId('valor')).toBeEmptyDOMElement());
   });
 
   it('avisa quando não há local disponível', async () => {
