@@ -73,7 +73,7 @@ describe('AutenticacaoProvider', () => {
     expect(localStorage.getItem(CHAVE_SESSAO)).toBeNull();
   });
 
-  it('restaura sessão válida e descobre os escopos por probe', async () => {
+  it('restaura sessão válida e sonda só o escopo de aprovação', async () => {
     gravarSessao({ administrador: true });
 
     const { result } = renderAutenticacao();
@@ -85,33 +85,82 @@ describe('AutenticacaoProvider', () => {
     await waitFor(() =>
       expect(result.current.permissoes).toEqual({ aprovacao: true, financeiro: true })
     );
-    expect(listarSolicitacoes).toHaveBeenCalledTimes(2);
+    expect(listarSolicitacoes).toHaveBeenCalledTimes(1);
+    expect(listarSolicitacoes).toHaveBeenCalledWith(
+      expect.objectContaining({ escopo: 'aprovacao' })
+    );
   });
 
-  it('marca o escopo como falso quando a API responde 403', async () => {
-    listarSolicitacoes.mockImplementation(({ escopo }) =>
-      escopo === 'financeiro'
-        ? Promise.reject({ status: 403 })
-        : Promise.resolve({ dados: [] })
-    );
-    gravarSessao();
+  it('marca a aprovação como falsa quando a API responde 403', async () => {
+    listarSolicitacoes.mockRejectedValue({ status: 403 });
+    gravarSessao({ financeiro: true });
 
     const { result } = renderAutenticacao();
 
-    await waitFor(() =>
-      expect(result.current.permissoes).toEqual({ aprovacao: true, financeiro: false })
-    );
+    await waitFor(() => expect(listarSolicitacoes).toHaveBeenCalledTimes(1));
+    expect(result.current.permissoes).toEqual({ aprovacao: false, financeiro: true });
   });
 
-  it('mantém o escopo verdadeiro em erro que não seja 403', async () => {
+  it('nega a aprovação em erro de rede ou do servidor', async () => {
     listarSolicitacoes.mockRejectedValue({ status: 0 });
     gravarSessao();
+    const rede = renderAutenticacao();
+    await waitFor(() => expect(listarSolicitacoes).toHaveBeenCalledTimes(1));
+    expect(rede.result.current.permissoes).toEqual(SEM_PERMISSAO);
+    rede.unmount();
 
+    localStorage.clear();
+    listarSolicitacoes.mockRejectedValue({ status: 500 });
+    gravarSessao();
+    const servidor = renderAutenticacao();
+    await waitFor(() => expect(listarSolicitacoes).toHaveBeenCalledTimes(2));
+    expect(servidor.result.current.permissoes).toEqual(SEM_PERMISSAO);
+  });
+
+  it('lê o perfil financeiro da sessão e o herda do administrador', async () => {
+    gravarSessao({ financeiro: true });
+    const financeiro = renderAutenticacao();
+    expect(financeiro.result.current.financeiro).toBe(true);
+    await waitFor(() =>
+      expect(financeiro.result.current.permissoes).toEqual({ aprovacao: true, financeiro: true })
+    );
+    financeiro.unmount();
+
+    localStorage.clear();
+    gravarSessao({ administrador: true });
+    const administrador = renderAutenticacao();
+    expect(administrador.result.current.financeiro).toBe(true);
+    administrador.unmount();
+
+    localStorage.clear();
+    gravarSessao();
+    const comum = renderAutenticacao();
+    expect(comum.result.current.financeiro).toBe(false);
+    await waitFor(() =>
+      expect(comum.result.current.permissoes).toEqual({ aprovacao: true, financeiro: false })
+    );
+  });
+
+  it('entrar grava o perfil financeiro da resposta do login', async () => {
+    autenticar.mockResolvedValue({
+      dados: {
+        token: 'token-novo',
+        expira_em: EXPIRA_FUTURA,
+        administrador: false,
+        comercial: false,
+        financeiro: true,
+        usuario: { id: 'u2', nome: 'Carla' },
+      },
+    });
     const { result } = renderAutenticacao();
 
-    await waitFor(() =>
-      expect(result.current.permissoes).toEqual({ aprovacao: true, financeiro: true })
-    );
+    await act(async () => {
+      await result.current.entrar('carla@exemplo.com', 'segredo');
+    });
+
+    expect(result.current.financeiro).toBe(true);
+    expect(JSON.parse(localStorage.getItem(CHAVE_SESSAO)).financeiro).toBe(true);
+    await waitFor(() => expect(result.current.permissoes.financeiro).toBe(true));
   });
 
   it('entrar grava a sessão e o token', async () => {
@@ -150,7 +199,7 @@ describe('AutenticacaoProvider', () => {
   it('encerrar limpa sessão, token e permissões', async () => {
     gravarSessao({ administrador: true });
     const { result } = renderAutenticacao();
-    await waitFor(() => expect(listarSolicitacoes).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(listarSolicitacoes).toHaveBeenCalledTimes(1));
 
     act(() => {
       result.current.encerrar();

@@ -39,7 +39,7 @@ function gravarSessao(sessao) {
 
 export function AutenticacaoProvider({ children }) {
   const [sessao, setSessao] = useState(carregarSessao);
-  const [permissoes, setPermissoes] = useState(SEM_PERMISSAO);
+  const [aprovacao, setAprovacao] = useState(false);
   const [aviso, setAviso] = useState(null);
 
   definirToken(sessao ? sessao.token : null);
@@ -50,18 +50,14 @@ export function AutenticacaoProvider({ children }) {
     let cancelado = false;
 
     (async () => {
-      const resultado = { aprovacao: false, financeiro: false };
-      await Promise.all(
-        ['aprovacao', 'financeiro'].map(async (escopo) => {
-          try {
-            await solicitacoesService.listarSolicitacoes({ pagina: 1, tamanho: 1, escopo });
-            resultado[escopo] = true;
-          } catch (e) {
-            resultado[escopo] = !e || e.status !== 403;
-          }
-        })
-      );
-      if (!cancelado) setPermissoes(resultado);
+      let permitido = false;
+      try {
+        await solicitacoesService.listarSolicitacoes({ pagina: 1, tamanho: 1, escopo: 'aprovacao' });
+        permitido = true;
+      } catch {
+        permitido = false;
+      }
+      if (!cancelado) setAprovacao(permitido);
     })();
 
     return () => {
@@ -72,7 +68,7 @@ export function AutenticacaoProvider({ children }) {
   const limpar = useCallback(() => {
     gravarSessao(null);
     definirToken(null);
-    setPermissoes(SEM_PERMISSAO);
+    setAprovacao(false);
     setSessao(null);
   }, []);
 
@@ -107,31 +103,33 @@ export function AutenticacaoProvider({ children }) {
       expira_em: dados.expira_em,
       administrador: !!dados.administrador,
       comercial: !!dados.comercial,
+      financeiro: !!dados.financeiro,
       usuario: dados.usuario,
     };
     gravarSessao(novaSessao);
-    setPermissoes(SEM_PERMISSAO);
+    setAprovacao(false);
     setAviso(null);
     setSessao(novaSessao);
     return novaSessao;
   }, []);
 
-  const valor = useMemo(
-    () => ({
+  const valor = useMemo(() => {
+    const financeiro = !!(sessao && (sessao.financeiro || sessao.administrador));
+    return {
       sessao,
       usuario: sessao ? sessao.usuario : null,
       autenticado: !!sessao,
       administrador: !!(sessao && sessao.administrador),
       comercial: !!(sessao && (sessao.comercial || sessao.administrador)),
-      permissoes: sessao ? permissoes : SEM_PERMISSAO,
+      financeiro,
+      permissoes: sessao ? { aprovacao, financeiro } : SEM_PERMISSAO,
       aviso,
       entrar,
       encerrar,
       encerrarComAviso,
       sair,
-    }),
-    [sessao, permissoes, aviso, entrar, encerrar, encerrarComAviso, sair]
-  );
+    };
+  }, [sessao, aprovacao, aviso, entrar, encerrar, encerrarComAviso, sair]);
 
   return (
     <AutenticacaoContexto.Provider value={valor}>{children}</AutenticacaoContexto.Provider>
