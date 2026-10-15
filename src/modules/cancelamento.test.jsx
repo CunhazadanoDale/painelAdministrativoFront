@@ -8,6 +8,7 @@ import { useAprovadores } from './aprovadores/useAprovadores';
 import { useCargos } from './cargos/useCargos';
 import { useDashboard } from './dashboard/useDashboard';
 import { useEmpresas } from './empresas/useEmpresas';
+import { useFornecedores } from './fornecedores/useFornecedores';
 import { useFunis } from './funis/useFunis';
 import { useKanban } from './leads/useKanban';
 import { useLeadDetalhe } from './leads/useLeadDetalhe';
@@ -83,6 +84,7 @@ describe('cancelamento das requisições ao desmontar', () => {
     ['useFunis', () => useFunis()],
     ['useDashboard', () => useDashboard()],
     ['useEmpresas', () => useEmpresas()],
+    ['useFornecedores', () => useFornecedores()],
   ])('%s', async (_, usar) => {
     const { unmount } = renderHook(usar, { wrapper: comAutenticacao });
 
