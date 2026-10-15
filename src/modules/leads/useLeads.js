@@ -29,10 +29,12 @@ export function useLeads() {
   const [leads, setLeads] = useState([]);
   const [total, setTotal] = useState(null);
   const [temProxima, setTemProxima] = useState(false);
-  const [pagina, setPagina] = useState(1);
+  const [paginacao, setPaginacao] = useState({ q, pagina: 1 });
+  const pagina = paginacao.q === q ? paginacao.pagina : 1;
   const [etapaFiltro, setEtapaFiltro] = useState('');
 
   const [recarga, setRecarga] = useState(0);
+  const [recargaEstrutura, setRecargaEstrutura] = useState(0);
   // Última chave de requisição concluída com sucesso (define o fim do loading).
   const [chaveDados, setChaveDados] = useState(null);
   // Falha da última requisição: { chave, mensagem }.
@@ -72,7 +74,13 @@ export function useLeads() {
     return () => {
       controle.abort();
     };
-  }, [recarga]);
+  }, [recargaEstrutura]);
+
+  const mudarPagina = useCallback(
+    (calcular) =>
+      setPaginacao((atual) => ({ q, pagina: calcular(atual.q === q ? atual.pagina : 1) })),
+    [q]
+  );
 
   // Leads: conforme filtro ativo (servidor ou cliente).
   useEffect(() => {
@@ -91,7 +99,7 @@ export function useLeads() {
 
           if (pagina > 1 && inicio >= totalFiltrado) {
             if (controle.signal.aborted) return;
-            setPagina(Math.max(1, Math.ceil(totalFiltrado / TAMANHO_PAGINA)));
+            mudarPagina(() => Math.max(1, Math.ceil(totalFiltrado / TAMANHO_PAGINA)));
             return;
           }
 
@@ -111,7 +119,7 @@ export function useLeads() {
 
           if (itens.length === 0 && pagina > 1) {
             if (controle.signal.aborted) return;
-            setPagina(pagina - 1);
+            mudarPagina(() => pagina - 1);
             return;
           }
 
@@ -143,14 +151,23 @@ export function useLeads() {
     return () => {
       controle.abort();
     };
-  }, [estruturaOk, pagina, q, etapaFiltro, funis, recarga, chave]);
+  }, [estruturaOk, pagina, q, etapaFiltro, funis, recarga, chave, mudarPagina]);
 
   const etapaMap = useMemo(
     () => Object.fromEntries(etapas.map((etapa) => [etapa.etapa_id, etapa])),
     [etapas]
   );
 
-  const recarregar = useCallback(() => setRecarga((valor) => valor + 1), []);
+  const estruturaFalhou = !!(falha && falha.estrutura);
+
+  const recarregar = useCallback(() => {
+    if (estruturaFalhou) {
+      setFalha(null);
+      setRecargaEstrutura((valor) => valor + 1);
+      return;
+    }
+    setRecarga((valor) => valor + 1);
+  }, [estruturaFalhou]);
 
   const definirBusca = useCallback(
     (busca) => {
@@ -164,7 +181,7 @@ export function useLeads() {
         }
         return novos;
       });
-      setPagina(1);
+      setPaginacao({ q: limpo, pagina: 1 });
     },
     [setParametros]
   );
@@ -182,17 +199,20 @@ export function useLeads() {
     setEtapaFiltro('');
   }, [definirBusca]);
 
-  const irParaAnterior = useCallback(() => setPagina((valor) => Math.max(1, valor - 1)), []);
-  const irParaProxima = useCallback(() => setPagina((valor) => valor + 1), []);
+  const irParaAnterior = useCallback(
+    () => mudarPagina((valor) => Math.max(1, valor - 1)),
+    [mudarPagina]
+  );
+  const irParaProxima = useCallback(() => mudarPagina((valor) => valor + 1), [mudarPagina]);
 
   /** Cria lead; volta para a página 1 (o mais novo aparece primeiro). */
   const criar = useCallback(
     async (dados) => {
       await leadsService.criarLead(dados);
-      setPagina(1);
+      mudarPagina(() => 1);
       recarregar();
     },
-    [recarregar]
+    [recarregar, mudarPagina]
   );
 
   /**
