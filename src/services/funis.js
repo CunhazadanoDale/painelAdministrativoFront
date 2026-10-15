@@ -30,8 +30,8 @@ export function removerFunil(id) {
 }
 
 /** Etapas de um funil, ordenadas por `ordem`. */
-export function listarEtapasDoFunil(funilId) {
-  return requisitar(`${CAMINHO_FUNIL}/${funilId}/etapas`);
+export function listarEtapasDoFunil(funilId, { sinal } = {}) {
+  return requisitar(`${CAMINHO_FUNIL}/${funilId}/etapas`, { sinal });
 }
 
 export function criarEtapa(dados) {

@@ -29,14 +29,14 @@ export function useDashboard() {
   const carregando = !erro && chaveOk !== chave;
 
   useEffect(() => {
-    let cancelado = false;
+    const controle = new AbortController();
 
     (async () => {
       try {
-        const listaFunis = await funisService.listarTodosFunis({ ativos: true });
+        const listaFunis = await funisService.listarTodosFunis({ ativos: true, sinal: controle.signal });
 
         const respostasEtapas = await Promise.all(
-          listaFunis.map((funil) => funisService.listarEtapasDoFunil(funil.funil_id))
+          listaFunis.map((funil) => funisService.listarEtapasDoFunil(funil.funil_id, { sinal: controle.signal }))
         );
         const listaEtapas = respostasEtapas.flatMap(
           (resposta) => resposta?.dados ?? []
@@ -44,12 +44,12 @@ export function useDashboard() {
 
         const [respostasContagem, respostaLeads] = await Promise.all([
           Promise.all(
-            listaEtapas.map((etapa) => leadsService.contarLeadsPorEtapa(etapa.etapa_id))
+            listaEtapas.map((etapa) => leadsService.contarLeadsPorEtapa(etapa.etapa_id, { sinal: controle.signal }))
           ),
-          leadsService.listarLeads({ pagina: 1, tamanho: TAMANHO_RECENTES }),
+          leadsService.listarLeads({ pagina: 1, tamanho: TAMANHO_RECENTES, sinal: controle.signal }),
         ]);
 
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setFunis(listaFunis);
         setEtapas(listaEtapas);
         setContagens(
@@ -64,13 +64,13 @@ export function useDashboard() {
         setChaveOk(chave);
         setFalha(null);
       } catch (e) {
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setFalha({ chave, mensagem: e.message || 'Erro ao carregar o painel.' });
       }
     })();
 
     return () => {
-      cancelado = true;
+      controle.abort();
     };
   }, [chave]);
 

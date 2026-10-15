@@ -1,10 +1,16 @@
 import { render, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AutenticacaoProvider } from '../app/autenticacao/AutenticacaoProvider';
 import { useAprovadores } from './aprovadores/useAprovadores';
 import { useCargos } from './cargos/useCargos';
+import { useDashboard } from './dashboard/useDashboard';
+import { useFunis } from './funis/useFunis';
+import { useKanban } from './leads/useKanban';
+import { useLeadDetalhe } from './leads/useLeadDetalhe';
+import { useLeads } from './leads/useLeads';
 import { usePerfil } from './perfil/usePerfil';
 import { MovimentoModal } from './produtos/MovimentoModal';
 import { useCategorias } from './produtos/useCategorias';
@@ -16,8 +22,15 @@ import { useUsuarios } from './usuarios/useUsuarios';
 
 let chamadas;
 
+const FUNIS = [{ funil_id: 'f1', nome: 'Vendas' }];
+const ETAPAS = [{ etapa_id: 'e1', funil_id: 'f1', ordem: 1 }];
+
 function comAutenticacao({ children }) {
-  return <AutenticacaoProvider>{children}</AutenticacaoProvider>;
+  return (
+    <MemoryRouter>
+      <AutenticacaoProvider>{children}</AutenticacaoProvider>
+    </MemoryRouter>
+  );
 }
 
 beforeEach(() => {
@@ -61,6 +74,11 @@ describe('cancelamento das requisições ao desmontar', () => {
     ['useCargos', () => useCargos()],
     ['useUsuarios', () => useUsuarios()],
     ['usePerfil', () => usePerfil()],
+    ['useLeads', () => useLeads()],
+    ['useKanban', () => useKanban({ funis: FUNIS, etapas: ETAPAS, ativo: true })],
+    ['useLeadDetalhe', () => useLeadDetalhe('lead-1')],
+    ['useFunis', () => useFunis()],
+    ['useDashboard', () => useDashboard()],
   ])('%s', async (_, usar) => {
     const { unmount } = renderHook(usar, { wrapper: comAutenticacao });
 

@@ -43,14 +43,14 @@ export function useKanban({ funis, etapas, ativo }) {
   useEffect(() => {
     if (!ativo || !funilEfetivoId) return undefined;
 
-    let cancelado = false;
+    const controle = new AbortController();
 
     (async () => {
       try {
         const respostas = await Promise.all(
-          etapasDoFunil.map((etapa) => leadsService.listarLeadsPorEtapa(etapa.etapa_id))
+          etapasDoFunil.map((etapa) => leadsService.listarLeadsPorEtapa(etapa.etapa_id, { sinal: controle.signal }))
         );
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
 
         const proximas = {};
         etapasDoFunil.forEach((etapa, indice) => {
@@ -63,13 +63,13 @@ export function useKanban({ funis, etapas, ativo }) {
         setChaveOk(chave);
         setFalha(null);
       } catch (e) {
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setFalha({ chave, mensagem: e.message || 'Erro ao carregar o quadro.' });
       }
     })();
 
     return () => {
-      cancelado = true;
+      controle.abort();
     };
   }, [ativo, funilEfetivoId, etapasDoFunil, chave]);
 

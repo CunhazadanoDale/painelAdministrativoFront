@@ -40,12 +40,12 @@ export function useFunis() {
 
   // Funis: lista geral (inclusive inativos, para permitir reeditar).
   useEffect(() => {
-    let cancelado = false;
+    const controle = new AbortController();
 
     (async () => {
       try {
-        const lista = await funisService.listarTodosFunis({ ativos: false });
-        if (cancelado) return;
+        const lista = await funisService.listarTodosFunis({ ativos: false, sinal: controle.signal });
+        if (controle.signal.aborted) return;
         setFunis(lista);
         setChaveFunisOk(chaveFunis);
         setFalhaFunis(null);
@@ -56,13 +56,13 @@ export function useFunis() {
             : lista[0]?.funil_id || ''
         );
       } catch (e) {
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setFalhaFunis(e.message || 'Erro ao carregar os funis.');
       }
     })();
 
     return () => {
-      cancelado = true;
+      controle.abort();
     };
   }, [chaveFunis]);
 
@@ -70,16 +70,16 @@ export function useFunis() {
   useEffect(() => {
     if (!funilSelecionadoId) return undefined;
 
-    let cancelado = false;
+    const controle = new AbortController();
 
     (async () => {
       try {
-        const resposta = await funisService.listarEtapasDoFunil(funilSelecionadoId);
+        const resposta = await funisService.listarEtapasDoFunil(funilSelecionadoId, { sinal: controle.signal });
         const lista = resposta?.dados ?? [];
         const respostasContagem = await Promise.all(
-          lista.map((etapa) => leadsService.contarLeadsPorEtapa(etapa.etapa_id))
+          lista.map((etapa) => leadsService.contarLeadsPorEtapa(etapa.etapa_id, { sinal: controle.signal }))
         );
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setEtapas(lista);
         setContagens(
           Object.fromEntries(
@@ -92,7 +92,7 @@ export function useFunis() {
         setChaveEtapasOk(chaveEtapas);
         setFalhaEtapas(null);
       } catch (e) {
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setFalhaEtapas({
           chave: chaveEtapas,
           mensagem: e.message || 'Erro ao carregar as etapas.',
@@ -101,7 +101,7 @@ export function useFunis() {
     })();
 
     return () => {
-      cancelado = true;
+      controle.abort();
     };
   }, [funilSelecionadoId, chaveEtapas]);
 

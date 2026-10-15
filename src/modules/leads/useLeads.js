@@ -46,22 +46,22 @@ export function useLeads() {
 
   // Estrutura: funis ativos e etapas de cada um (recarrega a cada "Tentar novamente").
   useEffect(() => {
-    let cancelado = false;
+    const controle = new AbortController();
 
     (async () => {
       try {
-        const listaFunis = await funisService.listarTodosFunis({ ativos: true });
+        const listaFunis = await funisService.listarTodosFunis({ ativos: true, sinal: controle.signal });
         const respostasEtapas = await Promise.all(
-          listaFunis.map((funil) => funisService.listarEtapasDoFunil(funil.funil_id))
+          listaFunis.map((funil) => funisService.listarEtapasDoFunil(funil.funil_id, { sinal: controle.signal }))
         );
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setFunis(listaFunis);
         setEtapas(respostasEtapas.flatMap((resposta) => resposta?.dados ?? []));
         setEstruturaOk(true);
         // Limpa apenas uma falha anterior de estrutura (não mexe na de leads).
         setFalha((atual) => (atual?.estrutura ? null : atual));
       } catch (e) {
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setFalha({
           estrutura: true,
           mensagem: e.message || 'Erro ao carregar funis e etapas.',
@@ -70,7 +70,7 @@ export function useLeads() {
     })();
 
     return () => {
-      cancelado = true;
+      controle.abort();
     };
   }, [recarga]);
 
@@ -78,24 +78,24 @@ export function useLeads() {
   useEffect(() => {
     if (!estruturaOk) return undefined;
 
-    let cancelado = false;
+    const controle = new AbortController();
 
     (async () => {
       try {
         if (etapaFiltro) {
-          const resposta = await leadsService.listarLeadsPorEtapa(etapaFiltro);
+          const resposta = await leadsService.listarLeadsPorEtapa(etapaFiltro, { sinal: controle.signal });
           const ativos = (resposta?.dados ?? []).filter((lead) => lead.ativo !== false);
           const filtrados = filtrarLeadsPorTexto(ativos, q);
           const totalFiltrado = filtrados.length;
           const inicio = (pagina - 1) * TAMANHO_PAGINA;
 
           if (pagina > 1 && inicio >= totalFiltrado) {
-            if (cancelado) return;
+            if (controle.signal.aborted) return;
             setPagina(Math.max(1, Math.ceil(totalFiltrado / TAMANHO_PAGINA)));
             return;
           }
 
-          if (cancelado) return;
+          if (controle.signal.aborted) return;
           setLeads(filtrados.slice(inicio, inicio + TAMANHO_PAGINA));
           setTotal(totalFiltrado);
           setTemProxima(inicio + TAMANHO_PAGINA < totalFiltrado);
@@ -105,11 +105,12 @@ export function useLeads() {
             pagina,
             tamanho: TAMANHO_PAGINA + 1,
             q,
+            sinal: controle.signal,
           });
           const itens = resposta?.dados ?? [];
 
           if (itens.length === 0 && pagina > 1) {
-            if (cancelado) return;
+            if (controle.signal.aborted) return;
             setPagina(pagina - 1);
             return;
           }
@@ -117,7 +118,7 @@ export function useLeads() {
           let totalConhecido = null;
           if (!q) {
             const contagens = await Promise.all(
-              funis.map((funil) => leadsService.contarLeadsPorFunil(funil.funil_id))
+              funis.map((funil) => leadsService.contarLeadsPorFunil(funil.funil_id, { sinal: controle.signal }))
             );
             totalConhecido = contagens.reduce(
               (soma, respostaContagem) => soma + (respostaContagem?.dados?.total ?? 0),
@@ -125,22 +126,22 @@ export function useLeads() {
             );
           }
 
-          if (cancelado) return;
+          if (controle.signal.aborted) return;
           setLeads(itens.slice(0, TAMANHO_PAGINA));
           setTemProxima(itens.length > TAMANHO_PAGINA);
           setTotal(totalConhecido);
         }
 
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setChaveDados(chave);
       } catch (e) {
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setFalha({ chave, mensagem: e.message || 'Erro ao carregar leads.' });
       }
     })();
 
     return () => {
-      cancelado = true;
+      controle.abort();
     };
   }, [estruturaOk, pagina, q, etapaFiltro, funis, recarga, chave]);
 

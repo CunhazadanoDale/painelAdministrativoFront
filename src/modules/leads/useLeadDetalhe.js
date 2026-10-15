@@ -47,43 +47,43 @@ export function useLeadDetalhe(leadId) {
 
   // Estrutura: todos os funis (inclusive inativos) e as etapas de cada um.
   useEffect(() => {
-    let cancelado = false;
+    const controle = new AbortController();
 
     (async () => {
       try {
-        const listaFunis = await funisService.listarTodosFunis({ ativos: false });
+        const listaFunis = await funisService.listarTodosFunis({ ativos: false, sinal: controle.signal });
         const respostasEtapas = await Promise.all(
-          listaFunis.map((funil) => funisService.listarEtapasDoFunil(funil.funil_id))
+          listaFunis.map((funil) => funisService.listarEtapasDoFunil(funil.funil_id, { sinal: controle.signal }))
         );
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setEtapas(respostasEtapas.flatMap((resposta) => resposta?.dados ?? []));
         setEstruturaOk(true);
         setFalhaEstrutura(null);
       } catch (e) {
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setFalhaEstrutura(e.message || 'Erro ao carregar as etapas.');
       }
     })();
 
     return () => {
-      cancelado = true;
+      controle.abort();
     };
   }, [recarga]);
 
   // Lead.
   useEffect(() => {
-    let cancelado = false;
+    const controle = new AbortController();
 
     (async () => {
       try {
-        const resposta = await leadsService.obterLead(leadId);
-        if (cancelado) return;
+        const resposta = await leadsService.obterLead(leadId, { sinal: controle.signal });
+        if (controle.signal.aborted) return;
         const obtido = resposta?.dados ?? null;
         setLead(obtido);
         setChaveLeadOk(chaveLead);
         setFalhaLead(obtido ? null : 'Lead não encontrado.');
       } catch (e) {
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setFalhaLead(
           e.status === 404
             ? 'Lead não encontrado. Ele pode ter sido excluído.'
@@ -93,22 +93,23 @@ export function useLeadDetalhe(leadId) {
     })();
 
     return () => {
-      cancelado = true;
+      controle.abort();
     };
   }, [leadId, chaveLead]);
 
   // Histórico de movimentações (página 1 substitui; demais anexam).
   useEffect(() => {
-    let cancelado = false;
+    const controle = new AbortController();
 
     (async () => {
       try {
         const resposta = await leadsService.listarHistoricoDoLead(leadId, {
           pagina,
           tamanho: TAMANHO_HISTORICO + 1,
+          sinal: controle.signal,
         });
         const itens = resposta?.dados ?? [];
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
 
         const paginaCompleta = itens.slice(0, TAMANHO_HISTORICO);
         setMovimentacoes((atual) => {
@@ -120,7 +121,7 @@ export function useLeadDetalhe(leadId) {
         setChaveHistOk(chaveHist);
         setFalhaHist(null);
       } catch (e) {
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setFalhaHist({
           chave: chaveHist,
           mensagem: e.message || 'Erro ao carregar as movimentações.',
@@ -129,7 +130,7 @@ export function useLeadDetalhe(leadId) {
     })();
 
     return () => {
-      cancelado = true;
+      controle.abort();
     };
   }, [leadId, pagina, recarga, chaveHist]);
 
