@@ -15,7 +15,8 @@ import {
   FolderTree,
   UserCog,
   BadgeCheck,
-  ShieldCheck
+  ShieldCheck,
+  Building2
 } from 'lucide-react';
 import { useAutenticacao } from '../autenticacao/useAutenticacao';
 import './Sidebar.css';
@@ -58,6 +59,7 @@ export function Sidebar() {
       title: 'Sistema',
       items: [
         { label: 'Relatórios', icon: <BarChart2 size={18} />, path: '/relatorios' },
+        { label: 'Empresas', icon: <Building2 size={18} />, path: '/empresas', admin: true },
         { label: 'Usuários', icon: <UserCog size={18} />, path: '/usuarios', admin: true },
         { label: 'Cargos', icon: <BadgeCheck size={18} />, path: '/cargos', admin: true },
         { label: 'Configurações', icon: <Settings size={18} />, path: '/configuracoes' }

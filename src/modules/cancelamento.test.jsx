@@ -7,6 +7,7 @@ import { AutenticacaoProvider } from '../app/autenticacao/AutenticacaoProvider';
 import { useAprovadores } from './aprovadores/useAprovadores';
 import { useCargos } from './cargos/useCargos';
 import { useDashboard } from './dashboard/useDashboard';
+import { useEmpresas } from './empresas/useEmpresas';
 import { useFunis } from './funis/useFunis';
 import { useKanban } from './leads/useKanban';
 import { useLeadDetalhe } from './leads/useLeadDetalhe';
@@ -18,6 +19,7 @@ import { useProdutoDetalhe } from './produtos/useProdutoDetalhe';
 import { useProdutos } from './produtos/useProdutos';
 import { useSolicitacaoDetalhe } from './solicitacoes/useSolicitacaoDetalhe';
 import { useSolicitacoes } from './solicitacoes/useSolicitacoes';
+import { useAcessoEmpresas } from './usuarios/useAcessoEmpresas';
 import { useUsuarios } from './usuarios/useUsuarios';
 
 let chamadas;
@@ -73,12 +75,14 @@ describe('cancelamento das requisições ao desmontar', () => {
     ['useAprovadores', () => useAprovadores()],
     ['useCargos', () => useCargos()],
     ['useUsuarios', () => useUsuarios()],
+    ['useAcessoEmpresas', () => useAcessoEmpresas('usr-1')],
     ['usePerfil', () => usePerfil()],
     ['useLeads', () => useLeads()],
     ['useKanban', () => useKanban({ funis: FUNIS, etapas: ETAPAS, ativo: true })],
     ['useLeadDetalhe', () => useLeadDetalhe('lead-1')],
     ['useFunis', () => useFunis()],
     ['useDashboard', () => useDashboard()],
+    ['useEmpresas', () => useEmpresas()],
   ])('%s', async (_, usar) => {
     const { unmount } = renderHook(usar, { wrapper: comAutenticacao });
 
