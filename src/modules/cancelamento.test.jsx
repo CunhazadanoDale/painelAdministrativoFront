@@ -7,6 +7,7 @@ import { AutenticacaoProvider } from '../app/autenticacao/AutenticacaoProvider';
 import { useAprovadores } from './aprovadores/useAprovadores';
 import { useCargos } from './cargos/useCargos';
 import { useDashboard } from './dashboard/useDashboard';
+import { useEmpresas } from './empresas/useEmpresas';
 import { useFunis } from './funis/useFunis';
 import { useKanban } from './leads/useKanban';
 import { useLeadDetalhe } from './leads/useLeadDetalhe';
@@ -79,6 +80,7 @@ describe('cancelamento das requisições ao desmontar', () => {
     ['useLeadDetalhe', () => useLeadDetalhe('lead-1')],
     ['useFunis', () => useFunis()],
     ['useDashboard', () => useDashboard()],
+    ['useEmpresas', () => useEmpresas()],
   ])('%s', async (_, usar) => {
     const { unmount } = renderHook(usar, { wrapper: comAutenticacao });
 
