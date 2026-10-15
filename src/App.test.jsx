@@ -77,6 +77,26 @@ describe('roteamento do App', () => {
     expect(screen.getByTestId('caminho')).toHaveTextContent('/usuarios');
   });
 
+  it('redireciona usuário comum que acessa /empresas', async () => {
+    gravarSessao(false);
+
+    renderizar('/empresas');
+
+    await waitFor(() => expect(screen.getByTestId('caminho')).toHaveTextContent(/^\/$/));
+    expect(screen.queryByText('Nova Empresa')).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Empresas' })).toBeNull();
+  });
+
+  it('libera /empresas e a entrada na sidebar para administrador', async () => {
+    gravarSessao(true);
+
+    renderizar('/empresas');
+
+    expect(await screen.findByText('Nova Empresa')).toBeInTheDocument();
+    expect(screen.getByTestId('caminho')).toHaveTextContent('/empresas');
+    expect(screen.getByRole('link', { name: 'Empresas' })).toHaveAttribute('href', '/empresas');
+  });
+
   it('redireciona /pagamentos para /solicitacoes', async () => {
     gravarSessao(false);
 
