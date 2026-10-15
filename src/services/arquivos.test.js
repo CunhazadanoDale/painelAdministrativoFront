@@ -1,7 +1,7 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ErroApi, definirToken } from '../lib/api';
-import { enviarArquivo } from './arquivos';
+import { baixarArquivo, enviarArquivo } from './arquivos';
 
 function simularXhr(status, responseText) {
   const instancias = [];
@@ -74,5 +74,30 @@ describe('enviarArquivo', () => {
 
     expect(erro.status).toBe(413);
     expect(erro.message).toBe('erro de validação: arquivo grande demais');
+  });
+});
+
+describe('baixarArquivo', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('só revoga o object URL depois que o download teve tempo de começar', async () => {
+    const criar = vi.fn(() => 'blob:download-1');
+    const revogar = vi.fn();
+    URL.createObjectURL = criar;
+    URL.revokeObjectURL = revogar;
+    const clique = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, status: 200, blob: async () => new Blob(['pdf']) })));
+    vi.useFakeTimers();
+
+    await baixarArquivo('arq-1', 'nota.pdf');
+
+    expect(clique).toHaveBeenCalledTimes(1);
+    expect(revogar).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(60000);
+
+    expect(revogar).toHaveBeenCalledWith('blob:download-1');
   });
 });

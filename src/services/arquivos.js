@@ -1,6 +1,7 @@
 import { ErroApi, MENSAGEM_SEM_JSON, montarConsulta, obterToken, obterUrlBase, requisitar } from '../lib/api';
 
 const CAMINHO = '/api/v1/arquivos';
+const PRAZO_PARA_REVOGAR_DOWNLOAD_MS = 60000;
 
 export function listarArquivos({ pagina = 1, tamanho = 20 } = {}) {
   return requisitar(`${CAMINHO}${montarConsulta({ pagina, tamanho })}`);
@@ -95,5 +96,5 @@ export async function baixarArquivo(id, nome) {
   document.body.appendChild(ancora);
   ancora.click();
   ancora.remove();
-  URL.revokeObjectURL(url);
+  setTimeout(() => URL.revokeObjectURL(url), PRAZO_PARA_REVOGAR_DOWNLOAD_MS);
 }

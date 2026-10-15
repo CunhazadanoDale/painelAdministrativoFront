@@ -36,8 +36,11 @@ export function useLeadDetalhe(leadId) {
   const chaveLead = `${leadId}|${recarga}`;
   const chaveHist = `${leadId}|${pagina}|${recarga}`;
 
-  const erroLead = falhaLead;
-  const erroEstrutura = falhaEstrutura;
+  const chaveEstrutura = String(recarga);
+
+  const erroLead = falhaLead && falhaLead.chave === chaveLead ? falhaLead.mensagem : null;
+  const erroEstrutura =
+    falhaEstrutura && falhaEstrutura.chave === chaveEstrutura ? falhaEstrutura.mensagem : null;
   const erroHistorico =
     falhaHist && falhaHist.chave === chaveHist ? falhaHist.mensagem : null;
 
@@ -61,14 +64,17 @@ export function useLeadDetalhe(leadId) {
         setFalhaEstrutura(null);
       } catch (e) {
         if (controle.signal.aborted) return;
-        setFalhaEstrutura(e.message || 'Erro ao carregar as etapas.');
+        setFalhaEstrutura({
+          chave: chaveEstrutura,
+          mensagem: e.message || 'Erro ao carregar as etapas.',
+        });
       }
     })();
 
     return () => {
       controle.abort();
     };
-  }, [recarga]);
+  }, [chaveEstrutura]);
 
   // Lead.
   useEffect(() => {
@@ -81,14 +87,16 @@ export function useLeadDetalhe(leadId) {
         const obtido = resposta?.dados ?? null;
         setLead(obtido);
         setChaveLeadOk(chaveLead);
-        setFalhaLead(obtido ? null : 'Lead não encontrado.');
+        setFalhaLead(obtido ? null : { chave: chaveLead, mensagem: 'Lead não encontrado.' });
       } catch (e) {
         if (controle.signal.aborted) return;
-        setFalhaLead(
-          e.status === 404
-            ? 'Lead não encontrado. Ele pode ter sido excluído.'
-            : e.message || 'Erro ao carregar o lead.'
-        );
+        setFalhaLead({
+          chave: chaveLead,
+          mensagem:
+            e.status === 404
+              ? 'Lead não encontrado. Ele pode ter sido excluído.'
+              : e.message || 'Erro ao carregar o lead.',
+        });
       }
     })();
 
