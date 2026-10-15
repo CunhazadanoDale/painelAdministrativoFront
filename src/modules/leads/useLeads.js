@@ -6,18 +6,6 @@ import { filtrarLeadsPorTexto } from './leadsUtils';
 
 export const TAMANHO_PAGINA = 20;
 
-/**
- * Hook de dados da tela de Leads.
- *
- * Estratégia de listagem:
- * - Sem filtro de etapa: paginação no servidor (busca `q` também) e total
- *   vindo da soma das contagens por funil.
- * - Com filtro de etapa: carrega todos os leads da etapa e pagina/filtra
- *   em cliente (o endpoint da etapa não paginado nem aceita busca).
- *
- * `carregando` e `erro` são derivados da chave da requisição atual
- * (página/busca/etapa/recarga) em vez de setState dentro do effect.
- */
 export function useLeads() {
   const [parametros, setParametros] = useSearchParams();
   const q = parametros.get('q') ?? '';
@@ -35,18 +23,14 @@ export function useLeads() {
 
   const [recarga, setRecarga] = useState(0);
   const [recargaEstrutura, setRecargaEstrutura] = useState(0);
-  // Última chave de requisição concluída com sucesso (define o fim do loading).
   const [chaveDados, setChaveDados] = useState(null);
-  // Falha da última requisição: { chave, mensagem }.
   const [falha, setFalha] = useState(null);
 
   const chave = `${pagina}|${q}|${etapaFiltro}|${recarga}`;
 
-  // Falha de estrutura vale para qualquer chave; falha de leads só para a sua chave.
   const erro = falha && (falha.estrutura || falha.chave === chave) ? falha.mensagem : null;
   const carregando = !erro && chaveDados !== chave;
 
-  // Estrutura: funis ativos e etapas de cada um (recarrega a cada "Tentar novamente").
   useEffect(() => {
     const controle = new AbortController();
 
@@ -60,7 +44,6 @@ export function useLeads() {
         setFunis(listaFunis);
         setEtapas(respostasEtapas.flatMap((resposta) => resposta?.dados ?? []));
         setEstruturaOk(true);
-        // Limpa apenas uma falha anterior de estrutura (não mexe na de leads).
         setFalha((atual) => (atual?.estrutura ? null : atual));
       } catch (e) {
         if (controle.signal.aborted) return;
@@ -82,7 +65,6 @@ export function useLeads() {
     [q]
   );
 
-  // Leads: conforme filtro ativo (servidor ou cliente).
   useEffect(() => {
     if (!estruturaOk) return undefined;
 
@@ -108,7 +90,6 @@ export function useLeads() {
           setTotal(totalFiltrado);
           setTemProxima(inicio + TAMANHO_PAGINA < totalFiltrado);
         } else {
-          // Página + 1 item: se vier mais que a página, existe próxima.
           const resposta = await leadsService.listarLeads({
             pagina,
             tamanho: TAMANHO_PAGINA + 1,
@@ -205,7 +186,6 @@ export function useLeads() {
   );
   const irParaProxima = useCallback(() => mudarPagina((valor) => valor + 1), [mudarPagina]);
 
-  /** Cria lead; volta para a página 1 (o mais novo aparece primeiro). */
   const criar = useCallback(
     async (dados) => {
       await leadsService.criarLead(dados);
@@ -215,10 +195,6 @@ export function useLeads() {
     [recarregar, mudarPagina]
   );
 
-  /**
-   * Atualiza o lead. A mudança de etapa vai por PATCH ao final para que o
-   * backend grave a trilha de histórico (o PUT sozinho não grava).
-   */
   const atualizar = useCallback(
     async (id, dados, etapaOriginalId) => {
       await leadsService.atualizarLead(id, {
@@ -246,7 +222,6 @@ export function useLeads() {
   );
 
   return {
-    // dados
     leads,
     etapas,
     funis,
@@ -256,11 +231,9 @@ export function useLeads() {
     pagina,
     q,
     etapaFiltro,
-    // estados
     carregando,
     erro,
     recarga,
-    // ações
     aplicarFiltros,
     limparFiltros,
     irParaAnterior,

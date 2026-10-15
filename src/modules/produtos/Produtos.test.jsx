@@ -60,9 +60,6 @@ describe('Produtos', () => {
 
     expect(await screen.findByText('teste apenas')).toBeInTheDocument();
 
-    // Regressão: o painel de filtros tem altura própria. Empilhado acima da
-    // grade num contêiner de altura fixa, ele colapsava .produtos-conteudo
-    // para zero e a tela ficava sem nenhuma linha de produto.
     const corpo = container.querySelector('.produtos-corpo');
     expect(corpo).toBeTruthy();
     expect(corpo.querySelector('.filter-panel')).toBeTruthy();

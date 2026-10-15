@@ -4,16 +4,6 @@ import * as funisService from '../../services/funis';
 
 const TAMANHO_RECENTES = 8;
 
-/**
- * Hook de dados do Dashboard.
- *
- * Em uma única carga:
- * - funis ativos e as etapas de cada um;
- * - contagem de leads por etapa (alimenta os KPIs e as barras);
- * - últimos leads cadastrados (`GET /leads` já ordena por criação desc).
- *
- * Deriva: total de leads, total por funil, maior funil e etapaMap.
- */
 export function useDashboard() {
   const [funis, setFunis] = useState([]);
   const [etapas, setEtapas] = useState([]);
@@ -79,13 +69,11 @@ export function useDashboard() {
     [etapas]
   );
 
-  /** Total de leads = soma das contagens de todas as etapas dos funis ativos. */
   const totalLeads = useMemo(
     () => Object.values(contagens).reduce((soma, total) => soma + total, 0),
     [contagens]
   );
 
-  /** [{ funil, total, etapas: [{ etapa, total }] }] ordenado por total desc. */
   const funisComContagem = useMemo(() => {
     const linhas = funis.map((funil) => {
       const etapasDoFunil = etapas
@@ -111,7 +99,6 @@ export function useDashboard() {
   const recarregar = useCallback(() => setRecarga((valor) => valor + 1), []);
 
   return {
-    // dados
     funis,
     etapas,
     etapaMap,
@@ -120,10 +107,8 @@ export function useDashboard() {
     totalLeads,
     funisComContagem,
     maiorFunil,
-    // estados
     carregando,
     erro,
-    // ações
     recarregar,
   };
 }

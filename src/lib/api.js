@@ -99,11 +99,6 @@ export async function requisitar(caminho, { metodo = 'GET', corpo, sinal } = {})
     throw new ErroApi(resposta.status, mensagem, { esperaSegundos: lerEsperaSegundos(resposta) });
   }
 
-  // Resposta 200 com corpo que não é JSON: acontece quando a API não está no
-  // endereço esperado (VITE_API_BASE_URL errado ou proxy ausente em produção) e
-  // quem atende é o fallback do SPA, que devolve o index.html com status 200.
-  // Devolver null aqui faz a tela mostrar "nenhum registro" mesmo havendo dados,
-  // então o problema precisa virar erro explícito.
   if (dados === null && texto.trim() !== '') {
     throw new ErroApi(resposta.status, MENSAGEM_SEM_JSON);
   }

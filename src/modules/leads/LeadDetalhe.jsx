@@ -8,11 +8,6 @@ import { AlertCircle, ArrowLeft, ArrowRight, Pencil } from 'lucide-react';
 import './Leads.css';
 import './LeadDetalhe.css';
 
-/**
- * Tela do lead (`/leads/:id`): dados cadastrais + trilha de movimentações
- * entre etapas (GET /leads/{id}/historico), da mais recente para a mais
- * antiga, com "Carregar mais" e o registro de criação no rodapé da linha.
- */
 export default function LeadDetalhe() {
   const { id } = useParams();
 
@@ -34,7 +29,6 @@ export default function LeadDetalhe() {
 
   const [modalAberto, setModalAberto] = useState(false);
 
-  // Mais recente primeiro (o backend ordena desc, mas garantimos por aqui).
   const movimentacoesOrdenadas = useMemo(
     () =>
       [...movimentacoes].sort(
@@ -118,7 +112,6 @@ export default function LeadDetalhe() {
       )}
 
       <div className="lead-detalhe-colunas">
-        {/* Dados cadastrais */}
         <section className="lead-detalhe-painel">
           <header className="lead-detalhe-painel-cabecalho">
             <h2>Dados do lead</h2>
@@ -168,7 +161,6 @@ export default function LeadDetalhe() {
           </dl>
         </section>
 
-        {/* Trilha de movimentações */}
         <section className="lead-detalhe-painel">
           <header className="lead-detalhe-painel-cabecalho">
             <h2>Movimentações</h2>
@@ -218,7 +210,6 @@ export default function LeadDetalhe() {
                   </li>
                 ))}
 
-                {/* Rodapé cronológico: quando toda a trilha foi carregada. */}
                 {!temProxima && (
                   <li className="lead-hist-item lead-hist-criacao">
                     <span className="lead-hist-ponto" aria-hidden="true" />

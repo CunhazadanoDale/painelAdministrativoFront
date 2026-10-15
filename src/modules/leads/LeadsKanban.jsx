@@ -3,18 +3,6 @@ import { formatarData } from './leadsUtils';
 import { AlertCircle, X } from 'lucide-react';
 import './Leads.css';
 
-/**
- * Quadro Kanban: uma coluna por etapa do funil selecionado, com cards
- * arrastáveis (HTML5 drag and drop). A coluna de destino responde a
- * dragover/drop e repassa o lead ao hook, que faz o PATCH da etapa.
- * O clique no card abre a tela de detalhe do lead.
- *
- * @param {{ etapas: object[], colunas: Record<string, object[]>,
- *           carregando: boolean, erro: string|null, erroMovimento: string|null,
- *           onMover: (lead: object, etapaId: string) => Promise<void>,
- *           onAbrir: (lead: object) => void, onLimparErroMovimento: () => void,
- *           onRecarregar: () => void }} props
- */
 export function LeadsKanban({
   etapas,
   colunas,
@@ -104,7 +92,6 @@ export function LeadsKanban({
                 if (alvoSobre !== etapa.etapa_id) setAlvoSobre(etapa.etapa_id);
               }}
               onDragLeave={(event) => {
-                // Ignora a saída para um filho (o dragleave borbulha).
                 if (event.currentTarget.contains(event.relatedTarget)) return;
                 setAlvoSobre((atual) => (atual === etapa.etapa_id ? null : atual));
               }}

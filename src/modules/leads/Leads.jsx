@@ -47,11 +47,9 @@ export default function Leads() {
     recarregar,
   } = useLeads();
 
-  // Visão da tela: lista (paginada) ou kanban (colunas por etapa).
   const [visao, setVisao] = useState('lista');
   const kanban = useKanban({ funis, etapas, ativo: visao === 'kanban' });
 
-  // Rascunho dos filtros: só aplica em "Aplicar".
   const [buscaRascunho, setBuscaRascunho] = useState(q);
   const [etapaRascunho, setEtapaRascunho] = useState('');
 

@@ -2,13 +2,6 @@ import React, { useState } from 'react';
 import { Modal } from '../../app/components/Modal';
 import './Funis.css';
 
-/**
- * Modal de criação/edição de etapa de um funil.
- * A ordem não é editada aqui: novas etapas entram no fim (backend define)
- * e a reordenação é feita com as setas na lista de etapas.
- * @param {{ etapa?: object|null, onFechar: () => void,
- *           onSalvar: (dados: {nome: string, ativo: boolean}) => Promise<void> }} props
- */
 export function EtapaFormModal({ etapa, onFechar, onSalvar }) {
   const [nome, setNome] = useState(etapa?.nome ?? '');
   const [ativo, setAtivo] = useState(etapa?.ativo ?? true);

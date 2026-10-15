@@ -2,19 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import * as funisService from '../../services/funis';
 import * as leadsService from '../../services/leads';
 
-/**
- * Hook de dados da tela de Funis (funis + etapas aninhadas).
- *
- * Estratégia:
- * - Carrega a lista de funis (ativos e inativos) e mantém o funil selecionado;
- * - Ao selecionar um funil, carrega as etapas ordenadas e a contagem de
- *   leads de cada etapa (usada no badge e para bloquear exclusões que a
- *   FK do banco rejeitaria: lead -> etapa é RESTRICT);
- * - Reordenação usa PUT /funils/{id}/etapas/ordem com os ids na nova ordem.
- *
- * `carregando`/`erro` são derivados da chave da requisição atual
- * (padrão adotado em useLeads para evitar setState síncrono no effect).
- */
 export function useFunis() {
   const [funis, setFunis] = useState([]);
   const [funilSelecionadoId, setFunilSelecionadoId] = useState('');
@@ -38,7 +25,6 @@ export function useFunis() {
   const carregandoEtapas =
     !!funilSelecionadoId && !erroEtapas && chaveEtapasOk !== chaveEtapas;
 
-  // Funis: lista geral (inclusive inativos, para permitir reeditar).
   useEffect(() => {
     const controle = new AbortController();
 
@@ -49,7 +35,6 @@ export function useFunis() {
         setFunis(lista);
         setChaveFunisOk(chaveFunis);
         setFalhaFunis(null);
-        // Mantém a seleção atual; se ela não existir mais, pega a primeira.
         setFunilSelecionadoId((atual) =>
           lista.some((funil) => funil.funil_id === atual)
             ? atual
@@ -66,7 +51,6 @@ export function useFunis() {
     };
   }, [chaveFunis]);
 
-  // Etapas do funil selecionado + contagem de leads por etapa.
   useEffect(() => {
     if (!funilSelecionadoId) return undefined;
 
@@ -119,7 +103,6 @@ export function useFunis() {
   const recarregarFunis = useCallback(() => setRecargaFunis((valor) => valor + 1), []);
   const recarregarEtapas = useCallback(() => setRecargaEtapas((valor) => valor + 1), []);
 
-  /** Cria o funil e o seleciona; mantém a lista local sem refetch. */
   const criarNovoFunil = useCallback(async ({ nome }) => {
     const resposta = await funisService.criarFunil({ nome });
     const criado = resposta?.dados;
@@ -139,11 +122,6 @@ export function useFunis() {
     );
   }, []);
 
-  /**
-   * Exclui o funil. Antes verifica a contagem de leads nas etapas:
-   * o banco tem FK lead -> etapa (RESTRICT), então um funil com leads
-   * jamais poderá ser removido — melhor avisar em linguagem humana.
-   */
   const excluirFunil = useCallback(
     async (funil) => {
       const respostaEtapas = await funisService.listarEtapasDoFunil(funil.funil_id);
@@ -168,7 +146,6 @@ export function useFunis() {
     []
   );
 
-  /** Cria etapa no funil selecionado (ordem 0 => backend anexa no fim). */
   const criarNovaEtapa = useCallback(
     async ({ nome }) => {
       await funisService.criarEtapa({
@@ -194,7 +171,6 @@ export function useFunis() {
     [recarregarEtapas]
   );
 
-  /** Exclui a etapa; bloqueia se houver leads vinculados (FK RESTRICT). */
   const excluirEtapa = useCallback(
     async (etapa) => {
       const total = contagens[etapa.etapa_id] ?? 0;
@@ -209,7 +185,6 @@ export function useFunis() {
     [contagens, recarregarEtapas]
   );
 
-  /** Sobe/desce uma etapa reordenando a lista enviada ao backend. */
   const moverEtapa = useCallback(
     async (etapa, direcao) => {
       const ordenadas = [...etapasOrdenadas];
@@ -231,18 +206,15 @@ export function useFunis() {
   );
 
   return {
-    // dados
     funis,
     funilSelecionado,
     funilSelecionadoId,
     etapas: etapasOrdenadas,
     contagens,
-    // estados
     carregandoFunis,
     carregandoEtapas,
     erroFunis,
     erroEtapas,
-    // ações
     selecionarFunil,
     criarNovoFunil,
     salvarFunil,

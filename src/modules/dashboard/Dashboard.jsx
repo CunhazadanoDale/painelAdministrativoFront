@@ -8,7 +8,6 @@ import { useAutenticacao } from '../../app/autenticacao/useAutenticacao';
 import { corDaEtapa, formatarData } from '../leads/leadsUtils';
 import { BarChart2, Activity, Users, AlertCircle, RefreshCw } from 'lucide-react';
 
-/** Barra horizontal de contagem (percentual em relação ao maior valor). */
 function Barra({ rotulo, total, maximo, sufixo }) {
   const percentual = maximo > 0 ? Math.round((total / maximo) * 100) : 0;
   return (
@@ -30,10 +29,6 @@ function Barra({ rotulo, total, maximo, sufixo }) {
   );
 }
 
-/**
- * Dashboard com dados reais do backend: KPIs (totais por contagem),
- * distribuição por funil e por etapa, e últimos leads cadastrados.
- */
 export default function Dashboard() {
   const { comercial, usuario } = useAutenticacao();
 
@@ -68,7 +63,6 @@ function PainelComercial() {
 
   const [funilId, setFunilId] = useState('');
 
-  // Funil do painel de etapas: escolha do usuário com fallback para o maior.
   const funilEfetivoId =
     funilId && funis.some((funil) => funil.funil_id === funilId)
       ? funilId

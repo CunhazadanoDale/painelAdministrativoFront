@@ -2,12 +2,6 @@ import React, { useState } from 'react';
 import { Modal } from '../../app/components/Modal';
 import './Funis.css';
 
-/**
- * Modal de criação/edição de funil. Montado pelo pai apenas quando aberto,
- * então o estado nasce já preenchido (sem reset em effect).
- * @param {{ funil?: object|null, onFechar: () => void,
- *           onSalvar: (dados: {nome: string, ativo: boolean}) => Promise<void> }} props
- */
 export function FunilFormModal({ funil, onFechar, onSalvar }) {
   const [nome, setNome] = useState(funil?.nome ?? '');
   const [ativo, setAtivo] = useState(funil?.ativo ?? true);

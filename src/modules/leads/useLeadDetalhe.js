@@ -4,19 +4,6 @@ import * as funisService from '../../services/funis';
 
 export const TAMANHO_HISTORICO = 20;
 
-/**
- * Hook de dados da tela de detalhe do lead (`/leads/:id`).
- *
- * Carrega:
- * - o lead (GET /leads/{id}); 404 vira "Lead não encontrado";
- * - a estrutura (funis + etapas, inclusive de funis inativos) para
- *   resolver os nomes das etapas do histórico;
- * - as movimentações (GET /leads/{id}/historico) em páginas "página+1",
- *   já que o envelope não traz `total` — anexando as páginas seguintes.
- *
- * A edição segue o mesmo combinado da lista: PUT e, se a etapa mudou,
- * PATCH /etapa ao final para a trilha de histórico ser gravada.
- */
 export function useLeadDetalhe(leadId) {
   const [lead, setLead] = useState(null);
   const [etapas, setEtapas] = useState([]);
@@ -48,7 +35,6 @@ export function useLeadDetalhe(leadId) {
   const carregandoEstrutura = !erroEstrutura && !estruturaOk;
   const carregandoHistorico = !erroHistorico && chaveHistOk !== chaveHist;
 
-  // Estrutura: todos os funis (inclusive inativos) e as etapas de cada um.
   useEffect(() => {
     const controle = new AbortController();
 
@@ -76,7 +62,6 @@ export function useLeadDetalhe(leadId) {
     };
   }, [chaveEstrutura]);
 
-  // Lead.
   useEffect(() => {
     const controle = new AbortController();
 
@@ -105,7 +90,6 @@ export function useLeadDetalhe(leadId) {
     };
   }, [leadId, chaveLead]);
 
-  // Histórico de movimentações (página 1 substitui; demais anexam).
   useEffect(() => {
     const controle = new AbortController();
 
@@ -147,10 +131,6 @@ export function useLeadDetalhe(leadId) {
     [etapas]
   );
 
-  /**
-   * Etapas sugeridas no modal de edição: as do funil da etapa atual do lead
-   * (evita listar etapas de funis que não têm nada a ver com ele).
-   */
   const etapasEditaveis = useMemo(() => {
     const etapaAtual = etapas.find((etapa) => etapa.etapa_id === lead?.etapa_id);
     if (!etapaAtual) return etapas;
@@ -164,7 +144,6 @@ export function useLeadDetalhe(leadId) {
 
   const carregarMais = useCallback(() => setPagina((valor) => valor + 1), []);
 
-  /** PUT + PATCH de etapa (para gravar histórico), depois recarrega tudo. */
   const atualizar = useCallback(
     async (dados) => {
       await leadsService.atualizarLead(leadId, {
@@ -184,19 +163,16 @@ export function useLeadDetalhe(leadId) {
   );
 
   return {
-    // dados
     lead,
     etapaMap,
     etapasEditaveis,
     movimentacoes,
     temProxima,
-    // estados
     carregando: carregandoLead || carregandoEstrutura,
     carregandoHistorico,
     erroLead,
     erroEstrutura,
     erroHistorico,
-    // ações
     atualizar,
     carregarMais,
     recarregar,

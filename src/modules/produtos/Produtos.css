@@ -62,11 +62,6 @@
   color: var(--text-main);
 }
 
-/* Abaixo dos cartões: filtros à esquerda, grade à direita.
-   O painel de filtros tem altura própria (260px de largura, ~360px de altura).
-   Enquanto ele ficava empilhado acima da grade num contêiner de altura fixa,
-   consumia todo o espaço disponível e `flex: 1` + `min-height: 0` colapsava
-   .produtos-conteudo para zero — a tela mostrava os cartões e nada mais. */
 .produtos-corpo {
   flex: 1;
   min-height: 320px;
