@@ -5,12 +5,14 @@ import { StatusBadge } from '../../app/components/StatusBadge';
 import { useUsuarios } from './useUsuarios';
 import { UsuarioFormModal } from './UsuarioFormModal';
 import { SenhaModal } from './SenhaModal';
+import { AcessoEmpresasModal } from './AcessoEmpresasModal';
 import { formatarDataHora } from '../../lib/formatar';
 import {
   Plus,
   Pencil,
   Trash2,
   KeyRound,
+  Building2,
   UserCheck,
   UserX,
   AlertCircle,
@@ -45,6 +47,7 @@ export default function Usuarios() {
   const [buscaRascunho, setBuscaRascunho] = useState('');
   const [formModal, setFormModal] = useState(undefined);
   const [senhaAlvo, setSenhaAlvo] = useState(null);
+  const [empresasAlvo, setEmpresasAlvo] = useState(null);
   const [excluirAlvo, setExcluirAlvo] = useState(null);
   const [excluindo, setExcluindo] = useState(false);
   const [erroExclusao, setErroExclusao] = useState(null);
@@ -125,7 +128,7 @@ export default function Usuarios() {
     {
       label: 'Ações',
       field: 'id',
-      width: '150px',
+      width: '180px',
       render: (id, usuario) => (
         <div className="leads-acoes" onClick={(evento) => evento.stopPropagation()}>
           <button
@@ -146,6 +149,18 @@ export default function Usuarios() {
             }}
           >
             <KeyRound size={14} />
+          </button>
+          <button
+            type="button"
+            className="leads-acao-btn"
+            title="Empresas do usuário"
+            aria-label="Empresas do usuário"
+            onClick={() => {
+              setErroAcao(null);
+              setEmpresasAlvo(usuario);
+            }}
+          >
+            <Building2 size={14} />
           </button>
           <button
             type="button"
@@ -301,6 +316,15 @@ export default function Usuarios() {
           usuario={senhaAlvo}
           onFechar={() => setSenhaAlvo(null)}
           onSalvar={(novaSenha) => trocarSenha(senhaAlvo.id, novaSenha)}
+        />
+      )}
+
+      {empresasAlvo && (
+        <AcessoEmpresasModal
+          key={empresasAlvo.id}
+          usuario={empresasAlvo}
+          administrador={!!cargoMapa[empresasAlvo.cargo_id]?.administrador}
+          onFechar={() => setEmpresasAlvo(null)}
         />
       )}
 

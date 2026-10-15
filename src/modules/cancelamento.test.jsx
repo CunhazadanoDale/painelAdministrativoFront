@@ -19,6 +19,7 @@ import { useProdutoDetalhe } from './produtos/useProdutoDetalhe';
 import { useProdutos } from './produtos/useProdutos';
 import { useSolicitacaoDetalhe } from './solicitacoes/useSolicitacaoDetalhe';
 import { useSolicitacoes } from './solicitacoes/useSolicitacoes';
+import { useAcessoEmpresas } from './usuarios/useAcessoEmpresas';
 import { useUsuarios } from './usuarios/useUsuarios';
 
 let chamadas;
@@ -74,6 +75,7 @@ describe('cancelamento das requisições ao desmontar', () => {
     ['useAprovadores', () => useAprovadores()],
     ['useCargos', () => useCargos()],
     ['useUsuarios', () => useUsuarios()],
+    ['useAcessoEmpresas', () => useAcessoEmpresas('usr-1')],
     ['usePerfil', () => usePerfil()],
     ['useLeads', () => useLeads()],
     ['useKanban', () => useKanban({ funis: FUNIS, etapas: ETAPAS, ativo: true })],

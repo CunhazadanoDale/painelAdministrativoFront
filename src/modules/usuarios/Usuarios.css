@@ -148,3 +148,42 @@
 .usuarios-excluir-confirmar:hover {
   background-color: #9d1f00;
 }
+
+.usuarios-acesso-status {
+  padding: var(--space-4);
+  color: var(--text-muted);
+  font-size: var(--font-size-md);
+  text-align: center;
+}
+
+.usuarios-acesso-aviso {
+  padding: var(--space-2);
+  background-color: var(--bg-app);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.usuarios-acesso-lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+.usuarios-acesso-lista:disabled {
+  opacity: 0.6;
+}
+
+.usuarios-acesso-opcao {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-md);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
