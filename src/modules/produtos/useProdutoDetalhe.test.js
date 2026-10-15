@@ -1,0 +1,73 @@
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import * as arquivosService from '../../services/arquivos';
+import * as categoriasService from '../../services/categorias';
+import * as produtosService from '../../services/produtos';
+import { useProdutoDetalhe } from './useProdutoDetalhe';
+
+const PRODUTO = { id: 'prod-1', nome: 'Cimento', imagens: [{ id: 'img-0', arquivo_id: 'arq-0' }] };
+const ARQUIVO = new File(['png'], 'foto.png', { type: 'image/png' });
+
+beforeEach(() => {
+  vi.restoreAllMocks();
+  vi.spyOn(produtosService, 'obterProduto').mockResolvedValue({ dados: PRODUTO });
+  vi.spyOn(produtosService, 'listarMovimentos').mockResolvedValue({ dados: [] });
+  vi.spyOn(categoriasService, 'listarTodasCategorias').mockResolvedValue([]);
+  vi.spyOn(arquivosService, 'enviarArquivo').mockResolvedValue({ id: 'arq-novo' });
+});
+
+async function renderizar() {
+  const hook = renderHook(() => useProdutoDetalhe('prod-1'));
+  await waitFor(() => expect(hook.result.current.carregando).toBe(false));
+  return hook;
+}
+
+describe('useProdutoDetalhe.anexarImagem', () => {
+  it('anexa o arquivo enviado na próxima ordem', async () => {
+    const anexar = vi.spyOn(produtosService, 'anexarImagem').mockResolvedValue({ dados: {} });
+    const remover = vi.spyOn(arquivosService, 'removerArquivo').mockResolvedValue(null);
+    const { result } = await renderizar();
+
+    await act(() => result.current.anexarImagem(ARQUIVO, 'foto'));
+
+    expect(anexar).toHaveBeenCalledWith('prod-1', { arquivo_id: 'arq-novo', ordem: 1, alt: 'foto' });
+    expect(remover).not.toHaveBeenCalled();
+  });
+
+  it('apaga o arquivo enviado quando o anexo falha e repassa o erro', async () => {
+    vi.spyOn(produtosService, 'anexarImagem').mockRejectedValue(new Error('arquivo deve ser uma imagem'));
+    const remover = vi.spyOn(arquivosService, 'removerArquivo').mockResolvedValue(null);
+    const { result } = await renderizar();
+
+    await expect(
+      act(() => result.current.anexarImagem(ARQUIVO, 'foto'))
+    ).rejects.toThrow('arquivo deve ser uma imagem');
+
+    expect(remover).toHaveBeenCalledWith('arq-novo');
+  });
+
+  it('mantém o erro do anexo mesmo se apagar o arquivo também falhar', async () => {
+    vi.spyOn(produtosService, 'anexarImagem').mockRejectedValue(new Error('produto não encontrado'));
+    vi.spyOn(arquivosService, 'removerArquivo').mockRejectedValue(new Error('sem conexão'));
+    const { result } = await renderizar();
+
+    await expect(
+      act(() => result.current.anexarImagem(ARQUIVO, 'foto'))
+    ).rejects.toThrow('produto não encontrado');
+  });
+
+  it('não tenta apagar nada quando o próprio envio falha', async () => {
+    arquivosService.enviarArquivo.mockRejectedValue(new Error('arquivo excede o limite de 10MB'));
+    const anexar = vi.spyOn(produtosService, 'anexarImagem');
+    const remover = vi.spyOn(arquivosService, 'removerArquivo');
+    const { result } = await renderizar();
+
+    await expect(
+      act(() => result.current.anexarImagem(ARQUIVO, 'foto'))
+    ).rejects.toThrow('arquivo excede o limite de 10MB');
+
+    expect(anexar).not.toHaveBeenCalled();
+    expect(remover).not.toHaveBeenCalled();
+  });
+});

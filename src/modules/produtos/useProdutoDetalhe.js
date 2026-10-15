@@ -101,11 +101,16 @@ export function useProdutoDetalhe(id) {
   const anexarImagem = useCallback(
     async (arquivo, alt) => {
       const enviado = await arquivosService.enviarArquivo(arquivo);
-      await produtosService.anexarImagem(id, {
-        arquivo_id: enviado.id,
-        ordem: produto && produto.imagens ? produto.imagens.length : 0,
-        alt,
-      });
+      try {
+        await produtosService.anexarImagem(id, {
+          arquivo_id: enviado.id,
+          ordem: produto && produto.imagens ? produto.imagens.length : 0,
+          alt,
+        });
+      } catch (e) {
+        await arquivosService.removerArquivo(enviado.id).catch(() => null);
+        throw e;
+      }
       recarregar();
     },
     [id, produto, recarregar]
