@@ -23,6 +23,12 @@ const Formularios = () => <div>Formulários Module</div>;
 const Relatorios = () => <div>Relatórios Module</div>;
 const Configuracoes = () => <div>Configurações Module</div>;
 
+function destinoDepoisDoLogin(origem) {
+  if (!origem || typeof origem.pathname !== 'string' || !origem.pathname.startsWith('/')) return '/';
+  if (origem.pathname === '/login') return '/';
+  return `${origem.pathname}${origem.search || ''}${origem.hash || ''}`;
+}
+
 function App() {
   const localizacao = useLocation();
   const { autenticado, administrador, comercial } = useAutenticacao();
@@ -32,7 +38,7 @@ function App() {
       <ErrorBoundary>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<Navigate to="/login" replace state={{ de: localizacao }} />} />
         </Routes>
       </ErrorBoundary>
     );
@@ -43,7 +49,10 @@ function App() {
       <AppShell>
         <ErrorBoundary key={localizacao.pathname}>
           <Routes>
-            <Route path="/login" element={<Navigate to="/" replace />} />
+            <Route
+              path="/login"
+              element={<Navigate to={destinoDepoisDoLogin(localizacao.state && localizacao.state.de)} replace />}
+            />
             <Route path="/" element={<Dashboard />} />
             <Route path="/leads" element={comercial ? <Leads /> : <Navigate to="/" replace />} />
             <Route

@@ -281,4 +281,46 @@ describe('AutenticacaoProvider', () => {
 
     expect(result.current.aviso).toBeNull();
   });
+
+  it('encerra a sessão quando outra aba faz logout', async () => {
+    gravarSessao();
+    const { result } = renderAutenticacao();
+    expect(result.current.autenticado).toBe(true);
+
+    act(() => {
+      localStorage.removeItem(CHAVE_SESSAO);
+      window.dispatchEvent(new StorageEvent('storage', { key: CHAVE_SESSAO, newValue: null }));
+    });
+
+    expect(result.current.autenticado).toBe(false);
+    expect(obterToken()).toBeNull();
+    expect(result.current.aviso).toBe('A sessão foi encerrada em outra aba.');
+  });
+
+  it('adota a sessão quando outra aba faz login', async () => {
+    const { result } = renderAutenticacao();
+    expect(result.current.autenticado).toBe(false);
+
+    act(() => {
+      gravarSessao({ token: 'token-da-outra-aba' });
+      window.dispatchEvent(
+        new StorageEvent('storage', { key: CHAVE_SESSAO, newValue: localStorage.getItem(CHAVE_SESSAO) })
+      );
+    });
+
+    expect(result.current.autenticado).toBe(true);
+    expect(obterToken()).toBe('token-da-outra-aba');
+    await waitFor(() => expect(listarSolicitacoes).toHaveBeenCalled());
+  });
+
+  it('ignora mudanças em outras chaves do armazenamento', () => {
+    gravarSessao();
+    const { result } = renderAutenticacao();
+
+    act(() => {
+      window.dispatchEvent(new StorageEvent('storage', { key: 'outra.chave', newValue: 'x' }));
+    });
+
+    expect(result.current.autenticado).toBe(true);
+  });
 });

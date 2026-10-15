@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
@@ -6,7 +6,12 @@ import { AutenticacaoProvider } from './app/autenticacao/AutenticacaoProvider';
 
 function Observador() {
   const localizacao = useLocation();
-  return <span data-testid="caminho">{localizacao.pathname}</span>;
+  return (
+    <>
+      <span data-testid="caminho">{localizacao.pathname}</span>
+      <span data-testid="caminho-completo">{`${localizacao.pathname}${localizacao.search}`}</span>
+    </>
+  );
 }
 
 function renderizar(caminho) {
@@ -79,6 +84,63 @@ describe('roteamento do App', () => {
 
     await waitFor(() => expect(screen.getByTestId('caminho')).toHaveTextContent('/solicitacoes'));
     expect(await screen.findByText('Nova Solicitação')).toBeInTheDocument();
+  });
+
+  it('depois do login volta para o link de origem', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url) => ({
+        ok: true,
+        status: 200,
+        text: async () =>
+          JSON.stringify(
+            String(url).includes('/usuarios/autenticar')
+              ? {
+                  dados: {
+                    token: 'token-novo',
+                    expira_em: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+                    administrador: false,
+                    usuario: { usuario_id: 1, nome: 'Pessoa Teste' },
+                  },
+                }
+              : { dados: [] }
+          ),
+      }))
+    );
+
+    renderizar('/solicitacoes?escopo=minhas');
+    expect(await screen.findByRole('heading', { name: 'Entrar no painel' })).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('E-mail'), { target: { value: 'pessoa@exemplo.com' } });
+    fireEvent.change(screen.getByLabelText('Senha'), { target: { value: 'segredo' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
+
+    await waitFor(() =>
+      expect(screen.getByTestId('caminho-completo')).toHaveTextContent('/solicitacoes?escopo=minhas')
+    );
+  });
+
+  it('sem link de origem o login leva para a raiz', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url) => ({
+        ok: true,
+        status: 200,
+        text: async () =>
+          JSON.stringify(
+            String(url).includes('/usuarios/autenticar')
+              ? { dados: { token: 'token-novo', usuario: { usuario_id: 1, nome: 'Pessoa Teste' } } }
+              : { dados: [] }
+          ),
+      }))
+    );
+
+    renderizar('/login');
+    fireEvent.change(await screen.findByLabelText('E-mail'), { target: { value: 'pessoa@exemplo.com' } });
+    fireEvent.change(screen.getByLabelText('Senha'), { target: { value: 'segredo' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
+
+    await waitFor(() => expect(screen.getByTestId('caminho-completo')).toHaveTextContent(/^\/$/));
   });
 
   it('leva qualquer rota desconhecida para a raiz', async () => {

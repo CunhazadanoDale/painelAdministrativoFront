@@ -97,6 +97,21 @@ export function AutenticacaoProvider({ children }) {
 
   useEffect(() => aoFalharSessao(encerrar), [encerrar]);
 
+  const haviaSessao = !!sessao;
+
+  useEffect(() => {
+    const aoMudarArmazenamento = (evento) => {
+      if (evento.key !== null && evento.key !== CHAVE_SESSAO) return;
+      const novaSessao = carregarSessao();
+      definirToken(novaSessao ? novaSessao.token : null);
+      setAprovacao(false);
+      setAviso(!novaSessao && haviaSessao ? 'A sessão foi encerrada em outra aba.' : null);
+      setSessao(novaSessao);
+    };
+    window.addEventListener('storage', aoMudarArmazenamento);
+    return () => window.removeEventListener('storage', aoMudarArmazenamento);
+  }, [haviaSessao]);
+
   const entrar = useCallback(async (email, senha) => {
     const resposta = await autenticacaoService.autenticar(email, senha);
     const dados = resposta ? resposta.dados : null;

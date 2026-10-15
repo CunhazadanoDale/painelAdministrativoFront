@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAutenticacao } from '../../app/autenticacao/useAutenticacao';
 import { AlertCircle, Info, LogIn } from 'lucide-react';
 import './Login.css';
 
 export default function Login() {
   const { entrar, aviso } = useAutenticacao();
-  const navegar = useNavigate();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState(null);
@@ -39,7 +37,6 @@ export default function Login() {
     setErro(null);
     try {
       await entrar(email.trim(), senha);
-      navegar('/', { replace: true });
     } catch (e) {
       setErro(e.message || 'Erro ao entrar.');
       if (e.status === 429 && e.esperaSegundos > 0) {
