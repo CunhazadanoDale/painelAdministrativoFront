@@ -33,7 +33,7 @@ export function useSolicitacoes() {
   const carregando = !erro && chaveDados !== chave;
 
   useEffect(() => {
-    let cancelado = false;
+    const controle = new AbortController();
 
     (async () => {
       try {
@@ -43,28 +43,29 @@ export function useSolicitacoes() {
           escopo: escopoAtivo,
           status,
           empresa,
+          sinal: controle.signal,
         });
         const daPagina = (resposta && resposta.dados) || [];
 
         if (daPagina.length === 0 && pagina > 1) {
-          if (cancelado) return;
+          if (controle.signal.aborted) return;
           setPagina(pagina - 1);
           return;
         }
 
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setItens(daPagina.slice(0, TAMANHO_PAGINA));
         setTemProxima(daPagina.length > TAMANHO_PAGINA);
         setChaveDados(chave);
         setFalha(null);
       } catch (e) {
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setFalha({ chave, mensagem: (e && e.message) || 'Erro ao carregar as solicitações.' });
       }
     })();
 
     return () => {
-      cancelado = true;
+      controle.abort();
     };
   }, [pagina, escopoAtivo, status, empresa, recarga, chave]);
 

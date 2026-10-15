@@ -22,22 +22,22 @@ export function useSolicitacaoDetalhe(id) {
   useEffect(() => {
     if (!id) return undefined;
 
-    let cancelado = false;
+    const controle = new AbortController();
 
     (async () => {
       try {
-        const resposta = await solicitacoesService.obterSolicitacao(id);
+        const resposta = await solicitacoesService.obterSolicitacao(id, { sinal: controle.signal });
         const dados = resposta ? resposta.dados : null;
         if (!dados) throw new Error('Solicitação não encontrada.');
 
-        const [respostaHistorico, respostaArquivos] = await Promise.all([
-          solicitacoesService.listarHistorico(id),
-          solicitacoesService.listarArquivos(id),
+        const [listaHistorico, listaArquivos] = await Promise.all([
+          solicitacoesService.listarHistorico(id, { sinal: controle.signal }),
+          solicitacoesService.listarArquivos(id, { sinal: controle.signal }),
         ]);
 
         let dadosPagamento = null;
         try {
-          const respostaPagamento = await solicitacoesService.obterPagamento(id);
+          const respostaPagamento = await solicitacoesService.obterPagamento(id, { sinal: controle.signal });
           dadosPagamento = respostaPagamento ? respostaPagamento.dados : null;
         } catch (e) {
           if (!e || e.status !== 404) throw e;
@@ -46,31 +46,29 @@ export function useSolicitacaoDetalhe(id) {
         let mapaUsuarios = {};
         if (administrador) {
           try {
-            const respostaUsuarios = await usuariosService.listarUsuarios({ pagina: 1, tamanho: 100 });
-            mapaUsuarios = Object.fromEntries(
-              (respostaUsuarios ? respostaUsuarios.dados : []).map((item) => [item.id, item])
-            );
+            const listaUsuarios = await usuariosService.listarTodosUsuarios({ sinal: controle.signal });
+            mapaUsuarios = Object.fromEntries(listaUsuarios.map((item) => [item.id, item]));
           } catch {
             mapaUsuarios = {};
           }
         }
 
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setSolicitacao(dados);
-        setHistorico(respostaHistorico ? respostaHistorico.dados ?? [] : []);
-        setArquivos(respostaArquivos ? respostaArquivos.dados ?? [] : []);
+        setHistorico(listaHistorico);
+        setArquivos(listaArquivos);
         setPagamento(dadosPagamento);
         setUsuarios(mapaUsuarios);
         setChaveDados(chave);
         setFalha(null);
       } catch (e) {
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setFalha({ chave, mensagem: (e && e.message) || 'Erro ao carregar a solicitação.' });
       }
     })();
 
     return () => {
-      cancelado = true;
+      controle.abort();
     };
   }, [id, administrador, recarga, chave]);
 

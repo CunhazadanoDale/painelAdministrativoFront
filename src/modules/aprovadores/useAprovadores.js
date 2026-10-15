@@ -16,27 +16,27 @@ export function useAprovadores() {
   const carregando = !erro && chaveDados !== chave;
 
   useEffect(() => {
-    let cancelado = false;
+    const controle = new AbortController();
 
     (async () => {
       try {
-        const [respostaAprovadores, respostaUsuarios] = await Promise.all([
-          aprovadoresService.listarAprovadores({ pagina: 1, tamanho: 100 }),
-          usuariosService.listarUsuarios({ pagina: 1, tamanho: 100 }),
+        const [listaAprovadores, listaUsuarios] = await Promise.all([
+          aprovadoresService.listarTodosAprovadores({ sinal: controle.signal }),
+          usuariosService.listarTodosUsuarios({ sinal: controle.signal }),
         ]);
-        if (cancelado) return;
-        setAprovadores(respostaAprovadores?.dados ?? []);
-        setUsuarios(respostaUsuarios?.dados ?? []);
+        if (controle.signal.aborted) return;
+        setAprovadores(listaAprovadores);
+        setUsuarios(listaUsuarios);
         setChaveDados(chave);
         setFalha(null);
       } catch (e) {
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setFalha({ chave, mensagem: e.message || 'Erro ao carregar os aprovadores.' });
       }
     })();
 
     return () => {
-      cancelado = true;
+      controle.abort();
     };
   }, [chave]);
 

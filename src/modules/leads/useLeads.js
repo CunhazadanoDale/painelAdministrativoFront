@@ -6,18 +6,6 @@ import { filtrarLeadsPorTexto } from './leadsUtils';
 
 export const TAMANHO_PAGINA = 20;
 
-/**
- * Hook de dados da tela de Leads.
- *
- * Estratégia de listagem:
- * - Sem filtro de etapa: paginação no servidor (busca `q` também) e total
- *   vindo da soma das contagens por funil.
- * - Com filtro de etapa: carrega todos os leads da etapa e pagina/filtra
- *   em cliente (o endpoint da etapa não paginado nem aceita busca).
- *
- * `carregando` e `erro` são derivados da chave da requisição atual
- * (página/busca/etapa/recarga) em vez de setState dentro do effect.
- */
 export function useLeads() {
   const [parametros, setParametros] = useSearchParams();
   const q = parametros.get('q') ?? '';
@@ -29,40 +17,36 @@ export function useLeads() {
   const [leads, setLeads] = useState([]);
   const [total, setTotal] = useState(null);
   const [temProxima, setTemProxima] = useState(false);
-  const [pagina, setPagina] = useState(1);
+  const [paginacao, setPaginacao] = useState({ q, pagina: 1 });
+  const pagina = paginacao.q === q ? paginacao.pagina : 1;
   const [etapaFiltro, setEtapaFiltro] = useState('');
 
   const [recarga, setRecarga] = useState(0);
-  // Última chave de requisição concluída com sucesso (define o fim do loading).
+  const [recargaEstrutura, setRecargaEstrutura] = useState(0);
   const [chaveDados, setChaveDados] = useState(null);
-  // Falha da última requisição: { chave, mensagem }.
   const [falha, setFalha] = useState(null);
 
   const chave = `${pagina}|${q}|${etapaFiltro}|${recarga}`;
 
-  // Falha de estrutura vale para qualquer chave; falha de leads só para a sua chave.
   const erro = falha && (falha.estrutura || falha.chave === chave) ? falha.mensagem : null;
   const carregando = !erro && chaveDados !== chave;
 
-  // Estrutura: funis ativos e etapas de cada um (recarrega a cada "Tentar novamente").
   useEffect(() => {
-    let cancelado = false;
+    const controle = new AbortController();
 
     (async () => {
       try {
-        const resFunis = await funisService.listarFunis({ pagina: 1, tamanho: 50, ativos: true });
-        const listaFunis = resFunis?.dados ?? [];
+        const listaFunis = await funisService.listarTodosFunis({ ativos: true, sinal: controle.signal });
         const respostasEtapas = await Promise.all(
-          listaFunis.map((funil) => funisService.listarEtapasDoFunil(funil.funil_id))
+          listaFunis.map((funil) => funisService.listarEtapasDoFunil(funil.funil_id, { sinal: controle.signal }))
         );
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setFunis(listaFunis);
         setEtapas(respostasEtapas.flatMap((resposta) => resposta?.dados ?? []));
         setEstruturaOk(true);
-        // Limpa apenas uma falha anterior de estrutura (não mexe na de leads).
         setFalha((atual) => (atual?.estrutura ? null : atual));
       } catch (e) {
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setFalha({
           estrutura: true,
           mensagem: e.message || 'Erro ao carregar funis e etapas.',
@@ -71,54 +55,59 @@ export function useLeads() {
     })();
 
     return () => {
-      cancelado = true;
+      controle.abort();
     };
-  }, [recarga]);
+  }, [recargaEstrutura]);
 
-  // Leads: conforme filtro ativo (servidor ou cliente).
+  const mudarPagina = useCallback(
+    (calcular) =>
+      setPaginacao((atual) => ({ q, pagina: calcular(atual.q === q ? atual.pagina : 1) })),
+    [q]
+  );
+
   useEffect(() => {
     if (!estruturaOk) return undefined;
 
-    let cancelado = false;
+    const controle = new AbortController();
 
     (async () => {
       try {
         if (etapaFiltro) {
-          const resposta = await leadsService.listarLeadsPorEtapa(etapaFiltro);
+          const resposta = await leadsService.listarLeadsPorEtapa(etapaFiltro, { sinal: controle.signal });
           const ativos = (resposta?.dados ?? []).filter((lead) => lead.ativo !== false);
           const filtrados = filtrarLeadsPorTexto(ativos, q);
           const totalFiltrado = filtrados.length;
           const inicio = (pagina - 1) * TAMANHO_PAGINA;
 
           if (pagina > 1 && inicio >= totalFiltrado) {
-            if (cancelado) return;
-            setPagina(Math.max(1, Math.ceil(totalFiltrado / TAMANHO_PAGINA)));
+            if (controle.signal.aborted) return;
+            mudarPagina(() => Math.max(1, Math.ceil(totalFiltrado / TAMANHO_PAGINA)));
             return;
           }
 
-          if (cancelado) return;
+          if (controle.signal.aborted) return;
           setLeads(filtrados.slice(inicio, inicio + TAMANHO_PAGINA));
           setTotal(totalFiltrado);
           setTemProxima(inicio + TAMANHO_PAGINA < totalFiltrado);
         } else {
-          // Página + 1 item: se vier mais que a página, existe próxima.
           const resposta = await leadsService.listarLeads({
             pagina,
             tamanho: TAMANHO_PAGINA + 1,
             q,
+            sinal: controle.signal,
           });
           const itens = resposta?.dados ?? [];
 
           if (itens.length === 0 && pagina > 1) {
-            if (cancelado) return;
-            setPagina(pagina - 1);
+            if (controle.signal.aborted) return;
+            mudarPagina(() => pagina - 1);
             return;
           }
 
           let totalConhecido = null;
           if (!q) {
             const contagens = await Promise.all(
-              funis.map((funil) => leadsService.contarLeadsPorFunil(funil.funil_id))
+              funis.map((funil) => leadsService.contarLeadsPorFunil(funil.funil_id, { sinal: controle.signal }))
             );
             totalConhecido = contagens.reduce(
               (soma, respostaContagem) => soma + (respostaContagem?.dados?.total ?? 0),
@@ -126,31 +115,40 @@ export function useLeads() {
             );
           }
 
-          if (cancelado) return;
+          if (controle.signal.aborted) return;
           setLeads(itens.slice(0, TAMANHO_PAGINA));
           setTemProxima(itens.length > TAMANHO_PAGINA);
           setTotal(totalConhecido);
         }
 
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setChaveDados(chave);
       } catch (e) {
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setFalha({ chave, mensagem: e.message || 'Erro ao carregar leads.' });
       }
     })();
 
     return () => {
-      cancelado = true;
+      controle.abort();
     };
-  }, [estruturaOk, pagina, q, etapaFiltro, funis, recarga, chave]);
+  }, [estruturaOk, pagina, q, etapaFiltro, funis, recarga, chave, mudarPagina]);
 
   const etapaMap = useMemo(
     () => Object.fromEntries(etapas.map((etapa) => [etapa.etapa_id, etapa])),
     [etapas]
   );
 
-  const recarregar = useCallback(() => setRecarga((valor) => valor + 1), []);
+  const estruturaFalhou = !!(falha && falha.estrutura);
+
+  const recarregar = useCallback(() => {
+    if (estruturaFalhou) {
+      setFalha(null);
+      setRecargaEstrutura((valor) => valor + 1);
+      return;
+    }
+    setRecarga((valor) => valor + 1);
+  }, [estruturaFalhou]);
 
   const definirBusca = useCallback(
     (busca) => {
@@ -164,7 +162,7 @@ export function useLeads() {
         }
         return novos;
       });
-      setPagina(1);
+      setPaginacao({ q: limpo, pagina: 1 });
     },
     [setParametros]
   );
@@ -182,23 +180,21 @@ export function useLeads() {
     setEtapaFiltro('');
   }, [definirBusca]);
 
-  const irParaAnterior = useCallback(() => setPagina((valor) => Math.max(1, valor - 1)), []);
-  const irParaProxima = useCallback(() => setPagina((valor) => valor + 1), []);
+  const irParaAnterior = useCallback(
+    () => mudarPagina((valor) => Math.max(1, valor - 1)),
+    [mudarPagina]
+  );
+  const irParaProxima = useCallback(() => mudarPagina((valor) => valor + 1), [mudarPagina]);
 
-  /** Cria lead; volta para a página 1 (o mais novo aparece primeiro). */
   const criar = useCallback(
     async (dados) => {
       await leadsService.criarLead(dados);
-      setPagina(1);
+      mudarPagina(() => 1);
       recarregar();
     },
-    [recarregar]
+    [recarregar, mudarPagina]
   );
 
-  /**
-   * Atualiza o lead. A mudança de etapa vai por PATCH ao final para que o
-   * backend grave a trilha de histórico (o PUT sozinho não grava).
-   */
   const atualizar = useCallback(
     async (id, dados, etapaOriginalId) => {
       await leadsService.atualizarLead(id, {
@@ -226,7 +222,6 @@ export function useLeads() {
   );
 
   return {
-    // dados
     leads,
     etapas,
     funis,
@@ -236,11 +231,9 @@ export function useLeads() {
     pagina,
     q,
     etapaFiltro,
-    // estados
     carregando,
     erro,
     recarga,
-    // ações
     aplicarFiltros,
     limparFiltros,
     irParaAnterior,

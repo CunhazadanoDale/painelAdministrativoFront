@@ -4,12 +4,22 @@ let tokenAtual = null;
 const ouvintesSessao = [];
 
 export class ErroApi extends Error {
-  constructor(status, mensagem) {
+  constructor(status, mensagem, { esperaSegundos = null } = {}) {
     super(mensagem);
     this.name = 'ErroApi';
     this.status = status;
+    this.esperaSegundos = esperaSegundos;
   }
 }
+
+function lerEsperaSegundos(resposta) {
+  const valor = resposta.headers && resposta.headers.get ? resposta.headers.get('Retry-After') : null;
+  if (!valor || !/^\d+$/.test(valor.trim())) return null;
+  return Number(valor.trim());
+}
+
+export const MENSAGEM_SEM_JSON =
+  'A API não devolveu JSON. Confirme se VITE_API_BASE_URL aponta para a API Go e se ela está em execução.';
 
 const SINAL_DE_CONCORRENCIA = /recarregue/i;
 
@@ -86,19 +96,11 @@ export async function requisitar(caminho, { metodo = 'GET', corpo, sinal } = {})
   if (!resposta.ok) {
     if (resposta.status === 401) comunicarFalhaSessao();
     const mensagem = (dados && dados.erro && dados.erro.mensagem) || `Falha na requisição (status ${resposta.status})`;
-    throw new ErroApi(resposta.status, mensagem);
+    throw new ErroApi(resposta.status, mensagem, { esperaSegundos: lerEsperaSegundos(resposta) });
   }
 
-  // Resposta 200 com corpo que não é JSON: acontece quando a API não está no
-  // endereço esperado (VITE_API_BASE_URL errado ou proxy ausente em produção) e
-  // quem atende é o fallback do SPA, que devolve o index.html com status 200.
-  // Devolver null aqui faz a tela mostrar "nenhum registro" mesmo havendo dados,
-  // então o problema precisa virar erro explícito.
   if (dados === null && texto.trim() !== '') {
-    throw new ErroApi(
-      resposta.status,
-      'A API não devolveu JSON. Confirme se VITE_API_BASE_URL aponta para a API Go e se ela está em execução.'
-    );
+    throw new ErroApi(resposta.status, MENSAGEM_SEM_JSON);
   }
 
   return dados;

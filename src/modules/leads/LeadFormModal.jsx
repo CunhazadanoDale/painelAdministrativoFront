@@ -4,12 +4,6 @@ import './Leads.css';
 
 const VAZIO = { nome: '', email: '', telefone: '', origem: '', etapa_id: '' };
 
-/**
- * Modal de criação/edição de lead. É montado pelo pai apenas quando aberto,
- * então o estado nasce já preenchido (sem reset em effect).
- * @param {{ lead?: object|null, etapas: object[], onFechar: () => void,
- *           onSalvar: (dados: object) => Promise<void> }} props
- */
 export function LeadFormModal({ lead, etapas, onFechar, onSalvar }) {
   const [form, setForm] = useState(() =>
     lead

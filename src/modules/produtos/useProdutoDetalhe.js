@@ -22,21 +22,22 @@ export function useProdutoDetalhe(id) {
   const carregando = !erro && chaveDados !== chave;
 
   useEffect(() => {
-    let cancelado = false;
+    const controle = new AbortController();
 
     (async () => {
       try {
-        const [respostaProduto, respostaCategorias, respostaMovimentos] = await Promise.all([
-          produtosService.obterProduto(id),
-          categoriasService.listarCategorias({ pagina: 1, tamanho: 100 }),
+        const [respostaProduto, listaCategorias, respostaMovimentos] = await Promise.all([
+          produtosService.obterProduto(id, { sinal: controle.signal }),
+          categoriasService.listarTodasCategorias({ sinal: controle.signal }),
           produtosService.listarMovimentos(id, {
             pagina: paginaMovimentos,
             tamanho: TAMANHO_PAGINA_MOVIMENTOS + 1,
+            sinal: controle.signal,
           }),
         ]);
         const itens = respostaMovimentos?.dados ?? [];
 
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
 
         if (itens.length === 0 && paginaMovimentos > 1) {
           setPaginaMovimentos(paginaMovimentos - 1);
@@ -44,19 +45,19 @@ export function useProdutoDetalhe(id) {
         }
 
         setProduto(respostaProduto?.dados ?? null);
-        setCategorias(respostaCategorias?.dados ?? []);
+        setCategorias(listaCategorias);
         setMovimentos(itens.slice(0, TAMANHO_PAGINA_MOVIMENTOS));
         setTemProximaMovimentos(itens.length > TAMANHO_PAGINA_MOVIMENTOS);
         setChaveDados(chave);
         setFalha(null);
       } catch (e) {
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setFalha({ chave, mensagem: e.message || 'Erro ao carregar o produto.' });
       }
     })();
 
     return () => {
-      cancelado = true;
+      controle.abort();
     };
   }, [id, chave, paginaMovimentos, recarga]);
 
@@ -101,11 +102,16 @@ export function useProdutoDetalhe(id) {
   const anexarImagem = useCallback(
     async (arquivo, alt) => {
       const enviado = await arquivosService.enviarArquivo(arquivo);
-      await produtosService.anexarImagem(id, {
-        arquivo_id: enviado.id,
-        ordem: produto && produto.imagens ? produto.imagens.length : 0,
-        alt,
-      });
+      try {
+        await produtosService.anexarImagem(id, {
+          arquivo_id: enviado.id,
+          ordem: produto && produto.imagens ? produto.imagens.length : 0,
+          alt,
+        });
+      } catch (e) {
+        await arquivosService.removerArquivo(enviado.id).catch(() => null);
+        throw e;
+      }
       recarregar();
     },
     [id, produto, recarregar]

@@ -1,6 +1,7 @@
-import { ErroApi, montarConsulta, obterToken, obterUrlBase, requisitar } from '../lib/api';
+import { ErroApi, MENSAGEM_SEM_JSON, montarConsulta, obterToken, obterUrlBase, requisitar } from '../lib/api';
 
 const CAMINHO = '/api/v1/arquivos';
+const PRAZO_PARA_REVOGAR_DOWNLOAD_MS = 60000;
 
 export function listarArquivos({ pagina = 1, tamanho = 20 } = {}) {
   return requisitar(`${CAMINHO}${montarConsulta({ pagina, tamanho })}`);
@@ -32,7 +33,11 @@ export function enviarArquivo(arquivo, { aoProgresso } = {}) {
         }
       }
       if (requisicao.status >= 200 && requisicao.status < 300) {
-        resolve(dados ? dados.dados : null);
+        if (dados && dados.dados) {
+          resolve(dados.dados);
+        } else {
+          reject(new ErroApi(requisicao.status, MENSAGEM_SEM_JSON));
+        }
         return;
       }
       const mensagem =
@@ -53,11 +58,18 @@ export function removerArquivo(id) {
   return requisitar(`${CAMINHO}/${id}`, { metodo: 'DELETE' });
 }
 
-export async function baixarArquivo(id, nome) {
+export async function obterArquivoBlob(id, { sinal } = {}) {
   const token = obterToken();
-  const resposta = await fetch(`${obterUrlBase()}${CAMINHO}/${id}`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-  });
+  let resposta;
+  try {
+    resposta = await fetch(`${obterUrlBase()}${CAMINHO}/${id}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      signal: sinal,
+    });
+  } catch (e) {
+    if (e && e.name === 'AbortError') throw e;
+    throw new ErroApi(0, 'Não foi possível conectar ao servidor. Verifique se a API está em execução.');
+  }
 
   if (!resposta.ok) {
     let dados = null;
@@ -72,7 +84,11 @@ export async function baixarArquivo(id, nome) {
     throw new ErroApi(resposta.status, mensagem);
   }
 
-  const blob = await resposta.blob();
+  return resposta.blob();
+}
+
+export async function baixarArquivo(id, nome) {
+  const blob = await obterArquivoBlob(id);
   const url = URL.createObjectURL(blob);
   const ancora = document.createElement('a');
   ancora.href = url;
@@ -80,5 +96,5 @@ export async function baixarArquivo(id, nome) {
   document.body.appendChild(ancora);
   ancora.click();
   ancora.remove();
-  URL.revokeObjectURL(url);
+  setTimeout(() => URL.revokeObjectURL(url), PRAZO_PARA_REVOGAR_DOWNLOAD_MS);
 }

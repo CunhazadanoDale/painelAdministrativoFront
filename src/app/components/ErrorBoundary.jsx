@@ -1,14 +1,6 @@
 import React from 'react';
 import './ErrorBoundary.css';
 
-/**
- * Error boundary global: intercepta exceções de renderização da árvore e
- * mostra um fallback amigável em vez de deixar a tela branca (React não
- * tem boundary funcional — precisa ser classe).
- *
- * Para limpar o erro ao navegar, use `<ErrorBoundary key={rota}>`:
- * a remontagem recria o estado (sem setState fora do render).
- */
 export class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -20,7 +12,6 @@ export class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(erro, info) {
-    // Mantém o detalhe no console para depuração.
     console.error('Erro não tratado na UI:', erro, info);
   }
 

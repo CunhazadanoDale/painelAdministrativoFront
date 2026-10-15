@@ -20,8 +20,11 @@ export function useProdutos() {
   const [pagina, setPagina] = useState(1);
   const [filtros, setFiltros] = useState(FILTROS_PADRAO);
   const [recarga, setRecarga] = useState(0);
+  const [recargaAuxiliar, setRecargaAuxiliar] = useState(0);
   const [chaveDados, setChaveDados] = useState(null);
   const [falha, setFalha] = useState(null);
+  const [erroCategorias, setErroCategorias] = useState(null);
+  const [erroResumo, setErroResumo] = useState(null);
 
   const chave = `${pagina}|${filtros.busca}|${filtros.categoria_id}|${filtros.ativo}|${filtros.destaque}|${filtros.estoque_baixo}|${recarga}`;
 
@@ -29,37 +32,58 @@ export function useProdutos() {
   const carregando = !erro && chaveDados !== chave;
 
   useEffect(() => {
-    let cancelado = false;
+    const controle = new AbortController();
 
-    const carregarCategorias = async () => {
+    (async () => {
       try {
-        const resposta = await categoriasService.listarCategorias({ pagina: 1, tamanho: 100 });
-        if (cancelado) return;
-        setCategorias(resposta?.dados ?? []);
-      } catch {
-        // Painel e filtros seguem funcionando com a lista vazia de categorias.
+        const lista = await categoriasService.listarTodasCategorias({ sinal: controle.signal });
+        if (controle.signal.aborted) return;
+        setCategorias(lista);
+        setErroCategorias(null);
+      } catch (e) {
+        if (controle.signal.aborted) return;
+        setErroCategorias(e.message || 'Erro ao carregar as categorias.');
       }
-    };
+    })();
 
-    const carregarResumo = async () => {
+    return () => {
+      controle.abort();
+    };
+  }, [recargaAuxiliar]);
+
+  useEffect(() => {
+    const controle = new AbortController();
+
+    (async () => {
       try {
-        const resposta = await produtosService.obterResumo();
-        if (cancelado) return;
+        const resposta = await produtosService.obterResumo({ sinal: controle.signal });
+        if (controle.signal.aborted) return;
         setResumo(resposta?.dados ?? null);
-      } catch {
-        // Os cartões de resumo são decorativos; falha não afeta a listagem.
+        setErroResumo(null);
+      } catch (e) {
+        if (controle.signal.aborted) return;
+        setErroResumo(e.message || 'Erro ao carregar o resumo do estoque.');
       }
-    };
+    })();
 
-    const carregarProdutos = async () => {
+    return () => {
+      controle.abort();
+    };
+  }, [recarga, recargaAuxiliar]);
+
+  useEffect(() => {
+    const controle = new AbortController();
+
+    (async () => {
       try {
         const resposta = await produtosService.listarProdutos({
           pagina,
           tamanho: TAMANHO_PAGINA + 1,
           ...filtros,
+          sinal: controle.signal,
         });
 
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
 
         const itens = Array.isArray(resposta?.dados) ? resposta.dados : [];
 
@@ -73,21 +97,17 @@ export function useProdutos() {
         setChaveDados(chave);
         setFalha(null);
       } catch (e) {
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setProdutos([]);
         setTemProxima(false);
         setFalha({ chave, mensagem: e.message || 'Erro ao carregar os produtos.' });
       }
-    };
-
-    carregarProdutos();
-    carregarCategorias();
-    carregarResumo();
+    })();
 
     return () => {
-      cancelado = true;
+      controle.abort();
     };
-  }, [chave, pagina, filtros, recarga]);
+  }, [chave, pagina, filtros]);
 
   const subcategorias = useMemo(
     () => categorias.filter((categoria) => categoria.categoria_pai_id),
@@ -100,6 +120,7 @@ export function useProdutos() {
   );
 
   const recarregar = useCallback(() => setRecarga((valor) => valor + 1), []);
+  const recarregarAuxiliares = useCallback(() => setRecargaAuxiliar((valor) => valor + 1), []);
 
   const aplicarFiltros = useCallback((novosFiltros) => {
     setFiltros({ ...FILTROS_PADRAO, ...novosFiltros });
@@ -164,7 +185,10 @@ export function useProdutos() {
     carregando,
     erro,
     chaveDados,
+    erroCategorias,
+    erroResumo,
     recarregar,
+    recarregarAuxiliares,
     aplicarFiltros,
     limparFiltros,
     irParaAnterior,

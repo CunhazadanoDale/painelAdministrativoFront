@@ -20,21 +20,22 @@ export function useUsuarios() {
   const carregando = !erro && chaveDados !== chave;
 
   useEffect(() => {
-    let cancelado = false;
+    const controle = new AbortController();
 
     (async () => {
       try {
-        const [respostaUsuarios, respostaCargos] = await Promise.all([
+        const [respostaUsuarios, listaCargos] = await Promise.all([
           usuariosService.listarUsuarios({
             pagina,
             tamanho: TAMANHO_PAGINA + 1,
             q,
+            sinal: controle.signal,
           }),
-          cargosService.listarCargos({ pagina: 1, tamanho: 100 }),
+          cargosService.listarTodosCargos({ sinal: controle.signal }),
         ]);
         const itens = respostaUsuarios?.dados ?? [];
 
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
 
         if (itens.length === 0 && pagina > 1) {
           setPagina(pagina - 1);
@@ -43,17 +44,17 @@ export function useUsuarios() {
 
         setUsuarios(itens.slice(0, TAMANHO_PAGINA));
         setTemProxima(itens.length > TAMANHO_PAGINA);
-        setCargos(respostaCargos?.dados ?? []);
+        setCargos(listaCargos);
         setChaveDados(chave);
         setFalha(null);
       } catch (e) {
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setFalha({ chave, mensagem: e.message || 'Erro ao carregar os usuários.' });
       }
     })();
 
     return () => {
-      cancelado = true;
+      controle.abort();
     };
   }, [pagina, q, recarga, chave]);
 

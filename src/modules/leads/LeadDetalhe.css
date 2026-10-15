@@ -1,4 +1,3 @@
-/* src/modules/leads/LeadDetalhe.css */
 .lead-detalhe-container {
   display: flex;
   flex-direction: column;
@@ -127,7 +126,6 @@
   border: 1px solid var(--danger-text);
 }
 
-/* Campos cadastrais */
 .lead-detalhe-campos {
   margin: 0;
   padding: var(--space-3);
@@ -157,7 +155,6 @@
   word-break: break-word;
 }
 
-/* Trilha de movimentações */
 .lead-detalhe-historico {
   flex: 1;
   min-height: 0;
@@ -178,7 +175,6 @@
   gap: var(--space-4);
 }
 
-/* Linha vertical da timeline */
 .lead-hist-linha::before {
   content: '';
   position: absolute;

@@ -14,11 +14,6 @@ import {
 } from 'lucide-react';
 import './Funis.css';
 
-/**
- * Tela de gestão de funis e etapas (estrutura do CRM).
- * Painel esquerdo: funis. Painel direito: etapas do funil selecionado,
- * com reordenação por setas (PUT /funils/{id}/etapas/ordem).
- */
 export default function Funis() {
   const { administrador } = useAutenticacao();
   const {
@@ -43,14 +38,11 @@ export default function Funis() {
     recarregarEtapas,
   } = useFunis();
 
-  // Modais: montados sob demanda (estado nasce preenchido).
   const [funilModal, setFunilModal] = useState(undefined);
   const [etapaModal, setEtapaModal] = useState(undefined);
-  // Exclusão em andamento: { tipo: 'funil'|'etapa', item }.
   const [excluirAlvo, setExcluirAlvo] = useState(null);
   const [excluindo, setExcluindo] = useState(false);
   const [erroExclusao, setErroExclusao] = useState(null);
-  // Erro de ações no painel de etapas (reordenação, exclusão bloqueada).
   const [erroAcao, setErroAcao] = useState(null);
 
   const abrirNovoFunil = () => setFunilModal(null);
@@ -114,7 +106,6 @@ export default function Funis() {
       )}
 
       <div className="funis-paineis">
-        {/* Funis */}
         <section className="funis-painel">
           <header className="funis-painel-cabecalho">
             <h2>Funis</h2>
@@ -170,7 +161,6 @@ export default function Funis() {
           )}
         </section>
 
-        {/* Etapas do funil selecionado */}
         <section className="funis-painel">
           <header className="funis-painel-cabecalho">
             <h2>{funilSelecionado ? `Etapas — ${funilSelecionado.nome}` : 'Etapas'}</h2>

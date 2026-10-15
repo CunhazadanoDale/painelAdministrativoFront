@@ -47,21 +47,26 @@ export function AutenticacaoProvider({ children }) {
   useEffect(() => {
     if (!sessao || !sessao.token) return undefined;
 
-    let cancelado = false;
+    const controle = new AbortController();
 
     (async () => {
       let permitido = false;
       try {
-        await solicitacoesService.listarSolicitacoes({ pagina: 1, tamanho: 1, escopo: 'aprovacao' });
+        await solicitacoesService.listarSolicitacoes({
+          pagina: 1,
+          tamanho: 1,
+          escopo: 'aprovacao',
+          sinal: controle.signal,
+        });
         permitido = true;
       } catch {
         permitido = false;
       }
-      if (!cancelado) setAprovacao(permitido);
+      if (!controle.signal.aborted) setAprovacao(permitido);
     })();
 
     return () => {
-      cancelado = true;
+      controle.abort();
     };
   }, [sessao]);
 
@@ -91,6 +96,21 @@ export function AutenticacaoProvider({ children }) {
   }, [encerrar]);
 
   useEffect(() => aoFalharSessao(encerrar), [encerrar]);
+
+  const haviaSessao = !!sessao;
+
+  useEffect(() => {
+    const aoMudarArmazenamento = (evento) => {
+      if (evento.key !== null && evento.key !== CHAVE_SESSAO) return;
+      const novaSessao = carregarSessao();
+      definirToken(novaSessao ? novaSessao.token : null);
+      setAprovacao(false);
+      setAviso(!novaSessao && haviaSessao ? 'A sessão foi encerrada em outra aba.' : null);
+      setSessao(novaSessao);
+    };
+    window.addEventListener('storage', aoMudarArmazenamento);
+    return () => window.removeEventListener('storage', aoMudarArmazenamento);
+  }, [haviaSessao]);
 
   const entrar = useCallback(async (email, senha) => {
     const resposta = await autenticacaoService.autenticar(email, senha);

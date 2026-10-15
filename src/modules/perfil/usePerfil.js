@@ -18,27 +18,27 @@ export function usePerfil() {
   const carregando = !erro && chaveDados !== chave;
 
   useEffect(() => {
-    let cancelado = false;
+    const controle = new AbortController();
 
     (async () => {
       try {
-        const [respostaSessao, respostaCargos] = await Promise.all([
-          sessaoService.obterSessao(),
-          cargosService.listarCargos({ pagina: 1, tamanho: 100 }),
+        const [respostaSessao, listaCargos] = await Promise.all([
+          sessaoService.obterSessao({ sinal: controle.signal }),
+          cargosService.listarTodosCargos({ sinal: controle.signal }),
         ]);
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setUsuario(respostaSessao?.dados ?? null);
-        setCargos(respostaCargos?.dados ?? []);
+        setCargos(listaCargos);
         setChaveDados(chave);
         setFalha(null);
       } catch (e) {
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setFalha({ chave, mensagem: e.message || 'Erro ao carregar o perfil.' });
       }
     })();
 
     return () => {
-      cancelado = true;
+      controle.abort();
     };
   }, [chave]);
 

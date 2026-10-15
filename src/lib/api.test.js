@@ -94,6 +94,29 @@ describe('requisitar', () => {
     expect(erro.message).toBe('erro de validação: nome');
   });
 
+  it('expõe o Retry-After do 429 em segundos', async () => {
+    fetchMock.mockResolvedValue({
+      ...resposta(429, { erro: { mensagem: 'muitas tentativas de login; tente novamente em 15 minuto(s)' } }),
+      headers: new Headers({ 'Retry-After': '900' }),
+    });
+
+    const erro = await requisitar('/api/v1/teste').catch((e) => e);
+
+    expect(erro.status).toBe(429);
+    expect(erro.esperaSegundos).toBe(900);
+  });
+
+  it('deixa a espera nula sem Retry-After válido', async () => {
+    fetchMock.mockResolvedValue({
+      ...resposta(429, { erro: { mensagem: 'muitas tentativas' } }),
+      headers: new Headers({ 'Retry-After': 'amanhã' }),
+    });
+
+    const erro = await requisitar('/api/v1/teste').catch((e) => e);
+
+    expect(erro.esperaSegundos).toBeNull();
+  });
+
   it('usa mensagem padrão quando a resposta não traz erro', async () => {
     fetchMock.mockResolvedValue(resposta(500));
 

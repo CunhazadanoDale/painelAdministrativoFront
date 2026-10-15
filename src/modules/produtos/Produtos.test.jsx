@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -60,14 +60,73 @@ describe('Produtos', () => {
 
     expect(await screen.findByText('teste apenas')).toBeInTheDocument();
 
-    // Regressão: o painel de filtros tem altura própria. Empilhado acima da
-    // grade num contêiner de altura fixa, ele colapsava .produtos-conteudo
-    // para zero e a tela ficava sem nenhuma linha de produto.
     const corpo = container.querySelector('.produtos-corpo');
     expect(corpo).toBeTruthy();
     expect(corpo.querySelector('.filter-panel')).toBeTruthy();
     expect(corpo.querySelector('.produtos-conteudo')).toBeTruthy();
     expect(corpo.querySelector('.datagrid tbody tr')).toBeTruthy();
     expect(screen.getByText('Produtos (1)')).toBeInTheDocument();
+  });
+
+  it('mostra só o erro, sem o aviso de lista vazia, quando a listagem falha', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url) =>
+        String(url).includes('/api/v1/produtos')
+          ? {
+              ok: false,
+              status: 500,
+              text: async () => JSON.stringify({ erro: { mensagem: 'erro interno do servidor' } }),
+            }
+          : responderPara(url)
+      )
+    );
+
+    render(
+      <MemoryRouter initialEntries={['/produtos']}>
+        <AutenticacaoProvider>
+          <Produtos />
+        </AutenticacaoProvider>
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText('erro interno do servidor')).toBeInTheDocument();
+    expect(screen.queryByText('Nenhum produto encontrado.')).not.toBeInTheDocument();
+  });
+
+  it('avisa quando categorias ou resumo não carregam e permite tentar de novo', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url) =>
+        String(url).includes('/estoque/resumo')
+          ? {
+              ok: false,
+              status: 500,
+              text: async () => JSON.stringify({ erro: { mensagem: 'erro interno do servidor' } }),
+            }
+          : responderPara(url)
+      )
+    );
+
+    render(
+      <MemoryRouter initialEntries={['/produtos']}>
+        <AutenticacaoProvider>
+          <Produtos />
+        </AutenticacaoProvider>
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText('teste apenas')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Não foi possível carregar o resumo do estoque: erro interno do servidor')
+    ).toBeInTheDocument();
+
+    vi.stubGlobal('fetch', vi.fn(async (url) => responderPara(url)));
+    fireEvent.click(screen.getByRole('button', { name: 'Tentar novamente' }));
+
+    expect(await screen.findByText('Total de produtos')).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.queryByText(/Não foi possível carregar o resumo/)).not.toBeInTheDocument()
+    );
   });
 });

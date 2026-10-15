@@ -1,4 +1,3 @@
-/* src/app/design-system/global.css */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 @import './variables.css';
 
@@ -38,7 +37,6 @@ input, select, textarea {
   font-size: inherit;
 }
 
-/* Scrollbar styling for density */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -54,8 +52,6 @@ input, select, textarea {
   background: #a5adba;
 }
 
-/* Banner de erro compartilhado por todas as telas
-   (antes vivia só no Leads.css e outras telas ficavam sem estilo em dev) */
 .leads-erro {
   display: flex;
   align-items: center;

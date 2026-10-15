@@ -10,14 +10,16 @@ export function listarProdutos({
   ativo = '',
   destaque = '',
   estoque_baixo = '',
+  sinal,
 } = {}) {
   return requisitar(
-    `${CAMINHO}${montarConsulta({ pagina, tamanho, categoria_id, busca, ativo, destaque, estoque_baixo })}`
+    `${CAMINHO}${montarConsulta({ pagina, tamanho, categoria_id, busca, ativo, destaque, estoque_baixo })}`,
+    { sinal }
   );
 }
 
-export function obterProduto(id) {
-  return requisitar(`${CAMINHO}/${id}`);
+export function obterProduto(id, { sinal } = {}) {
+  return requisitar(`${CAMINHO}/${id}`, { sinal });
 }
 
 export function criarProduto(dados) {
@@ -40,12 +42,14 @@ export function alternarDestaque(id, destaque) {
   return requisitar(`${CAMINHO}/${id}/destaque`, { metodo: 'PATCH', corpo: { destaque } });
 }
 
-export function obterSaldo(id) {
-  return requisitar(`${CAMINHO}/${id}/saldo`);
+export function obterSaldo(id, { sinal } = {}) {
+  return requisitar(`${CAMINHO}/${id}/saldo`, { sinal });
 }
 
-export function listarMovimentos(id, { pagina = 1, tamanho = 20, tipo = '' } = {}) {
-  return requisitar(`${CAMINHO}/${id}/movimentos${montarConsulta({ pagina, tamanho, tipo })}`);
+export function listarMovimentos(id, { pagina = 1, tamanho = 20, tipo = '', sinal } = {}) {
+  return requisitar(`${CAMINHO}/${id}/movimentos${montarConsulta({ pagina, tamanho, tipo })}`, {
+    sinal,
+  });
 }
 
 export function movimentar(id, dados) {
@@ -60,6 +64,6 @@ export function removerImagem(id, imagemId) {
   return requisitar(`${CAMINHO}/${id}/imagens/${imagemId}`, { metodo: 'DELETE' });
 }
 
-export function obterResumo() {
-  return requisitar('/api/v1/estoque/resumo');
+export function obterResumo({ sinal } = {}) {
+  return requisitar('/api/v1/estoque/resumo', { sinal });
 }
