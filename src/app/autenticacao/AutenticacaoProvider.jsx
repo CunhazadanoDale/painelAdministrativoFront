@@ -47,21 +47,26 @@ export function AutenticacaoProvider({ children }) {
   useEffect(() => {
     if (!sessao || !sessao.token) return undefined;
 
-    let cancelado = false;
+    const controle = new AbortController();
 
     (async () => {
       let permitido = false;
       try {
-        await solicitacoesService.listarSolicitacoes({ pagina: 1, tamanho: 1, escopo: 'aprovacao' });
+        await solicitacoesService.listarSolicitacoes({
+          pagina: 1,
+          tamanho: 1,
+          escopo: 'aprovacao',
+          sinal: controle.signal,
+        });
         permitido = true;
       } catch {
         permitido = false;
       }
-      if (!cancelado) setAprovacao(permitido);
+      if (!controle.signal.aborted) setAprovacao(permitido);
     })();
 
     return () => {
-      cancelado = true;
+      controle.abort();
     };
   }, [sessao]);
 

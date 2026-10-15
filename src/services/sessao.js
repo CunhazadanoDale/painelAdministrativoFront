@@ -2,8 +2,8 @@ import { requisitar } from '../lib/api';
 
 const CAMINHO = '/api/v1/sessao';
 
-export function obterSessao() {
-  return requisitar(CAMINHO);
+export function obterSessao({ sinal } = {}) {
+  return requisitar(CAMINHO, { sinal });
 }
 
 export function trocarSenhaPropria(senhaAtual, novaSenha) {

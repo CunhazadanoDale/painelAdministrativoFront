@@ -18,35 +18,36 @@ export function useCargos() {
   const carregando = !erro && chaveDados !== chave;
 
   useEffect(() => {
-    let cancelado = false;
+    const controle = new AbortController();
 
     (async () => {
       try {
         const resposta = await cargosService.listarCargos({
           pagina,
           tamanho: TAMANHO_PAGINA + 1,
+          sinal: controle.signal,
         });
         const itens = resposta?.dados ?? [];
 
         if (itens.length === 0 && pagina > 1) {
-          if (cancelado) return;
+          if (controle.signal.aborted) return;
           setPagina(pagina - 1);
           return;
         }
 
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setCargos(itens.slice(0, TAMANHO_PAGINA));
         setTemProxima(itens.length > TAMANHO_PAGINA);
         setChaveDados(chave);
         setFalha(null);
       } catch (e) {
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setFalha({ chave, mensagem: e.message || 'Erro ao carregar os cargos.' });
       }
     })();
 
     return () => {
-      cancelado = true;
+      controle.abort();
     };
   }, [chave, pagina, recarga]);
 

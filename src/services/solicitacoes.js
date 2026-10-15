@@ -8,12 +8,15 @@ export function listarSolicitacoes({
   escopo = '',
   status = '',
   empresa = '',
+  sinal,
 } = {}) {
-  return requisitar(`${CAMINHO}${montarConsulta({ pagina, tamanho, escopo, status, empresa })}`);
+  return requisitar(`${CAMINHO}${montarConsulta({ pagina, tamanho, escopo, status, empresa })}`, {
+    sinal,
+  });
 }
 
-export function obterSolicitacao(id) {
-  return requisitar(`${CAMINHO}/${id}`);
+export function obterSolicitacao(id, { sinal } = {}) {
+  return requisitar(`${CAMINHO}/${id}`, { sinal });
 }
 
 export function criarSolicitacao(dados) {
@@ -36,8 +39,8 @@ export function registrarPagamento(id, dados) {
   return requisitar(`${CAMINHO}/${id}/pagamento`, { metodo: 'POST', corpo: dados });
 }
 
-export function obterPagamento(id) {
-  return requisitar(`${CAMINHO}/${id}/pagamento`);
+export function obterPagamento(id, { sinal } = {}) {
+  return requisitar(`${CAMINHO}/${id}/pagamento`, { sinal });
 }
 
 export function listarHistorico(id, { sinal } = {}) {

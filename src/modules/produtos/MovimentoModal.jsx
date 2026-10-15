@@ -35,24 +35,24 @@ export function MovimentoModal({ produto, onFechar, onSalvar }) {
 
   useEffect(() => {
     if (!produtoId) return undefined;
-    let cancelado = false;
+    const controle = new AbortController();
 
     produtosService
-      .obterSaldo(produtoId)
+      .obterSaldo(produtoId, { sinal: controle.signal })
       .then((resposta) => {
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setSaldo((resposta && resposta.dados) || null);
         setConflito(null);
       })
       .catch(() => {
-        if (!cancelado) setSaldo(null);
+        if (!controle.signal.aborted) setSaldo(null);
       })
       .finally(() => {
-        if (!cancelado) setRecarregando(false);
+        if (!controle.signal.aborted) setRecarregando(false);
       });
 
     return () => {
-      cancelado = true;
+      controle.abort();
     };
   }, [produtoId, recargaSaldo]);
 

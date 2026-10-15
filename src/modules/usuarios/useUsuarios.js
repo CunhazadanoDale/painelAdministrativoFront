@@ -20,7 +20,7 @@ export function useUsuarios() {
   const carregando = !erro && chaveDados !== chave;
 
   useEffect(() => {
-    let cancelado = false;
+    const controle = new AbortController();
 
     (async () => {
       try {
@@ -29,12 +29,13 @@ export function useUsuarios() {
             pagina,
             tamanho: TAMANHO_PAGINA + 1,
             q,
+            sinal: controle.signal,
           }),
-          cargosService.listarTodosCargos(),
+          cargosService.listarTodosCargos({ sinal: controle.signal }),
         ]);
         const itens = respostaUsuarios?.dados ?? [];
 
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
 
         if (itens.length === 0 && pagina > 1) {
           setPagina(pagina - 1);
@@ -47,13 +48,13 @@ export function useUsuarios() {
         setChaveDados(chave);
         setFalha(null);
       } catch (e) {
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setFalha({ chave, mensagem: e.message || 'Erro ao carregar os usuários.' });
       }
     })();
 
     return () => {
-      cancelado = true;
+      controle.abort();
     };
   }, [pagina, q, recarga, chave]);
 

@@ -32,47 +32,47 @@ export function useProdutos() {
   const carregando = !erro && chaveDados !== chave;
 
   useEffect(() => {
-    let cancelado = false;
+    const controle = new AbortController();
 
     (async () => {
       try {
-        const lista = await categoriasService.listarTodasCategorias();
-        if (cancelado) return;
+        const lista = await categoriasService.listarTodasCategorias({ sinal: controle.signal });
+        if (controle.signal.aborted) return;
         setCategorias(lista);
         setErroCategorias(null);
       } catch (e) {
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setErroCategorias(e.message || 'Erro ao carregar as categorias.');
       }
     })();
 
     return () => {
-      cancelado = true;
+      controle.abort();
     };
   }, [recargaAuxiliar]);
 
   useEffect(() => {
-    let cancelado = false;
+    const controle = new AbortController();
 
     (async () => {
       try {
-        const resposta = await produtosService.obterResumo();
-        if (cancelado) return;
+        const resposta = await produtosService.obterResumo({ sinal: controle.signal });
+        if (controle.signal.aborted) return;
         setResumo(resposta?.dados ?? null);
         setErroResumo(null);
       } catch (e) {
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setErroResumo(e.message || 'Erro ao carregar o resumo do estoque.');
       }
     })();
 
     return () => {
-      cancelado = true;
+      controle.abort();
     };
   }, [recarga, recargaAuxiliar]);
 
   useEffect(() => {
-    let cancelado = false;
+    const controle = new AbortController();
 
     (async () => {
       try {
@@ -80,9 +80,10 @@ export function useProdutos() {
           pagina,
           tamanho: TAMANHO_PAGINA + 1,
           ...filtros,
+          sinal: controle.signal,
         });
 
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
 
         const itens = Array.isArray(resposta?.dados) ? resposta.dados : [];
 
@@ -96,7 +97,7 @@ export function useProdutos() {
         setChaveDados(chave);
         setFalha(null);
       } catch (e) {
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setProdutos([]);
         setTemProxima(false);
         setFalha({ chave, mensagem: e.message || 'Erro ao carregar os produtos.' });
@@ -104,7 +105,7 @@ export function useProdutos() {
     })();
 
     return () => {
-      cancelado = true;
+      controle.abort();
     };
   }, [chave, pagina, filtros]);
 

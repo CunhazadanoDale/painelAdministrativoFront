@@ -13,23 +13,23 @@ export function useCategorias() {
   const carregando = !erro && chaveDados !== chave;
 
   useEffect(() => {
-    let cancelado = false;
+    const controle = new AbortController();
 
     (async () => {
       try {
-        const lista = await categoriasService.listarTodasCategorias();
-        if (cancelado) return;
+        const lista = await categoriasService.listarTodasCategorias({ sinal: controle.signal });
+        if (controle.signal.aborted) return;
         setCategorias(lista);
         setChaveDados(chave);
         setFalha(null);
       } catch (e) {
-        if (cancelado) return;
+        if (controle.signal.aborted) return;
         setFalha({ chave, mensagem: e.message || 'Erro ao carregar as categorias.' });
       }
     })();
 
     return () => {
-      cancelado = true;
+      controle.abort();
     };
   }, [chave]);
 
