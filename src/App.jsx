@@ -14,6 +14,7 @@ import Usuarios from './modules/usuarios/Usuarios';
 import Cargos from './modules/cargos/Cargos';
 import Aprovadores from './modules/aprovadores/Aprovadores';
 import Empresas from './modules/empresas/Empresas';
+import Fornecedores from './modules/fornecedores/Fornecedores';
 import Produtos from './modules/produtos/Produtos';
 import ProdutoDetalhe from './modules/produtos/ProdutoDetalhe';
 import Categorias from './modules/produtos/Categorias';
@@ -81,6 +82,7 @@ function App() {
               path="/empresas"
               element={administrador ? <Empresas /> : <Navigate to="/" replace />}
             />
+            <Route path="/fornecedores" element={<Fornecedores />} />
             <Route path="/formularios" element={<Formularios />} />
             <Route path="/produtos" element={<Produtos />} />
             <Route path="/produtos/:id" element={<ProdutoDetalhe />} />
