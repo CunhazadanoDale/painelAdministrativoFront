@@ -152,6 +152,32 @@
   background-color: #9d1f00;
 }
 
+.plano-raiz td {
+  font-weight: 600;
+}
+
+.plano-sub td:first-child {
+  padding-left: var(--space-6);
+}
+
+.plano-nome {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.plano-seta {
+  color: var(--text-muted);
+  flex: none;
+}
+
+.plano-so-ativas {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  cursor: pointer;
+}
+
 @media (max-width: 900px) {
   .financeiro-toolbar,
   .financeiro-toolbar-acoes {

@@ -9,6 +9,7 @@ import { useCargos } from './cargos/useCargos';
 import { useDashboard } from './dashboard/useDashboard';
 import { useEmpresas } from './empresas/useEmpresas';
 import { useContasBancarias } from './financeiro/useContasBancarias';
+import { usePlanoContas } from './financeiro/usePlanoContas';
 import { useFornecedores } from './fornecedores/useFornecedores';
 import { useFunis } from './funis/useFunis';
 import { useKanban } from './leads/useKanban';
@@ -87,6 +88,7 @@ describe('cancelamento das requisições ao desmontar', () => {
     ['useEmpresas', () => useEmpresas()],
     ['useFornecedores', () => useFornecedores()],
     ['useContasBancarias', () => useContasBancarias()],
+    ['usePlanoContas', () => usePlanoContas()],
   ])('%s', async (_, usar) => {
     const { unmount } = renderHook(usar, { wrapper: comAutenticacao });
 
