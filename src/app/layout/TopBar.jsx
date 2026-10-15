@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Bell, HelpCircle, LogOut } from 'lucide-react';
+import { Search, LogOut } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAutenticacao } from '../autenticacao/useAutenticacao';
 import './TopBar.css';
@@ -37,10 +37,11 @@ export function TopBar() {
       </div>
 
       {comercial ? (
-        <form className="topbar-search" onSubmit={pesquisar}>
-          <Search className="topbar-search-icon" size={16} />
+        <form className="topbar-search" role="search" onSubmit={pesquisar}>
+          <Search className="topbar-search-icon" size={16} aria-hidden="true" />
           <input
-            type="text"
+            type="search"
+            aria-label="Pesquisar leads"
             className="topbar-search-input"
             placeholder="Pesquisar leads..."
             value={termo}
@@ -52,14 +53,8 @@ export function TopBar() {
       )}
 
       <div className="topbar-right">
-        <button className="topbar-action-btn" title="Ajuda">
-          <HelpCircle size={18} />
-        </button>
-        <button className="topbar-action-btn" title="Notificações">
-          <Bell size={18} />
-        </button>
-        <button className="topbar-action-btn" title="Sair" onClick={sair}>
-          <LogOut size={18} />
+        <button type="button" className="topbar-action-btn" title="Sair" aria-label="Sair" onClick={sair}>
+          <LogOut size={18} aria-hidden="true" />
         </button>
         <Link className="topbar-user" to="/perfil" title="Meu perfil">
           <div className="user-info">
