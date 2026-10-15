@@ -97,6 +97,34 @@ describe('roteamento do App', () => {
     expect(screen.getByRole('link', { name: 'Empresas' })).toHaveAttribute('href', '/empresas');
   });
 
+  it('libera /fornecedores e a entrada na sidebar para qualquer autenticado, só para leitura', async () => {
+    gravarSessao(false);
+
+    renderizar('/fornecedores');
+
+    expect(await screen.findByText('Nenhum fornecedor cadastrado.')).toBeInTheDocument();
+    expect(screen.getByTestId('caminho')).toHaveTextContent('/fornecedores');
+    expect(screen.getByRole('link', { name: 'Fornecedores' })).toHaveAttribute('href', '/fornecedores');
+    expect(screen.queryByText('Novo Fornecedor')).toBeNull();
+  });
+
+  it('mostra o cadastro de fornecedor para o financeiro', async () => {
+    localStorage.setItem(
+      'mia.sessao',
+      JSON.stringify({
+        token: 'token-de-teste',
+        expira_em: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+        administrador: false,
+        financeiro: true,
+        usuario: { usuario_id: 1, nome: 'Pessoa Teste', email: 'teste@exemplo.com' },
+      })
+    );
+
+    renderizar('/fornecedores');
+
+    expect(await screen.findByText('Novo Fornecedor')).toBeInTheDocument();
+  });
+
   it('redireciona /pagamentos para /solicitacoes', async () => {
     gravarSessao(false);
 

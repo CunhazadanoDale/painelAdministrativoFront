@@ -16,7 +16,8 @@ import {
   UserCog,
   BadgeCheck,
   ShieldCheck,
-  Building2
+  Building2,
+  Truck
 } from 'lucide-react';
 import { useAutenticacao } from '../autenticacao/useAutenticacao';
 import './Sidebar.css';
@@ -44,6 +45,7 @@ export function Sidebar() {
       title: 'Financeiro',
       items: [
         { label: 'Solicitações', icon: <CreditCard size={18} />, path: '/solicitacoes' },
+        { label: 'Fornecedores', icon: <Truck size={18} />, path: '/fornecedores' },
         { label: 'Aprovadores', icon: <ShieldCheck size={18} />, path: '/aprovadores', admin: true }
       ]
     },
