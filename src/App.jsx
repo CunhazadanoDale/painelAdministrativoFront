@@ -15,6 +15,8 @@ import Cargos from './modules/cargos/Cargos';
 import Aprovadores from './modules/aprovadores/Aprovadores';
 import Empresas from './modules/empresas/Empresas';
 import Fornecedores from './modules/fornecedores/Fornecedores';
+import ContasBancarias from './modules/financeiro/ContasBancarias';
+import PlanoContas from './modules/financeiro/PlanoContas';
 import Produtos from './modules/produtos/Produtos';
 import ProdutoDetalhe from './modules/produtos/ProdutoDetalhe';
 import Categorias from './modules/produtos/Categorias';
@@ -33,7 +35,7 @@ function destinoDepoisDoLogin(origem) {
 
 function App() {
   const localizacao = useLocation();
-  const { autenticado, administrador, comercial } = useAutenticacao();
+  const { autenticado, administrador, comercial, financeiro } = useAutenticacao();
 
   if (!autenticado) {
     return (
@@ -83,6 +85,11 @@ function App() {
               element={administrador ? <Empresas /> : <Navigate to="/" replace />}
             />
             <Route path="/fornecedores" element={<Fornecedores />} />
+            <Route
+              path="/contas-bancarias"
+              element={financeiro ? <ContasBancarias /> : <Navigate to="/" replace />}
+            />
+            <Route path="/plano-de-contas" element={<PlanoContas />} />
             <Route path="/formularios" element={<Formularios />} />
             <Route path="/produtos" element={<Produtos />} />
             <Route path="/produtos/:id" element={<ProdutoDetalhe />} />
