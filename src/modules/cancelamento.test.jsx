@@ -7,6 +7,8 @@ import { AutenticacaoProvider } from '../app/autenticacao/AutenticacaoProvider';
 import { useAprovadores } from './aprovadores/useAprovadores';
 import { useCargos } from './cargos/useCargos';
 import { useDashboard } from './dashboard/useDashboard';
+import { useCadastrosCliente } from './clientes/useCadastrosCliente';
+import { useClientes } from './clientes/useClientes';
 import { useGruposClientes } from './clientes/useGruposClientes';
 import { useRepresentantes } from './clientes/useRepresentantes';
 import { useEmpresas } from './empresas/useEmpresas';
@@ -103,6 +105,8 @@ describe('cancelamento das requisições ao desmontar', () => {
     ['useLotesProduto', () => useLotesProduto('prod-1', 0)],
     ['useGruposClientes', () => useGruposClientes()],
     ['useRepresentantes', () => useRepresentantes()],
+    ['useClientes', () => useClientes()],
+    ['useCadastrosCliente', () => useCadastrosCliente(true)],
   ])('%s', async (_, usar) => {
     const { unmount } = renderHook(usar, { wrapper: comAutenticacao });
 

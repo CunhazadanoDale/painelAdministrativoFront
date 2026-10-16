@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { erroDoPercentual, formatarPercentual, paraPontosBase, pontosBaseParaTexto } from './clientesUtils';
+import {
+  erroDoPercentual,
+  erroDoTipoComDocumento,
+  formatarPercentual,
+  paraPontosBase,
+  pontosBaseParaTexto,
+  rotuloTipoCliente,
+} from './clientesUtils';
 
 describe('percentual em pontos-base', () => {
   it('formata pontos-base como porcentagem com duas casas', () => {
@@ -31,5 +38,21 @@ describe('percentual em pontos-base', () => {
     expect(pontosBaseParaTexto(300)).toBe('3,00');
     expect(pontosBaseParaTexto(125)).toBe('1,25');
     expect(pontosBaseParaTexto(null)).toBe('0,00');
+  });
+});
+
+describe('tipo do cliente', () => {
+  it('amarra pessoa física ao CPF', () => {
+    expect(erroDoTipoComDocumento('pf', '52998224725')).toBeNull();
+    expect(erroDoTipoComDocumento('construtora', '11222333000181')).toBeNull();
+    expect(erroDoTipoComDocumento('construtora', '52998224725')).toBe(
+      'CPF só com o tipo pessoa física, e pessoa física só com CPF.'
+    );
+    expect(erroDoTipoComDocumento('pf', '11222333000181')).not.toBeNull();
+  });
+
+  it('dá nome ao tipo', () => {
+    expect(rotuloTipoCliente('pf')).toBe('Pessoa física');
+    expect(rotuloTipoCliente('construtora')).toBe('Construtora');
   });
 });

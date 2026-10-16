@@ -24,3 +24,19 @@ export function paraPontosBase(texto) {
 export function erroDoPercentual(texto) {
   return paraPontosBase(texto) === null ? 'Informe um percentual de 0 a 100, com até duas casas.' : null;
 }
+
+export const TIPOS_CLIENTE = [
+  { valor: 'construtora', rotulo: 'Construtora' },
+  { valor: 'loja', rotulo: 'Loja' },
+  { valor: 'pf', rotulo: 'Pessoa física' },
+  { valor: 'outro', rotulo: 'Outro' },
+];
+
+export function rotuloTipoCliente(tipo) {
+  return TIPOS_CLIENTE.find((item) => item.valor === tipo)?.rotulo ?? tipo ?? '—';
+}
+
+export function erroDoTipoComDocumento(tipo, documento) {
+  const cpf = String(documento ?? '').length === 11;
+  return (tipo === 'pf') === cpf ? null : 'CPF só com o tipo pessoa física, e pessoa física só com CPF.';
+}
