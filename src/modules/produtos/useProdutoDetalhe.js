@@ -106,6 +106,15 @@ export function useProdutoDetalhe(id) {
     [id, recarregar]
   );
 
+  const transferir = useCallback(
+    async (dados) => {
+      await produtosService.transferir(id, dados);
+      setPaginaMovimentos(1);
+      recarregar();
+    },
+    [id, recarregar]
+  );
+
   const anexarImagem = useCallback(
     async (arquivo, alt) => {
       const enviado = await arquivosService.enviarArquivo(arquivo);
@@ -150,6 +159,7 @@ export function useProdutoDetalhe(id) {
     irParaProximoMovimento,
     filtrarMovimentosPorLocal,
     movimentar,
+    transferir,
     anexarImagem,
     removerImagem,
   };

@@ -13,12 +13,14 @@ import { formatarDataHora, formatarMoeda, formatarTamanho } from '../../lib/form
 import { ProdutoFormModal } from './ProdutoFormModal';
 import { MovimentoModal } from './MovimentoModal';
 import { SaldoPorLocal } from './SaldoPorLocal';
+import { TransferenciaModal } from './TransferenciaModal';
 import { useProdutoDetalhe } from './useProdutoDetalhe';
 import { LIMITE_ARQUIVO, imagemPermitida, rotuloTipoMovimento, rotuloUnidade } from './produtosUtils';
 import {
   AlertCircle,
   ChevronLeft,
   ChevronRight,
+  ArrowLeftRight,
   ImagePlus,
   PackagePlus,
   Pencil,
@@ -54,6 +56,7 @@ export default function ProdutoDetalhe() {
     irParaProximoMovimento,
     filtrarMovimentosPorLocal,
     movimentar,
+    transferir,
     anexarImagem,
     removerImagem,
   } = useProdutoDetalhe(id);
@@ -63,6 +66,7 @@ export default function ProdutoDetalhe() {
   const arquivoInputRef = useRef(null);
   const [produtoModal, setProdutoModal] = useState(false);
   const [movimentoAberto, setMovimentoAberto] = useState(false);
+  const [transferenciaAberta, setTransferenciaAberta] = useState(false);
   const [erroAcao, setErroAcao] = useState(null);
   const [erroImagem, setErroImagem] = useState(null);
   const [enviandoImagem, setEnviandoImagem] = useState(false);
@@ -238,6 +242,20 @@ export default function ProdutoDetalhe() {
               onClick={() => setMovimentoAberto(true)}
             >
               <PackagePlus size={14} /> Movimentar
+            </button>
+            <button
+              type="button"
+              className="filter-btn filter-btn-secondary"
+              style={{
+                flex: 'none',
+                padding: '4px 12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+              }}
+              onClick={() => setTransferenciaAberta(true)}
+            >
+              <ArrowLeftRight size={14} /> Transferir
             </button>
           </div>
         )}
@@ -424,6 +442,14 @@ export default function ProdutoDetalhe() {
           produto={produto}
           onFechar={() => setMovimentoAberto(false)}
           onSalvar={movimentar}
+        />
+      )}
+
+      {transferenciaAberta && (
+        <TransferenciaModal
+          produto={produto}
+          onFechar={() => setTransferenciaAberta(false)}
+          onSalvar={transferir}
         />
       )}
     </div>

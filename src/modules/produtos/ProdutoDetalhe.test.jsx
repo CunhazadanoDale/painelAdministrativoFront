@@ -198,4 +198,18 @@ describe('ProdutoDetalhe', () => {
       expect(urls.at(-1)).toContain('local=loc-loja');
     });
   });
+
+  it('só o administrador vê Transferir, que abre o modal de transferência', async () => {
+    entrarComo(false);
+    const { unmount } = renderizar();
+    await screen.findByText('Saldo por local');
+    expect(screen.queryByRole('button', { name: /Transferir/ })).toBeNull();
+    unmount();
+
+    entrarComo(true);
+    renderizar();
+    fireEvent.click(await screen.findByRole('button', { name: /Transferir/ }));
+
+    expect(await screen.findByRole('dialog', { name: 'Transferir entre locais' })).toBeInTheDocument();
+  });
 });

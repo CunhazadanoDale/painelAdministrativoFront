@@ -45,6 +45,21 @@ describe('useProdutoDetalhe.movimentos', () => {
   });
 });
 
+describe('useProdutoDetalhe.transferir', () => {
+  it('transfere, volta os movimentos para a página 1 e recarrega', async () => {
+    const transferir = vi.spyOn(produtosService, 'transferir').mockResolvedValue({ dados: {} });
+    const { result } = await renderizar();
+    const geracaoInicial = result.current.geracao;
+    const dados = { local_origem_id: 'loc-1', local_destino_id: 'loc-2', quantidade: 2, observacao: '' };
+
+    await act(() => result.current.transferir(dados));
+
+    expect(transferir).toHaveBeenCalledWith('prod-1', dados);
+    expect(result.current.geracao).toBeGreaterThan(geracaoInicial);
+    expect(result.current.paginaMovimentos).toBe(1);
+  });
+});
+
 describe('useProdutoDetalhe.anexarImagem', () => {
   it('anexa o arquivo enviado na próxima ordem', async () => {
     const anexar = vi.spyOn(produtosService, 'anexarImagem').mockResolvedValue({ dados: {} });
