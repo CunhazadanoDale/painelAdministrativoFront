@@ -46,14 +46,39 @@ export function obterSaldo(id, { sinal } = {}) {
   return requisitar(`${CAMINHO}/${id}/saldo`, { sinal });
 }
 
-export function listarMovimentos(id, { pagina = 1, tamanho = 20, tipo = '', sinal } = {}) {
-  return requisitar(`${CAMINHO}/${id}/movimentos${montarConsulta({ pagina, tamanho, tipo })}`, {
+export function listarMovimentos(id, { pagina = 1, tamanho = 20, tipo = '', local = '', sinal } = {}) {
+  return requisitar(`${CAMINHO}/${id}/movimentos${montarConsulta({ pagina, tamanho, tipo, local })}`, {
     sinal,
   });
 }
 
 export function movimentar(id, dados) {
   return requisitar(`${CAMINHO}/${id}/movimentos`, { metodo: 'POST', corpo: dados });
+}
+
+export function listarLotes(id, { pagina = 1, tamanho = 20, local = '', comSaldo = false, sinal } = {}) {
+  const com_saldo = comSaldo ? 'true' : '';
+  return requisitar(`${CAMINHO}/${id}/lotes${montarConsulta({ pagina, tamanho, local, com_saldo })}`, {
+    sinal,
+  });
+}
+
+export function transferir(id, dados) {
+  return requisitar(`${CAMINHO}/${id}/transferencias`, { metodo: 'POST', corpo: dados });
+}
+
+export function reservar(id, dados) {
+  return requisitar(`${CAMINHO}/${id}/reservas`, { metodo: 'POST', corpo: dados });
+}
+
+export function listarReservas(id, { pagina = 1, tamanho = 20, status = '', local = '', sinal } = {}) {
+  return requisitar(`${CAMINHO}/${id}/reservas${montarConsulta({ pagina, tamanho, status, local })}`, {
+    sinal,
+  });
+}
+
+export function liberarReserva(reservaId) {
+  return requisitar(`/api/v1/reservas/${reservaId}/liberar`, { metodo: 'POST' });
 }
 
 export function anexarImagem(id, dados) {
