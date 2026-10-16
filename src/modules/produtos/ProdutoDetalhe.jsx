@@ -12,6 +12,7 @@ import { obterUrlBase } from '../../lib/api';
 import { formatarDataHora, formatarMoeda, formatarTamanho } from '../../lib/formatar';
 import { ProdutoFormModal } from './ProdutoFormModal';
 import { MovimentoModal } from './MovimentoModal';
+import { ReservasProduto } from './ReservasProduto';
 import { SaldoPorLocal } from './SaldoPorLocal';
 import { TransferenciaModal } from './TransferenciaModal';
 import { useProdutoDetalhe } from './useProdutoDetalhe';
@@ -57,6 +58,8 @@ export default function ProdutoDetalhe() {
     filtrarMovimentosPorLocal,
     movimentar,
     transferir,
+    reservar,
+    liberarReserva,
     anexarImagem,
     removerImagem,
   } = useProdutoDetalhe(id);
@@ -374,6 +377,18 @@ export default function ProdutoDetalhe() {
               </button>
             </div>
           )}
+        </Panel>
+
+        <Panel title="Reservas">
+          <ReservasProduto
+            produto={produto}
+            geracao={geracao}
+            administrador={administrador}
+            onReservar={reservar}
+            onLiberar={liberarReserva}
+            onBaixar={movimentar}
+            onRecarregar={recarregar}
+          />
         </Panel>
 
         <Panel title="Movimentações">

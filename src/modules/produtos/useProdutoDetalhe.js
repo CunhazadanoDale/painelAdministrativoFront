@@ -115,6 +115,22 @@ export function useProdutoDetalhe(id) {
     [id, recarregar]
   );
 
+  const reservar = useCallback(
+    async (dados) => {
+      await produtosService.reservar(id, dados);
+      recarregar();
+    },
+    [id, recarregar]
+  );
+
+  const liberarReserva = useCallback(
+    async (reserva) => {
+      await produtosService.liberarReserva(reserva.id);
+      recarregar();
+    },
+    [recarregar]
+  );
+
   const anexarImagem = useCallback(
     async (arquivo, alt) => {
       const enviado = await arquivosService.enviarArquivo(arquivo);
@@ -160,6 +176,8 @@ export function useProdutoDetalhe(id) {
     filtrarMovimentosPorLocal,
     movimentar,
     transferir,
+    reservar,
+    liberarReserva,
     anexarImagem,
     removerImagem,
   };

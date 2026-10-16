@@ -118,6 +118,7 @@ beforeEach(() => {
   URL.revokeObjectURL = vi.fn();
   respostas = {
     '/movimentos': { dados: [] },
+    '/reservas': { dados: [] },
     '/saldo': { dados: SALDO },
     '/api/v1/categorias': { dados: [] },
     '/api/v1/estoque/locais': { dados: LOCAIS },
@@ -211,5 +212,14 @@ describe('ProdutoDetalhe', () => {
     fireEvent.click(await screen.findByRole('button', { name: /Transferir/ }));
 
     expect(await screen.findByRole('dialog', { name: 'Transferir entre locais' })).toBeInTheDocument();
+  });
+
+  it('mostra o painel de reservas do produto', async () => {
+    entrarComo(false);
+    renderizar();
+
+    expect(await screen.findByText('Nenhuma reserva ativa.')).toBeInTheDocument();
+    const urls = fetchMock.mock.calls.map(([url]) => String(url));
+    expect(urls.some((url) => url.includes('/api/v1/produtos/prod-1/reservas') && url.includes('status=ativa'))).toBe(true);
   });
 });

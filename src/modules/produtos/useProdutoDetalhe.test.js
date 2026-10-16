@@ -60,6 +60,22 @@ describe('useProdutoDetalhe.transferir', () => {
   });
 });
 
+describe('useProdutoDetalhe.reservas', () => {
+  it('reserva e libera pelo id da reserva, recarregando o detalhe', async () => {
+    const reservar = vi.spyOn(produtosService, 'reservar').mockResolvedValue({ dados: {} });
+    const liberar = vi.spyOn(produtosService, 'liberarReserva').mockResolvedValue({ dados: {} });
+    const { result } = await renderizar();
+    const geracaoInicial = result.current.geracao;
+
+    await act(() => result.current.reservar({ local_id: 'loc-1', quantidade: 2, observacao: '' }));
+    await act(() => result.current.liberarReserva({ id: 'res-1' }));
+
+    expect(reservar).toHaveBeenCalledWith('prod-1', { local_id: 'loc-1', quantidade: 2, observacao: '' });
+    expect(liberar).toHaveBeenCalledWith('res-1');
+    expect(result.current.geracao).toBe(geracaoInicial + 2);
+  });
+});
+
 describe('useProdutoDetalhe.anexarImagem', () => {
   it('anexa o arquivo enviado na próxima ordem', async () => {
     const anexar = vi.spyOn(produtosService, 'anexarImagem').mockResolvedValue({ dados: {} });
