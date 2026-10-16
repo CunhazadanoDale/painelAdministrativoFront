@@ -15,6 +15,8 @@ import { useFunis } from './funis/useFunis';
 import { useKanban } from './leads/useKanban';
 import { useLeadDetalhe } from './leads/useLeadDetalhe';
 import { useLeads } from './leads/useLeads';
+import { useLocais } from './locais/useLocais';
+import { useSaldosDoLocal } from './locais/useSaldosDoLocal';
 import { usePerfil } from './perfil/usePerfil';
 import { MovimentoModal } from './produtos/MovimentoModal';
 import { useCategorias } from './produtos/useCategorias';
@@ -89,6 +91,8 @@ describe('cancelamento das requisições ao desmontar', () => {
     ['useFornecedores', () => useFornecedores()],
     ['useContasBancarias', () => useContasBancarias()],
     ['usePlanoContas', () => usePlanoContas()],
+    ['useLocais', () => useLocais()],
+    ['useSaldosDoLocal', () => useSaldosDoLocal('loc-1')],
   ])('%s', async (_, usar) => {
     const { unmount } = renderHook(usar, { wrapper: comAutenticacao });
 
