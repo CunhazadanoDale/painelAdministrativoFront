@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  enderecoDaObra,
+  erroDoCep,
   erroDoPercentual,
   erroDoTipoComDocumento,
+  formatarCep,
   formatarPercentual,
   paraPontosBase,
   pontosBaseParaTexto,
@@ -54,5 +57,18 @@ describe('tipo do cliente', () => {
   it('dá nome ao tipo', () => {
     expect(rotuloTipoCliente('pf')).toBe('Pessoa física');
     expect(rotuloTipoCliente('construtora')).toBe('Construtora');
+  });
+});
+
+describe('endereço da obra', () => {
+  it('formata o CEP e monta o endereço com número e bairro quando houver', () => {
+    expect(formatarCep('58310000')).toBe('58310-000');
+    expect(erroDoCep('58310-000')).toBeNull();
+    expect(erroDoCep('5831')).toBe('O CEP tem 8 dígitos.');
+    expect(erroDoCep('')).toBeNull();
+    expect(enderecoDaObra({ logradouro: 'Av. Beira Mar', numero: '100', bairro: 'Intermares' })).toBe(
+      'Av. Beira Mar, 100 — Intermares'
+    );
+    expect(enderecoDaObra({ logradouro: 'Rua A', numero: null, bairro: null })).toBe('Rua A');
   });
 });

@@ -40,3 +40,25 @@ export function erroDoTipoComDocumento(tipo, documento) {
   const cpf = String(documento ?? '').length === 11;
   return (tipo === 'pf') === cpf ? null : 'CPF só com o tipo pessoa física, e pessoa física só com CPF.';
 }
+
+export { erroDoCnpj, normalizarCnpj } from '../empresas/empresasUtils';
+
+export function normalizarCep(texto) {
+  return String(texto ?? '').replace(/\D/g, '');
+}
+
+export function erroDoCep(texto) {
+  const cep = normalizarCep(texto);
+  return !cep || cep.length === 8 ? null : 'O CEP tem 8 dígitos.';
+}
+
+export function formatarCep(cep) {
+  const digitos = normalizarCep(cep);
+  return digitos.length === 8 ? `${digitos.slice(0, 5)}-${digitos.slice(5)}` : digitos;
+}
+
+export function enderecoDaObra(obra) {
+  const numero = obra.numero ? `, ${obra.numero}` : '';
+  const bairro = obra.bairro ? ` — ${obra.bairro}` : '';
+  return `${obra.logradouro}${numero}${bairro}`;
+}
