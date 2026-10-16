@@ -37,6 +37,19 @@ function gravarSessao(administrador) {
   );
 }
 
+function gravarSessaoFinanceiro() {
+  localStorage.setItem(
+    'mia.sessao',
+    JSON.stringify({
+      token: 'token-de-teste',
+      expira_em: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+      administrador: false,
+      financeiro: true,
+      usuario: { usuario_id: 1, nome: 'Pessoa Teste', email: 'teste@exemplo.com' },
+    })
+  );
+}
+
 beforeEach(() => {
   localStorage.clear();
   vi.stubGlobal(
@@ -123,6 +136,54 @@ describe('roteamento do App', () => {
     renderizar('/fornecedores');
 
     expect(await screen.findByText('Novo Fornecedor')).toBeInTheDocument();
+  });
+
+  it('redireciona quem não é financeiro que acessa /contas-bancarias e esconde a entrada', async () => {
+    gravarSessao(false);
+
+    renderizar('/contas-bancarias');
+
+    await waitFor(() => expect(screen.getByTestId('caminho')).toHaveTextContent(/^\/$/));
+    expect(screen.queryByText('Nova Conta')).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Contas Bancárias' })).toBeNull();
+  });
+
+  it('libera /contas-bancarias e a entrada na sidebar para o financeiro', async () => {
+    gravarSessaoFinanceiro();
+
+    renderizar('/contas-bancarias');
+
+    expect(await screen.findByText('Nova Conta')).toBeInTheDocument();
+    expect(screen.getByTestId('caminho')).toHaveTextContent('/contas-bancarias');
+    expect(screen.getByRole('link', { name: 'Contas Bancárias' })).toHaveAttribute('href', '/contas-bancarias');
+  });
+
+  it('libera /contas-bancarias para o administrador', async () => {
+    gravarSessao(true);
+
+    renderizar('/contas-bancarias');
+
+    expect(await screen.findByText('Nova Conta')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Contas Bancárias' })).toBeInTheDocument();
+  });
+
+  it('libera /plano-de-contas e a entrada na sidebar para qualquer autenticado, só para leitura', async () => {
+    gravarSessao(false);
+
+    renderizar('/plano-de-contas');
+
+    expect(await screen.findByText('Nenhuma categoria no plano de contas.')).toBeInTheDocument();
+    expect(screen.getByTestId('caminho')).toHaveTextContent('/plano-de-contas');
+    expect(screen.getByRole('link', { name: 'Plano de Contas' })).toHaveAttribute('href', '/plano-de-contas');
+    expect(screen.queryByText('Nova Categoria')).toBeNull();
+  });
+
+  it('mostra o cadastro do plano de contas para o financeiro', async () => {
+    gravarSessaoFinanceiro();
+
+    renderizar('/plano-de-contas');
+
+    expect(await screen.findByText('Nova Categoria')).toBeInTheDocument();
   });
 
   it('redireciona /pagamentos para /solicitacoes', async () => {

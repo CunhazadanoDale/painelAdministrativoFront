@@ -17,14 +17,16 @@ import {
   BadgeCheck,
   ShieldCheck,
   Building2,
-  Truck
+  Truck,
+  Landmark,
+  ListTree
 } from 'lucide-react';
 import { useAutenticacao } from '../autenticacao/useAutenticacao';
 import './Sidebar.css';
 
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
-  const { administrador, comercial } = useAutenticacao();
+  const { administrador, comercial, financeiro } = useAutenticacao();
 
   const navGroups = [
     {
@@ -46,6 +48,8 @@ export function Sidebar() {
       items: [
         { label: 'Solicitações', icon: <CreditCard size={18} />, path: '/solicitacoes' },
         { label: 'Fornecedores', icon: <Truck size={18} />, path: '/fornecedores' },
+        { label: 'Contas Bancárias', icon: <Landmark size={18} />, path: '/contas-bancarias', financeiro: true },
+        { label: 'Plano de Contas', icon: <ListTree size={18} />, path: '/plano-de-contas' },
         { label: 'Aprovadores', icon: <ShieldCheck size={18} />, path: '/aprovadores', admin: true }
       ]
     },
@@ -73,7 +77,10 @@ export function Sidebar() {
     .map((group) => ({
       ...group,
       items: group.items.filter(
-        (item) => (!item.admin || administrador) && (!item.comercial || comercial)
+        (item) =>
+          (!item.admin || administrador) &&
+          (!item.comercial || comercial) &&
+          (!item.financeiro || financeiro)
       )
     }))
     .filter((group) => group.items.length > 0);
