@@ -417,3 +417,55 @@
     grid-template-columns: 1fr;
   }
 }
+
+.produtos-saldo-local {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.produtos-saldo-local-titulo {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.produtos-saldo-totais {
+  display: flex;
+  gap: var(--space-6);
+  margin: 0;
+}
+
+.produtos-saldo-totais dt {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.produtos-saldo-totais dd {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.produtos-saldo-ajuda {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.produtos-movimentos-filtro {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.produtos-movimentos-filtro .filter-input {
+  width: auto;
+}

@@ -11,12 +11,13 @@ export function useProdutoDetalhe(id) {
   const [movimentos, setMovimentos] = useState([]);
   const [paginaMovimentos, setPaginaMovimentos] = useState(1);
   const [temProximaMovimentos, setTemProximaMovimentos] = useState(false);
+  const [localMovimentos, setLocalMovimentos] = useState('');
 
   const [recarga, setRecarga] = useState(0);
   const [chaveDados, setChaveDados] = useState(null);
   const [falha, setFalha] = useState(null);
 
-  const chave = `${paginaMovimentos}|${recarga}`;
+  const chave = JSON.stringify([paginaMovimentos, localMovimentos, recarga]);
 
   const erro = falha && falha.chave === chave ? falha.mensagem : null;
   const carregando = !erro && chaveDados !== chave;
@@ -32,6 +33,7 @@ export function useProdutoDetalhe(id) {
           produtosService.listarMovimentos(id, {
             pagina: paginaMovimentos,
             tamanho: TAMANHO_PAGINA_MOVIMENTOS + 1,
+            local: localMovimentos,
             sinal: controle.signal,
           }),
         ]);
@@ -59,7 +61,7 @@ export function useProdutoDetalhe(id) {
     return () => {
       controle.abort();
     };
-  }, [id, chave, paginaMovimentos, recarga]);
+  }, [id, chave, paginaMovimentos, localMovimentos]);
 
   const categoriaMapa = useMemo(
     () => Object.fromEntries(categorias.map((categoria) => [categoria.id, categoria])),
@@ -81,6 +83,11 @@ export function useProdutoDetalhe(id) {
     () => setPaginaMovimentos((valor) => valor + 1),
     []
   );
+
+  const filtrarMovimentosPorLocal = useCallback((local) => {
+    setLocalMovimentos(local);
+    setPaginaMovimentos(1);
+  }, []);
 
   const atualizar = useCallback(
     async (dados) => {
@@ -133,12 +140,15 @@ export function useProdutoDetalhe(id) {
     movimentos,
     temProximaMovimentos,
     paginaMovimentos,
+    localMovimentos,
+    geracao: recarga,
     carregando,
     erro,
     recarregar,
     atualizar,
     irParaAnteriorMovimentos,
     irParaProximoMovimento,
+    filtrarMovimentosPorLocal,
     movimentar,
     anexarImagem,
     removerImagem,

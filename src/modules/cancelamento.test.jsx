@@ -22,6 +22,7 @@ import { MovimentoModal } from './produtos/MovimentoModal';
 import { useCategorias } from './produtos/useCategorias';
 import { useProdutoDetalhe } from './produtos/useProdutoDetalhe';
 import { useProdutos } from './produtos/useProdutos';
+import { useSaldoProduto } from './produtos/useSaldoProduto';
 import { useSolicitacaoDetalhe } from './solicitacoes/useSolicitacaoDetalhe';
 import { useSolicitacoes } from './solicitacoes/useSolicitacoes';
 import { useAcessoEmpresas } from './usuarios/useAcessoEmpresas';
@@ -93,6 +94,7 @@ describe('cancelamento das requisições ao desmontar', () => {
     ['usePlanoContas', () => usePlanoContas()],
     ['useLocais', () => useLocais()],
     ['useSaldosDoLocal', () => useSaldosDoLocal('loc-1')],
+    ['useSaldoProduto', () => useSaldoProduto('prod-1', 0)],
   ])('%s', async (_, usar) => {
     const { unmount } = renderHook(usar, { wrapper: comAutenticacao });
 

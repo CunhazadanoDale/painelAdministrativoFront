@@ -23,6 +23,28 @@ async function renderizar() {
   return hook;
 }
 
+describe('useProdutoDetalhe.movimentos', () => {
+  it('filtra os movimentos por local voltando para a página 1 e avança a geração ao movimentar', async () => {
+    vi.spyOn(produtosService, 'movimentar').mockResolvedValue({ dados: {} });
+    const { result } = await renderizar();
+    const geracaoInicial = result.current.geracao;
+
+    act(() => result.current.filtrarMovimentosPorLocal('loc-1'));
+
+    await waitFor(() =>
+      expect(produtosService.listarMovimentos).toHaveBeenLastCalledWith(
+        'prod-1',
+        expect.objectContaining({ pagina: 1, local: 'loc-1' })
+      )
+    );
+    expect(result.current.localMovimentos).toBe('loc-1');
+
+    await act(() => result.current.movimentar({ tipo: 'entrada' }));
+
+    expect(result.current.geracao).toBeGreaterThan(geracaoInicial);
+  });
+});
+
 describe('useProdutoDetalhe.anexarImagem', () => {
   it('anexa o arquivo enviado na próxima ordem', async () => {
     const anexar = vi.spyOn(produtosService, 'anexarImagem').mockResolvedValue({ dados: {} });
