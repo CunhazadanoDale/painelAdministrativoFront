@@ -20,6 +20,7 @@ import PlanoContas from './modules/financeiro/PlanoContas';
 import Produtos from './modules/produtos/Produtos';
 import ProdutoDetalhe from './modules/produtos/ProdutoDetalhe';
 import Categorias from './modules/produtos/Categorias';
+import Locais from './modules/locais/Locais';
 import Perfil from './modules/perfil/Perfil';
 
 const Negociacoes = () => <div>Negociações Module</div>;
@@ -94,6 +95,7 @@ function App() {
             <Route path="/produtos" element={<Produtos />} />
             <Route path="/produtos/:id" element={<ProdutoDetalhe />} />
             <Route path="/categorias" element={<Categorias />} />
+            <Route path="/locais-estoque" element={<Locais />} />
             <Route path="/relatorios" element={<Relatorios />} />
             <Route path="/configuracoes" element={<Configuracoes />} />
             <Route path="/perfil" element={<Perfil />} />
