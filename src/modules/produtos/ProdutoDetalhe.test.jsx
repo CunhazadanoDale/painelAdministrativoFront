@@ -86,13 +86,14 @@ function responderPara(url) {
   return { ok: true, status: 200, text: async () => JSON.stringify(corpo) };
 }
 
-function entrarComo(administrador) {
+function entrarComo(administrador, financeiro = false) {
   localStorage.setItem(
     'mia.sessao',
     JSON.stringify({
       token: 'token-de-teste',
       expira_em: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
       administrador,
+      financeiro,
       usuario: { usuario_id: 1, nome: 'Pessoa Teste', email: 'teste@exemplo.com' },
     })
   );
@@ -119,6 +120,7 @@ beforeEach(() => {
   respostas = {
     '/movimentos': { dados: [] },
     '/reservas': { dados: [] },
+    '/lotes': { dados: [] },
     '/saldo': { dados: SALDO },
     '/api/v1/categorias': { dados: [] },
     '/api/v1/estoque/locais': { dados: LOCAIS },
@@ -221,5 +223,20 @@ describe('ProdutoDetalhe', () => {
     expect(await screen.findByText('Nenhuma reserva ativa.')).toBeInTheDocument();
     const urls = fetchMock.mock.calls.map(([url]) => String(url));
     expect(urls.some((url) => url.includes('/api/v1/produtos/prod-1/reservas') && url.includes('status=ativa'))).toBe(true);
+  });
+
+  it('mostra os lotes com custo só para financeiro ou administrador', async () => {
+    entrarComo(false);
+    const { unmount } = renderizar();
+    await screen.findByText('Nenhuma reserva ativa.');
+    expect(screen.queryByText('Lotes e custo')).toBeNull();
+    expect(fetchMock.mock.calls.some(([url]) => String(url).includes('/lotes'))).toBe(false);
+    unmount();
+
+    entrarComo(false, true);
+    renderizar();
+
+    expect(await screen.findByText('Lotes e custo')).toBeInTheDocument();
+    expect(await screen.findByText('Nenhum lote com saldo nos locais do seu acesso.')).toBeInTheDocument();
   });
 });

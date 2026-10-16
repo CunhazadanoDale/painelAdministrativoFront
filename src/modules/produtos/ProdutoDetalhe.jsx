@@ -12,6 +12,7 @@ import { obterUrlBase } from '../../lib/api';
 import { formatarDataHora, formatarMoeda, formatarTamanho } from '../../lib/formatar';
 import { ProdutoFormModal } from './ProdutoFormModal';
 import { MovimentoModal } from './MovimentoModal';
+import { LotesProduto } from './LotesProduto';
 import { ReservasProduto } from './ReservasProduto';
 import { SaldoPorLocal } from './SaldoPorLocal';
 import { TransferenciaModal } from './TransferenciaModal';
@@ -39,7 +40,7 @@ function localDoMovimento(movimento, nomeLocal) {
 
 export default function ProdutoDetalhe() {
   const { id } = useParams();
-  const { administrador } = useAutenticacao();
+  const { administrador, financeiro } = useAutenticacao();
   const {
     produto,
     subcategorias,
@@ -390,6 +391,12 @@ export default function ProdutoDetalhe() {
             onRecarregar={recarregar}
           />
         </Panel>
+
+        {(administrador || financeiro) && (
+          <Panel title="Lotes e custo">
+            <LotesProduto produtoId={id} geracao={geracao} />
+          </Panel>
+        )}
 
         <Panel title="Movimentações">
           <div className="produtos-movimentos-filtro">

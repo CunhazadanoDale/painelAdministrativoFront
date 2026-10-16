@@ -469,3 +469,16 @@
 .produtos-movimentos-filtro .filter-input {
   width: auto;
 }
+
+.produtos-reservas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.produtos-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  cursor: pointer;
+}
