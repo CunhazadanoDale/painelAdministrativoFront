@@ -5,16 +5,24 @@ import { StatusBadge } from '../../app/components/StatusBadge';
 import { Panel } from '../../app/components/Panel';
 import { ImagemArquivo } from '../../app/components/ImagemArquivo';
 import { useAutenticacao } from '../../app/autenticacao/useAutenticacao';
+import { SeletorLocal } from '../../app/components/SeletorLocal';
+import { useNomesEmpresas } from '../../app/empresas/useNomesEmpresas';
+import { useNomesLocais } from '../../app/estoque/useNomesLocais';
 import { obterUrlBase } from '../../lib/api';
 import { formatarDataHora, formatarMoeda, formatarTamanho } from '../../lib/formatar';
 import { ProdutoFormModal } from './ProdutoFormModal';
 import { MovimentoModal } from './MovimentoModal';
+import { LotesProduto } from './LotesProduto';
+import { ReservasProduto } from './ReservasProduto';
+import { SaldoPorLocal } from './SaldoPorLocal';
+import { TransferenciaModal } from './TransferenciaModal';
 import { useProdutoDetalhe } from './useProdutoDetalhe';
 import { LIMITE_ARQUIVO, imagemPermitida, rotuloTipoMovimento, rotuloUnidade } from './produtosUtils';
 import {
   AlertCircle,
   ChevronLeft,
   ChevronRight,
+  ArrowLeftRight,
   ImagePlus,
   PackagePlus,
   Pencil,
@@ -22,9 +30,17 @@ import {
 } from 'lucide-react';
 import './Produtos.css';
 
+function localDoMovimento(movimento, nomeLocal) {
+  if (!movimento.local_id) return 'Anterior aos locais';
+  if (movimento.local_destino_id) {
+    return `${nomeLocal(movimento.local_id)} → ${nomeLocal(movimento.local_destino_id)}`;
+  }
+  return nomeLocal(movimento.local_id);
+}
+
 export default function ProdutoDetalhe() {
   const { id } = useParams();
-  const { administrador } = useAutenticacao();
+  const { administrador, financeiro } = useAutenticacao();
   const {
     produto,
     subcategorias,
@@ -32,20 +48,29 @@ export default function ProdutoDetalhe() {
     movimentos,
     temProximaMovimentos,
     paginaMovimentos,
+    localMovimentos,
+    geracao,
     carregando,
     erro,
     recarregar,
     atualizar,
     irParaAnteriorMovimentos,
     irParaProximoMovimento,
+    filtrarMovimentosPorLocal,
     movimentar,
+    transferir,
+    reservar,
+    liberarReserva,
     anexarImagem,
     removerImagem,
   } = useProdutoDetalhe(id);
 
+  const nomeEmpresa = useNomesEmpresas();
+  const nomeLocal = useNomesLocais();
   const arquivoInputRef = useRef(null);
   const [produtoModal, setProdutoModal] = useState(false);
   const [movimentoAberto, setMovimentoAberto] = useState(false);
+  const [transferenciaAberta, setTransferenciaAberta] = useState(false);
   const [erroAcao, setErroAcao] = useState(null);
   const [erroImagem, setErroImagem] = useState(null);
   const [enviandoImagem, setEnviandoImagem] = useState(false);
@@ -123,8 +148,20 @@ export default function ProdutoDetalhe() {
       width: '12%',
       render: (tipo) => rotuloTipoMovimento(tipo),
     },
-    { label: 'Quantidade', field: 'quantidade', width: '12%' },
-    { label: 'Saldo após', field: 'saldo_apos', width: '12%' },
+    {
+      label: 'Local',
+      field: 'local_id',
+      width: '18%',
+      render: (_, movimento) => localDoMovimento(movimento, nomeLocal),
+    },
+    { label: 'Quantidade', field: 'quantidade', width: '9%' },
+    {
+      label: 'Saldo no local',
+      field: 'saldo_local_apos',
+      width: '9%',
+      render: (valor) => (valor === null || valor === undefined ? '—' : valor),
+    },
+    { label: 'Saldo total', field: 'saldo_apos', width: '9%' },
     {
       label: 'Documento',
       field: 'documento_ref',
@@ -134,7 +171,7 @@ export default function ProdutoDetalhe() {
     {
       label: 'Observação',
       field: 'observacao',
-      width: '34%',
+      width: '19%',
       render: (valor) => <span className="produtos-observacao-celula">{valor || '—'}</span>,
     },
   ];
@@ -210,6 +247,20 @@ export default function ProdutoDetalhe() {
             >
               <PackagePlus size={14} /> Movimentar
             </button>
+            <button
+              type="button"
+              className="filter-btn filter-btn-secondary"
+              style={{
+                flex: 'none',
+                padding: '4px 12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+              }}
+              onClick={() => setTransferenciaAberta(true)}
+            >
+              <ArrowLeftRight size={14} /> Transferir
+            </button>
           </div>
         )}
       </div>
@@ -259,6 +310,7 @@ export default function ProdutoDetalhe() {
               </span>
             </div>
           </div>
+          <SaldoPorLocal produtoId={id} geracao={geracao} />
         </Panel>
 
         <Panel title="Imagens">
@@ -328,9 +380,44 @@ export default function ProdutoDetalhe() {
           )}
         </Panel>
 
+        <Panel title="Reservas">
+          <ReservasProduto
+            produto={produto}
+            geracao={geracao}
+            administrador={administrador}
+            onReservar={reservar}
+            onLiberar={liberarReserva}
+            onBaixar={movimentar}
+            onRecarregar={recarregar}
+          />
+        </Panel>
+
+        {(administrador || financeiro) && (
+          <Panel title="Lotes e custo">
+            <LotesProduto produtoId={id} geracao={geracao} />
+          </Panel>
+        )}
+
         <Panel title="Movimentações">
+          <div className="produtos-movimentos-filtro">
+            <label className="filter-label" htmlFor="produto-movimentos-local">
+              Local dos movimentos
+            </label>
+            <SeletorLocal
+              id="produto-movimentos-local"
+              className="filter-input"
+              valor={localMovimentos}
+              onAlterar={filtrarMovimentosPorLocal}
+              apenasAtivos={false}
+              selecionarUnica={false}
+              nomeEmpresa={nomeEmpresa}
+              placeholder="Todos"
+            />
+          </div>
           {movimentos.length === 0 ? (
-            <div className="produtos-imagens-vazio">Nenhuma movimentação registrada.</div>
+            <div className="produtos-imagens-vazio">
+              {localMovimentos ? 'Nenhuma movimentação neste local.' : 'Nenhuma movimentação registrada.'}
+            </div>
           ) : (
             <>
               <DataGrid columns={colunasMovimentos} data={movimentos} selectable={false} />
@@ -377,6 +464,14 @@ export default function ProdutoDetalhe() {
           produto={produto}
           onFechar={() => setMovimentoAberto(false)}
           onSalvar={movimentar}
+        />
+      )}
+
+      {transferenciaAberta && (
+        <TransferenciaModal
+          produto={produto}
+          onFechar={() => setTransferenciaAberta(false)}
+          onSalvar={transferir}
         />
       )}
     </div>

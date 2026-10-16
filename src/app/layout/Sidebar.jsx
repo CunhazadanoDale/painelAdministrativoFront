@@ -19,7 +19,8 @@ import {
   Building2,
   Truck,
   Landmark,
-  ListTree
+  ListTree,
+  Warehouse
 } from 'lucide-react';
 import { useAutenticacao } from '../autenticacao/useAutenticacao';
 import './Sidebar.css';
@@ -58,7 +59,8 @@ export function Sidebar() {
       items: [
         { label: 'Formulários', icon: <Inbox size={18} />, path: '/formularios' },
         { label: 'Categorias', icon: <FolderTree size={18} />, path: '/categorias' },
-        { label: 'Produtos', icon: <Package size={18} />, path: '/produtos' }
+        { label: 'Produtos', icon: <Package size={18} />, path: '/produtos' },
+        { label: 'Locais de Estoque', icon: <Warehouse size={18} />, path: '/locais-estoque' }
       ]
     },
     {

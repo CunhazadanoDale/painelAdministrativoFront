@@ -186,6 +186,25 @@ describe('roteamento do App', () => {
     expect(await screen.findByText('Nova Categoria')).toBeInTheDocument();
   });
 
+  it('libera /locais-estoque e a entrada na sidebar para qualquer autenticado, só para consulta', async () => {
+    gravarSessao(false);
+
+    renderizar('/locais-estoque');
+
+    expect(await screen.findByText('Nenhum local de estoque nas empresas do seu acesso.')).toBeInTheDocument();
+    expect(screen.getByTestId('caminho')).toHaveTextContent('/locais-estoque');
+    expect(screen.getByRole('link', { name: 'Locais de Estoque' })).toHaveAttribute('href', '/locais-estoque');
+    expect(screen.queryByText('Novo Local')).toBeNull();
+  });
+
+  it('mostra o cadastro de locais para o administrador', async () => {
+    gravarSessao(true);
+
+    renderizar('/locais-estoque');
+
+    expect(await screen.findByText('Novo Local')).toBeInTheDocument();
+  });
+
   it('redireciona /pagamentos para /solicitacoes', async () => {
     gravarSessao(false);
 

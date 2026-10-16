@@ -15,11 +15,16 @@ import { useFunis } from './funis/useFunis';
 import { useKanban } from './leads/useKanban';
 import { useLeadDetalhe } from './leads/useLeadDetalhe';
 import { useLeads } from './leads/useLeads';
+import { useLocais } from './locais/useLocais';
+import { useSaldosDoLocal } from './locais/useSaldosDoLocal';
 import { usePerfil } from './perfil/usePerfil';
 import { MovimentoModal } from './produtos/MovimentoModal';
 import { useCategorias } from './produtos/useCategorias';
 import { useProdutoDetalhe } from './produtos/useProdutoDetalhe';
 import { useProdutos } from './produtos/useProdutos';
+import { useLotesProduto } from './produtos/useLotesProduto';
+import { useReservasProduto } from './produtos/useReservasProduto';
+import { useSaldoProduto } from './produtos/useSaldoProduto';
 import { useSolicitacaoDetalhe } from './solicitacoes/useSolicitacaoDetalhe';
 import { useSolicitacoes } from './solicitacoes/useSolicitacoes';
 import { useAcessoEmpresas } from './usuarios/useAcessoEmpresas';
@@ -89,6 +94,11 @@ describe('cancelamento das requisições ao desmontar', () => {
     ['useFornecedores', () => useFornecedores()],
     ['useContasBancarias', () => useContasBancarias()],
     ['usePlanoContas', () => usePlanoContas()],
+    ['useLocais', () => useLocais()],
+    ['useSaldosDoLocal', () => useSaldosDoLocal('loc-1')],
+    ['useSaldoProduto', () => useSaldoProduto('prod-1', 0)],
+    ['useReservasProduto', () => useReservasProduto('prod-1', 0)],
+    ['useLotesProduto', () => useLotesProduto('prod-1', 0)],
   ])('%s', async (_, usar) => {
     const { unmount } = renderHook(usar, { wrapper: comAutenticacao });
 

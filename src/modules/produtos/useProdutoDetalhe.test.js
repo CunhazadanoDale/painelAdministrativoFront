@@ -23,6 +23,59 @@ async function renderizar() {
   return hook;
 }
 
+describe('useProdutoDetalhe.movimentos', () => {
+  it('filtra os movimentos por local voltando para a página 1 e avança a geração ao movimentar', async () => {
+    vi.spyOn(produtosService, 'movimentar').mockResolvedValue({ dados: {} });
+    const { result } = await renderizar();
+    const geracaoInicial = result.current.geracao;
+
+    act(() => result.current.filtrarMovimentosPorLocal('loc-1'));
+
+    await waitFor(() =>
+      expect(produtosService.listarMovimentos).toHaveBeenLastCalledWith(
+        'prod-1',
+        expect.objectContaining({ pagina: 1, local: 'loc-1' })
+      )
+    );
+    expect(result.current.localMovimentos).toBe('loc-1');
+
+    await act(() => result.current.movimentar({ tipo: 'entrada' }));
+
+    expect(result.current.geracao).toBeGreaterThan(geracaoInicial);
+  });
+});
+
+describe('useProdutoDetalhe.transferir', () => {
+  it('transfere, volta os movimentos para a página 1 e recarrega', async () => {
+    const transferir = vi.spyOn(produtosService, 'transferir').mockResolvedValue({ dados: {} });
+    const { result } = await renderizar();
+    const geracaoInicial = result.current.geracao;
+    const dados = { local_origem_id: 'loc-1', local_destino_id: 'loc-2', quantidade: 2, observacao: '' };
+
+    await act(() => result.current.transferir(dados));
+
+    expect(transferir).toHaveBeenCalledWith('prod-1', dados);
+    expect(result.current.geracao).toBeGreaterThan(geracaoInicial);
+    expect(result.current.paginaMovimentos).toBe(1);
+  });
+});
+
+describe('useProdutoDetalhe.reservas', () => {
+  it('reserva e libera pelo id da reserva, recarregando o detalhe', async () => {
+    const reservar = vi.spyOn(produtosService, 'reservar').mockResolvedValue({ dados: {} });
+    const liberar = vi.spyOn(produtosService, 'liberarReserva').mockResolvedValue({ dados: {} });
+    const { result } = await renderizar();
+    const geracaoInicial = result.current.geracao;
+
+    await act(() => result.current.reservar({ local_id: 'loc-1', quantidade: 2, observacao: '' }));
+    await act(() => result.current.liberarReserva({ id: 'res-1' }));
+
+    expect(reservar).toHaveBeenCalledWith('prod-1', { local_id: 'loc-1', quantidade: 2, observacao: '' });
+    expect(liberar).toHaveBeenCalledWith('res-1');
+    expect(result.current.geracao).toBe(geracaoInicial + 2);
+  });
+});
+
 describe('useProdutoDetalhe.anexarImagem', () => {
   it('anexa o arquivo enviado na próxima ordem', async () => {
     const anexar = vi.spyOn(produtosService, 'anexarImagem').mockResolvedValue({ dados: {} });
