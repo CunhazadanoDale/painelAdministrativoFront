@@ -256,6 +256,56 @@ describe('roteamento do App', () => {
     expect(screen.queryByText('Novo Representante')).toBeNull();
   });
 
+  it('libera /pedidos, /entregas e as consultas para qualquer autenticado, com entradas na sidebar', async () => {
+    gravarSessao(false);
+
+    renderizar('/pedidos');
+
+    expect(await screen.findByText('Nenhum pedido nas empresas do seu acesso.')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Pedidos' })).toHaveAttribute('href', '/pedidos');
+    expect(screen.getByRole('link', { name: 'Entregas' })).toHaveAttribute('href', '/entregas');
+    expect(screen.getByRole('link', { name: 'Consultas de Pedidos' })).toHaveAttribute('href', '/pedidos/consultas');
+    expect(screen.queryByText('Nova Proposta')).toBeNull();
+  });
+
+  it('abre as consultas pela rota fixa antes do detalhe do pedido', async () => {
+    gravarSessao(false);
+
+    renderizar('/pedidos/consultas');
+
+    expect(await screen.findByRole('tab', { name: 'Pendências' })).toBeInTheDocument();
+    expect(screen.getByTestId('caminho')).toHaveTextContent('/pedidos/consultas');
+  });
+
+  it('abre o detalhe do pedido pela rota com o id', async () => {
+    gravarSessao(false);
+
+    renderizar('/pedidos/ped-1');
+
+    await waitFor(() =>
+      expect(fetch.mock.calls.some(([url]) => String(url).includes('/api/v1/pedidos/ped-1'))).toBe(true)
+    );
+  });
+
+  it('abre /entregas e mostra a nova proposta para o comercial', async () => {
+    localStorage.setItem(
+      'mia.sessao',
+      JSON.stringify({
+        token: 'token-de-teste',
+        expira_em: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+        administrador: false,
+        comercial: true,
+        usuario: { usuario_id: 1, nome: 'Pessoa Teste', email: 'teste@exemplo.com' },
+      })
+    );
+
+    renderizar('/entregas');
+
+    expect(await screen.findByText('Nenhuma entrega nas empresas do seu acesso.')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('link', { name: 'Pedidos' }));
+    expect(await screen.findByText('Nova Proposta')).toBeInTheDocument();
+  });
+
   it('redireciona /pagamentos para /solicitacoes', async () => {
     gravarSessao(false);
 
