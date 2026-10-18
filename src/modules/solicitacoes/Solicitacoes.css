@@ -478,3 +478,16 @@
     margin-left: 0;
   }
 }
+
+.solicitacoes-form-ajuda {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.solicitacoes-form-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}

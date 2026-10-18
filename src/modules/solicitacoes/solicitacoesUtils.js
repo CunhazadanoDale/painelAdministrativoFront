@@ -24,6 +24,8 @@ export const FORMAS_PAGAMENTO = [
   { valor: 'pix', rotulo: 'PIX' },
   { valor: 'cartao', rotulo: 'Cartão' },
   { valor: 'boleto', rotulo: 'Boleto' },
+  { valor: 'transferencia', rotulo: 'Transferência' },
+  { valor: 'debito_automatico', rotulo: 'Débito automático' },
 ];
 
 export const ESCOPOS = [
