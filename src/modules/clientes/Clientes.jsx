@@ -5,6 +5,7 @@ import { DataGrid } from '../../app/components/DataGrid';
 import { Modal } from '../../app/components/Modal';
 import { StatusBadge } from '../../app/components/StatusBadge';
 import { ClienteFormModal } from './ClienteFormModal';
+import { ImportacaoClientesModal } from './ImportacaoClientesModal';
 import { TIPOS_CLIENTE, UFS, rotuloTipoCliente } from './clientesUtils';
 import { useCadastrosCliente } from './useCadastrosCliente';
 import { useClientes } from './useClientes';
@@ -18,6 +19,7 @@ import {
   PowerOff,
   Search,
   Trash2,
+  Upload,
 } from 'lucide-react';
 import './Clientes.css';
 
@@ -49,6 +51,7 @@ export default function Clientes() {
   const [erroExclusao, setErroExclusao] = useState(null);
   const [erroAcao, setErroAcao] = useState(null);
   const [alternando, setAlternando] = useState(null);
+  const [importando, setImportando] = useState(false);
 
   const filtrando = Object.values(filtros).some(Boolean);
 
@@ -273,6 +276,16 @@ export default function Clientes() {
             <option value="true">Ativos</option>
             <option value="false">Inativos</option>
           </select>
+          {administrador && (
+            <button
+              type="button"
+              className="filter-btn filter-btn-secondary"
+              style={{ flex: 'none', width: 'auto', padding: '4px 12px', display: 'flex', alignItems: 'center', gap: 4 }}
+              onClick={() => setImportando(true)}
+            >
+              <Upload size={16} /> Importar CSV
+            </button>
+          )}
           {comercial && (
             <button
               type="button"
@@ -355,6 +368,8 @@ export default function Clientes() {
           onSalvar={(dados) => (clienteModal ? atualizar(clienteModal.id, dados) : criar(dados))}
         />
       )}
+
+      {importando && <ImportacaoClientesModal onFechar={() => setImportando(false)} onImportado={recarregar} />}
 
       <Modal
         aberto={!!clienteParaExcluir}

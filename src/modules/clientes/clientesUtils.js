@@ -62,3 +62,6 @@ export function enderecoDaObra(obra) {
   const bairro = obra.bairro ? ` — ${obra.bairro}` : '';
   return `${obra.logradouro}${numero}${bairro}`;
 }
+
+export const CABECALHO_IMPORTACAO =
+  'documento;nome;nome_fantasia;tipo;grupo;uf;cidade;email_nf;telefone;representante_documento;exige_numero_pedido_na_nf;proibe_antecipacao;observacoes';

@@ -21,6 +21,7 @@ vi.mock('../../services/clientes', () => ({
   ativarCliente: vi.fn(),
   desativarCliente: vi.fn(),
   removerCliente: vi.fn(),
+  importarClientes: vi.fn(),
 }));
 
 const { listarClientes, criarCliente, atualizarCliente, ativarCliente, desativarCliente, removerCliente } =
@@ -343,5 +344,26 @@ describe('Clientes', () => {
     fireEvent.click(within(dialogo).getByRole('button', { name: 'Excluir' }));
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     expect(removerCliente).toHaveBeenCalledWith('cli-aguia');
+  });
+
+  it('esconde a importação por CSV de quem não é administrador', async () => {
+    await carregar();
+    expect(screen.queryByRole('button', { name: /Importar CSV/ })).toBeNull();
+  });
+
+  it('abre a importação para o administrador e recarrega a lista depois de importar', async () => {
+    perfil({ comercial: true, administrador: true });
+    clientesService.importarClientes.mockResolvedValue({ dados: { simulacao: false, total: 1, importadas: 1, rejeitadas: [] } });
+    await carregar();
+
+    fireEvent.click(screen.getByRole('button', { name: /Importar CSV/ }));
+    const dialogo = screen.getByRole('dialog', { name: 'Importar clientes' });
+    fireEvent.change(within(dialogo).getByLabelText('Arquivo CSV *'), {
+      target: { files: [new File(['documento;nome'], 'clientes.csv', { type: 'text/csv' })] },
+    });
+    fireEvent.click(within(dialogo).getByRole('button', { name: 'Importar' }));
+
+    expect(await within(dialogo).findByText('1 de 1 linhas importadas.')).toBeInTheDocument();
+    await waitFor(() => expect(listarClientes).toHaveBeenCalledTimes(2));
   });
 });
