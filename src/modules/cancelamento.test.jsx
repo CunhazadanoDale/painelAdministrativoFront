@@ -6,7 +6,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AutenticacaoProvider } from '../app/autenticacao/AutenticacaoProvider';
 import { useAprovadores } from './aprovadores/useAprovadores';
 import { useCargos } from './cargos/useCargos';
+import { useConsulta } from './pedidos/useConsulta';
 import { useEntregas } from './pedidos/useEntregas';
+import * as pedidosService from '../services/pedidos';
 import { useEntregasDoPedido } from './pedidos/useEntregasDoPedido';
 import { usePedidoDetalhe } from './pedidos/usePedidoDetalhe';
 import { usePedidoHistorico } from './pedidos/usePedidoHistorico';
@@ -123,6 +125,7 @@ describe('cancelamento das requisições ao desmontar', () => {
     ['usePedidoHistorico', () => usePedidoHistorico('ped-1', 0)],
     ['useEntregasDoPedido', () => useEntregasDoPedido('ped-1', 0)],
     ['useEntregas', () => useEntregas()],
+    ['useConsulta', () => useConsulta(pedidosService.listarPendencias, { empresa: '' })],
   ])('%s', async (_, usar) => {
     const { unmount } = renderHook(usar, { wrapper: comAutenticacao });
 
