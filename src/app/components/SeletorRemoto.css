@@ -25,3 +25,14 @@
   cursor: default;
   opacity: 0.6;
 }
+
+.busca-remota {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.busca-remota-vazio {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
