@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { centavosParaTexto, formatarMoeda, paraCentavos } from '../../lib/formatar';
-import { AcaoPedidoModal } from './AcaoPedidoModal';
+import { AcaoModal } from '../../app/components/AcaoModal';
 import { entradaSugerida, hojeEmBrasilia } from './pedidosUtils';
 
 const LIMITE_MOTIVO = 1000;
 
 export function ConfirmarPedidoModal({ pedido, onConfirmar, onFechar, onRecarregar }) {
   return (
-    <AcaoPedidoModal
+    <AcaoModal
       titulo={`Confirmar pedido ${pedido.numero}`}
       rotuloConfirmar="Confirmar pedido"
       onConfirmar={onConfirmar}
@@ -19,13 +19,13 @@ export function ConfirmarPedidoModal({ pedido, onConfirmar, onFechar, onRecarreg
         disponível. O que faltar fica a cobrir. Depois de confirmado, os itens não mudam mais; o pedido só pode ser
         cancelado.
       </p>
-    </AcaoPedidoModal>
+    </AcaoModal>
   );
 }
 
 export function ReservarPendenciasModal({ pedido, onConfirmar, onFechar, onRecarregar }) {
   return (
-    <AcaoPedidoModal
+    <AcaoModal
       titulo={`Reservar pendências do pedido ${pedido.numero}`}
       rotuloConfirmar="Reservar"
       onConfirmar={onConfirmar}
@@ -35,7 +35,7 @@ export function ReservarPendenciasModal({ pedido, onConfirmar, onFechar, onRecar
       <p className="pedidos-texto">
         Reserva o que estiver disponível agora nos locais da empresa para os itens que ainda faltam cobrir.
       </p>
-    </AcaoPedidoModal>
+    </AcaoModal>
   );
 }
 
@@ -54,7 +54,7 @@ export function RegistrarEntradaModal({ pedido, onConfirmar, onFechar, onRecarre
   };
 
   return (
-    <AcaoPedidoModal
+    <AcaoModal
       titulo={`Registrar entrada do pedido ${pedido.numero}`}
       rotuloConfirmar="Registrar"
       validar={validar}
@@ -94,7 +94,7 @@ export function RegistrarEntradaModal({ pedido, onConfirmar, onFechar, onRecarre
           />
         </div>
       </div>
-    </AcaoPedidoModal>
+    </AcaoModal>
   );
 }
 
@@ -122,7 +122,7 @@ export function CancelarPedidoModal({ pedido, onConfirmar, onFechar, onRecarrega
     });
 
   return (
-    <AcaoPedidoModal
+    <AcaoModal
       titulo={`Cancelar pedido ${pedido.numero}`}
       rotuloConfirmar="Cancelar o pedido"
       validar={validar}
@@ -165,6 +165,6 @@ export function CancelarPedidoModal({ pedido, onConfirmar, onFechar, onRecarrega
           </span>
         </div>
       )}
-    </AcaoPedidoModal>
+    </AcaoModal>
   );
 }

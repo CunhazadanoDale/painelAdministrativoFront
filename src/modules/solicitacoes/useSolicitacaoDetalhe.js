@@ -9,7 +9,7 @@ export function useSolicitacaoDetalhe(id) {
   const [solicitacao, setSolicitacao] = useState(null);
   const [historico, setHistorico] = useState([]);
   const [arquivos, setArquivos] = useState([]);
-  const [pagamento, setPagamento] = useState(null);
+  const [pagamentos, setPagamentos] = useState([]);
   const [usuarios, setUsuarios] = useState({});
   const [recarga, setRecarga] = useState(0);
   const [chaveDados, setChaveDados] = useState(null);
@@ -35,13 +35,7 @@ export function useSolicitacaoDetalhe(id) {
           solicitacoesService.listarArquivos(id, { sinal: controle.signal }),
         ]);
 
-        let dadosPagamento = null;
-        try {
-          const respostaPagamento = await solicitacoesService.obterPagamento(id, { sinal: controle.signal });
-          dadosPagamento = respostaPagamento ? respostaPagamento.dados : null;
-        } catch (e) {
-          if (!e || e.status !== 404) throw e;
-        }
+        const respostaPagamentos = await solicitacoesService.listarPagamentos(id, { sinal: controle.signal });
 
         let mapaUsuarios = {};
         if (administrador) {
@@ -57,7 +51,7 @@ export function useSolicitacaoDetalhe(id) {
         setSolicitacao(dados);
         setHistorico(listaHistorico);
         setArquivos(listaArquivos);
-        setPagamento(dadosPagamento);
+        setPagamentos(respostaPagamentos?.dados ?? []);
         setUsuarios(mapaUsuarios);
         setChaveDados(chave);
         setFalha(null);
@@ -74,10 +68,43 @@ export function useSolicitacaoDetalhe(id) {
 
   const recarregar = useCallback(() => setRecarga((valor) => valor + 1), []);
 
-  const aprovar = useCallback(async () => {
-    await solicitacoesService.aprovar(id);
-    recarregar();
-  }, [id, recarregar]);
+  const versao = solicitacao?.versao;
+
+  const executar = useCallback(
+    async (acao) => {
+      await acao();
+      recarregar();
+    },
+    [recarregar]
+  );
+
+  const aprovar = useCallback(() => executar(() => solicitacoesService.aprovar(id, versao)), [executar, id, versao]);
+
+  const atualizar = useCallback(
+    (dados) => executar(() => solicitacoesService.atualizarSolicitacao(id, dados)),
+    [executar, id]
+  );
+
+  const classificar = useCallback(
+    ({ fornecedor_id, categoria_financeira_id, competencia }) =>
+      executar(() =>
+        solicitacoesService.classificar(id, { fornecedor_id, categoria_financeira_id, competencia, versao })
+      ),
+    [executar, id, versao]
+  );
+
+  const adiar = useCallback(
+    ({ vencimento, motivo }) => executar(() => solicitacoesService.adiar(id, { vencimento, motivo, versao })),
+    [executar, id, versao]
+  );
+
+  const estornar = useCallback(
+    ({ motivo, estornado_em }) => {
+      const dados = estornado_em ? { motivo, estornado_em, versao } : { motivo, versao };
+      return executar(() => solicitacoesService.estornarPagamento(id, dados));
+    },
+    [executar, id, versao]
+  );
 
   const rejeitar = useCallback(
     async (motivo) => {
@@ -104,7 +131,8 @@ export function useSolicitacaoDetalhe(id) {
     solicitacao,
     historico,
     arquivos,
-    pagamento,
+    pagamentos,
+    pagamento: pagamentos.find((item) => !item.estornado) ?? null,
     usuarios,
     carregando,
     erro,
@@ -112,6 +140,10 @@ export function useSolicitacaoDetalhe(id) {
     rejeitar,
     cancelar,
     registrarPagamento,
+    atualizar,
+    classificar,
+    adiar,
+    estornar,
     recarregar,
   };
 }

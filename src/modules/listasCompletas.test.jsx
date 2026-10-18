@@ -35,6 +35,7 @@ function responder(url) {
   const texto = String(url);
   if (texto.includes('/api/v1/sessao')) return json({ dados: { id: 'eu', cargo_id: 'item-149' } });
   if (texto.endsWith('/api/v1/solicitacoes/sol-1')) return json({ dados: { id: 'sol-1' } });
+  if (texto.includes('/pagamentos')) return json({ dados: [] });
   if (texto.includes('/pagamento')) return json({ erro: { mensagem: 'não encontrado' } }, 404);
   return paginado(url);
 }
