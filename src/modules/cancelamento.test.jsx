@@ -9,6 +9,7 @@ import { useCargos } from './cargos/useCargos';
 import { useDashboard } from './dashboard/useDashboard';
 import { useCadastrosCliente } from './clientes/useCadastrosCliente';
 import { useClienteDetalhe } from './clientes/useClienteDetalhe';
+import { useClienteDoLead } from './clientes/useClienteDoLead';
 import { useObrasCliente } from './clientes/useObrasCliente';
 import { useClientes } from './clientes/useClientes';
 import { useGruposClientes } from './clientes/useGruposClientes';
@@ -111,6 +112,7 @@ describe('cancelamento das requisições ao desmontar', () => {
     ['useCadastrosCliente', () => useCadastrosCliente(true)],
     ['useClienteDetalhe', () => useClienteDetalhe('cli-1')],
     ['useObrasCliente', () => useObrasCliente('cli-1', 0)],
+    ['useClienteDoLead', () => useClienteDoLead('lead-1')],
   ])('%s', async (_, usar) => {
     const { unmount } = renderHook(usar, { wrapper: comAutenticacao });
 

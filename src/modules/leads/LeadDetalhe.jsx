@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { StatusBadge } from '../../app/components/StatusBadge';
+import { ConversaoLead } from '../clientes/ConversaoLead';
 import { LeadFormModal } from './LeadFormModal';
 import { useLeadDetalhe } from './useLeadDetalhe';
 import { corDaEtapa, formatarDataHora } from './leadsUtils';
@@ -83,6 +84,7 @@ export default function LeadDetalhe() {
         </Link>
         <div className="lead-detalhe-titulo">{lead.nome}</div>
         <div className="lead-detalhe-acoes">
+          <ConversaoLead lead={lead} />
           <button
             type="button"
             className="filter-btn filter-btn-primary"
