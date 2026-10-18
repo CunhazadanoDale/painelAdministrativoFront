@@ -23,7 +23,10 @@ import {
   Warehouse,
   Contact,
   Network,
-  Handshake
+  Handshake,
+  ClipboardList,
+  PackageCheck,
+  SearchCheck
 } from 'lucide-react';
 import { useAutenticacao } from '../autenticacao/useAutenticacao';
 import './Sidebar.css';
@@ -45,6 +48,9 @@ export function Sidebar() {
         { label: 'Leads', icon: <Users size={18} />, path: '/leads', comercial: true },
         { label: 'Funis', icon: <Filter size={18} />, path: '/funis', comercial: true },
         { label: 'Negociações', icon: <Briefcase size={18} />, path: '/negociacoes' },
+        { label: 'Pedidos', icon: <ClipboardList size={18} />, path: '/pedidos', end: true },
+        { label: 'Entregas', icon: <PackageCheck size={18} />, path: '/entregas' },
+        { label: 'Consultas de Pedidos', icon: <SearchCheck size={18} />, path: '/pedidos/consultas' },
         { label: 'Clientes', icon: <Contact size={18} />, path: '/clientes' },
         { label: 'Grupos de Clientes', icon: <Network size={18} />, path: '/grupos-clientes' },
         { label: 'Representantes', icon: <Handshake size={18} />, path: '/representantes', comercial: true }
@@ -110,6 +116,7 @@ export function Sidebar() {
                 <li key={itemIdx}>
                   <NavLink
                     to={item.path}
+                    end={item.end}
                     className={({ isActive }) => isActive ? 'sidebar-link active' : 'sidebar-link'}
                   >
                     <span className="sidebar-icon">{item.icon}</span>
