@@ -42,3 +42,36 @@ export function descricaoDaCondicao(condicao) {
 export function dataParaCampo(iso) {
   return iso ? String(iso).slice(0, 10) : '';
 }
+
+const ACOES_HISTORICO = {
+  criado: 'Proposta criada',
+  alterado: 'Proposta alterada',
+  confirmado: 'Pedido confirmado',
+  entrada_registrada: 'Entrada registrada',
+  pendencias_reservadas: 'Pendências reservadas',
+  entrega_criada: 'Entrega programada',
+  entrega_saiu: 'Entrega saiu',
+  entrega_concluida: 'Entrega concluída',
+  entrega_cancelada: 'Entrega cancelada',
+  cancelado: 'Pedido cancelado',
+};
+
+export function rotuloAcaoHistorico(acao) {
+  return ACOES_HISTORICO[acao] ?? acao;
+}
+
+export function entradaSugerida(pedido) {
+  const percentual = pedido?.condicao?.entrada_bp ?? 0;
+  return Math.floor(((pedido?.valor_total_centavos ?? 0) * percentual) / 10000);
+}
+
+const formatoDataBrasilia = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'America/Sao_Paulo',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
+
+export function hojeEmBrasilia() {
+  return formatoDataBrasilia.format(new Date());
+}
