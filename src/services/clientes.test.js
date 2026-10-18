@@ -14,6 +14,7 @@ import {
   listarClientes,
   listarObras,
   obterCliente,
+  obterObra,
   removerCliente,
 } from './clientes';
 
@@ -174,5 +175,14 @@ describe('services de obras', () => {
 
     await desativarObra('obra-1');
     expect(ultimaChamada().url).toMatch(/\/api\/v1\/obras\/obra-1\/desativar$/);
+  });
+
+  it('obtém uma obra pelo id com o sinal', async () => {
+    const controle = new AbortController();
+
+    await obterObra('obra-1', { sinal: controle.signal });
+
+    expect(ultimaChamada().url).toMatch(/\/api\/v1\/obras\/obra-1$/);
+    expect(ultimaChamada().sinal).toBe(controle.signal);
   });
 });

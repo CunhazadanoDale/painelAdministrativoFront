@@ -1,0 +1,94 @@
+import { formatarMoeda } from '../../lib/formatar';
+import { formatarPercentual } from '../clientes/clientesUtils';
+
+export const STATUS_PEDIDO = [
+  { valor: 'proposta', rotulo: 'Proposta', cor: 'neutral' },
+  { valor: 'confirmado', rotulo: 'Confirmado', cor: 'info' },
+  { valor: 'parcialmente_entregue', rotulo: 'Parcialmente entregue', cor: 'warning' },
+  { valor: 'entregue', rotulo: 'Entregue', cor: 'success' },
+  { valor: 'cancelado', rotulo: 'Cancelado', cor: 'danger' },
+];
+
+export const MODELOS = [
+  { valor: 'pronta_entrega', rotulo: 'Pronta entrega' },
+  { valor: 'importacao', rotulo: 'Importação' },
+];
+
+export const LIMITES = { numero_pedido_cliente: 60, observacoes: 2000 };
+
+export function statusDoPedido(status) {
+  return STATUS_PEDIDO.find((item) => item.valor === status) ?? { valor: status, rotulo: status, cor: 'neutral' };
+}
+
+export function rotuloModelo(modelo) {
+  return MODELOS.find((item) => item.valor === modelo)?.rotulo ?? modelo;
+}
+
+export function descricaoDoModelo(modelo) {
+  return modelo === 'importacao'
+    ? 'Entrada de 30% e entrega em até 120 dias contados da entrada paga.'
+    : 'Boleto em 30 dias; prazo de entrega opcional.';
+}
+
+export function descricaoDaCondicao(condicao) {
+  if (!condicao) return '—';
+  const partes = [];
+  if (condicao.entrada_bp) partes.push(`entrada de ${formatarPercentual(condicao.entrada_bp)}`);
+  if (condicao.prazo_boleto_dias) partes.push(`boleto em ${condicao.prazo_boleto_dias} dias`);
+  if (condicao.prazo_entrega_dias) partes.push(`entrega em até ${condicao.prazo_entrega_dias} dias da entrada`);
+  const texto = partes.join(', ');
+  return texto ? texto.charAt(0).toUpperCase() + texto.slice(1) : '—';
+}
+
+export function dataParaCampo(iso) {
+  return iso ? String(iso).slice(0, 10) : '';
+}
+
+const ACOES_HISTORICO = {
+  criado: 'Proposta criada',
+  alterado: 'Proposta alterada',
+  confirmado: 'Pedido confirmado',
+  entrada_registrada: 'Entrada registrada',
+  pendencias_reservadas: 'Pendências reservadas',
+  entrega_criada: 'Entrega programada',
+  entrega_saiu: 'Entrega saiu',
+  entrega_concluida: 'Entrega concluída',
+  entrega_cancelada: 'Entrega cancelada',
+  cancelado: 'Pedido cancelado',
+};
+
+export function rotuloAcaoHistorico(acao) {
+  return ACOES_HISTORICO[acao] ?? acao;
+}
+
+export function entradaSugerida(pedido) {
+  const percentual = pedido?.condicao?.entrada_bp ?? 0;
+  return Math.floor(((pedido?.valor_total_centavos ?? 0) * percentual) / 10000);
+}
+
+const formatoDataBrasilia = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'America/Sao_Paulo',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
+
+export function hojeEmBrasilia() {
+  return formatoDataBrasilia.format(new Date());
+}
+
+export const STATUS_ENTREGA = {
+  pendente: { rotulo: 'Pendente', cor: 'neutral' },
+  saiu: { rotulo: 'Em trânsito', cor: 'info' },
+  entregue: { rotulo: 'Entregue', cor: 'success' },
+  cancelada: { rotulo: 'Cancelada', cor: 'danger' },
+};
+
+export const STATUS_ENTREGA_LISTA = Object.entries(STATUS_ENTREGA).map(([valor, item]) => ({ valor, ...item }));
+
+export function textoDoFrete(entrega) {
+  const tipo = entrega.frete_tipo.toUpperCase();
+  return entrega.frete_centavos === null || entrega.frete_centavos === undefined
+    ? tipo
+    : `${tipo} · ${formatarMoeda(entrega.frete_centavos)}`;
+}

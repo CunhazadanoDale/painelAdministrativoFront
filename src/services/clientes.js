@@ -59,6 +59,10 @@ export function listarObras(clienteId, { pagina = 1, tamanho = 20, ativas = '', 
   return requisitar(`${CAMINHO}/${clienteId}/obras${montarConsulta({ pagina, tamanho, ativas })}`, { sinal });
 }
 
+export function obterObra(id, { sinal } = {}) {
+  return requisitar(`/api/v1/obras/${id}`, { sinal });
+}
+
 export function criarObra(clienteId, dados) {
   return requisitar(`${CAMINHO}/${clienteId}/obras`, { metodo: 'POST', corpo: dados });
 }
