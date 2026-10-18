@@ -20,7 +20,10 @@ import {
   Truck,
   Landmark,
   ListTree,
-  Warehouse
+  Warehouse,
+  Contact,
+  Network,
+  Handshake
 } from 'lucide-react';
 import { useAutenticacao } from '../autenticacao/useAutenticacao';
 import './Sidebar.css';
@@ -41,7 +44,10 @@ export function Sidebar() {
       items: [
         { label: 'Leads', icon: <Users size={18} />, path: '/leads', comercial: true },
         { label: 'Funis', icon: <Filter size={18} />, path: '/funis', comercial: true },
-        { label: 'Negociações', icon: <Briefcase size={18} />, path: '/negociacoes' }
+        { label: 'Negociações', icon: <Briefcase size={18} />, path: '/negociacoes' },
+        { label: 'Clientes', icon: <Contact size={18} />, path: '/clientes' },
+        { label: 'Grupos de Clientes', icon: <Network size={18} />, path: '/grupos-clientes' },
+        { label: 'Representantes', icon: <Handshake size={18} />, path: '/representantes', comercial: true }
       ]
     },
     {

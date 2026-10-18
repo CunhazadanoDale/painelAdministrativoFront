@@ -21,6 +21,10 @@ import Produtos from './modules/produtos/Produtos';
 import ProdutoDetalhe from './modules/produtos/ProdutoDetalhe';
 import Categorias from './modules/produtos/Categorias';
 import Locais from './modules/locais/Locais';
+import Clientes from './modules/clientes/Clientes';
+import ClienteDetalhe from './modules/clientes/ClienteDetalhe';
+import GruposClientes from './modules/clientes/GruposClientes';
+import Representantes from './modules/clientes/Representantes';
 import Perfil from './modules/perfil/Perfil';
 
 const Negociacoes = () => <div>Negociações Module</div>;
@@ -66,6 +70,13 @@ function App() {
             />
             <Route path="/funis" element={comercial ? <Funis /> : <Navigate to="/" replace />} />
             <Route path="/negociacoes" element={<Negociacoes />} />
+            <Route path="/clientes" element={<Clientes />} />
+            <Route path="/clientes/:id" element={<ClienteDetalhe />} />
+            <Route path="/grupos-clientes" element={<GruposClientes />} />
+            <Route
+              path="/representantes"
+              element={comercial ? <Representantes /> : <Navigate to="/" replace />}
+            />
             <Route path="/solicitacoes" element={<Solicitacoes />} />
             <Route path="/solicitacoes/:id" element={<SolicitacaoDetalhe />} />
             <Route path="/pagamentos" element={<Navigate to="/solicitacoes" replace />} />
