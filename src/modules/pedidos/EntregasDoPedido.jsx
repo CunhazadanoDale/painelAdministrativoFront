@@ -2,30 +2,16 @@ import React, { useState } from 'react';
 import { SeletorLocal } from '../../app/components/SeletorLocal';
 import { StatusBadge } from '../../app/components/StatusBadge';
 import { useNomesLocais } from '../../app/estoque/useNomesLocais';
-import { formatarData, formatarMoeda, paraCentavos } from '../../lib/formatar';
+import { formatarData, paraCentavos } from '../../lib/formatar';
 import * as pedidosService from '../../services/pedidos';
 import { AcaoPedidoModal } from './AcaoPedidoModal';
-import { dataParaCampo, hojeEmBrasilia } from './pedidosUtils';
+import { STATUS_ENTREGA, dataParaCampo, hojeEmBrasilia, textoDoFrete } from './pedidosUtils';
 import { useEntregasDoPedido } from './useEntregasDoPedido';
 import { AlertCircle, Plus } from 'lucide-react';
 import '../../app/components/DataGrid.css';
 import './Pedidos.css';
 
-const STATUS_ENTREGA = {
-  pendente: { rotulo: 'Pendente', cor: 'neutral' },
-  saiu: { rotulo: 'Em trânsito', cor: 'info' },
-  entregue: { rotulo: 'Entregue', cor: 'success' },
-  cancelada: { rotulo: 'Cancelada', cor: 'danger' },
-};
-
 const ABERTOS = ['confirmado', 'parcialmente_entregue'];
-
-function textoDoFrete(entrega) {
-  const tipo = entrega.frete_tipo.toUpperCase();
-  return entrega.frete_centavos === null || entrega.frete_centavos === undefined
-    ? tipo
-    : `${tipo} · ${formatarMoeda(entrega.frete_centavos)}`;
-}
 
 function programavelPorItem(pedido, entregas) {
   const programado = {};

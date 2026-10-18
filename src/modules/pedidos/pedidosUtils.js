@@ -1,3 +1,4 @@
+import { formatarMoeda } from '../../lib/formatar';
 import { formatarPercentual } from '../clientes/clientesUtils';
 
 export const STATUS_PEDIDO = [
@@ -74,4 +75,20 @@ const formatoDataBrasilia = new Intl.DateTimeFormat('en-CA', {
 
 export function hojeEmBrasilia() {
   return formatoDataBrasilia.format(new Date());
+}
+
+export const STATUS_ENTREGA = {
+  pendente: { rotulo: 'Pendente', cor: 'neutral' },
+  saiu: { rotulo: 'Em trânsito', cor: 'info' },
+  entregue: { rotulo: 'Entregue', cor: 'success' },
+  cancelada: { rotulo: 'Cancelada', cor: 'danger' },
+};
+
+export const STATUS_ENTREGA_LISTA = Object.entries(STATUS_ENTREGA).map(([valor, item]) => ({ valor, ...item }));
+
+export function textoDoFrete(entrega) {
+  const tipo = entrega.frete_tipo.toUpperCase();
+  return entrega.frete_centavos === null || entrega.frete_centavos === undefined
+    ? tipo
+    : `${tipo} · ${formatarMoeda(entrega.frete_centavos)}`;
 }
