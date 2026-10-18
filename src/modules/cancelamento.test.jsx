@@ -7,6 +7,13 @@ import { AutenticacaoProvider } from '../app/autenticacao/AutenticacaoProvider';
 import { useAprovadores } from './aprovadores/useAprovadores';
 import { useCargos } from './cargos/useCargos';
 import { useDashboard } from './dashboard/useDashboard';
+import { useCadastrosCliente } from './clientes/useCadastrosCliente';
+import { useClienteDetalhe } from './clientes/useClienteDetalhe';
+import { useClienteDoLead } from './clientes/useClienteDoLead';
+import { useObrasCliente } from './clientes/useObrasCliente';
+import { useClientes } from './clientes/useClientes';
+import { useGruposClientes } from './clientes/useGruposClientes';
+import { useRepresentantes } from './clientes/useRepresentantes';
 import { useEmpresas } from './empresas/useEmpresas';
 import { useContasBancarias } from './financeiro/useContasBancarias';
 import { usePlanoContas } from './financeiro/usePlanoContas';
@@ -99,6 +106,13 @@ describe('cancelamento das requisições ao desmontar', () => {
     ['useSaldoProduto', () => useSaldoProduto('prod-1', 0)],
     ['useReservasProduto', () => useReservasProduto('prod-1', 0)],
     ['useLotesProduto', () => useLotesProduto('prod-1', 0)],
+    ['useGruposClientes', () => useGruposClientes()],
+    ['useRepresentantes', () => useRepresentantes()],
+    ['useClientes', () => useClientes()],
+    ['useCadastrosCliente', () => useCadastrosCliente(true)],
+    ['useClienteDetalhe', () => useClienteDetalhe('cli-1')],
+    ['useObrasCliente', () => useObrasCliente('cli-1', 0)],
+    ['useClienteDoLead', () => useClienteDoLead('lead-1')],
   ])('%s', async (_, usar) => {
     const { unmount } = renderHook(usar, { wrapper: comAutenticacao });
 

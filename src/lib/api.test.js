@@ -63,6 +63,17 @@ describe('requisitar', () => {
     expect(opcoes.body).toBe(JSON.stringify({ nome: 'abc' }));
   });
 
+  it('envia o corpo cru com o tipo de conteúdo informado', async () => {
+    fetchMock.mockResolvedValue(resposta(200, { dados: null }));
+    const arquivo = new Blob(['documento;nome'], { type: 'text/csv' });
+
+    await requisitar('/api/v1/teste', { metodo: 'POST', corpo: arquivo, tipoConteudo: 'text/csv' });
+
+    const [, opcoes] = fetchMock.mock.calls[0];
+    expect(opcoes.headers['Content-Type']).toBe('text/csv');
+    expect(opcoes.body).toBe(arquivo);
+  });
+
   it('não define Content-Type para FormData', async () => {
     fetchMock.mockResolvedValue(resposta(200, { dados: null }));
     const formulario = new FormData();

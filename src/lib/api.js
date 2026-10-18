@@ -62,10 +62,11 @@ export function montarConsulta(params = {}) {
   return texto ? `?${texto}` : '';
 }
 
-export async function requisitar(caminho, { metodo = 'GET', corpo, sinal } = {}) {
-  const formulario = corpo instanceof FormData;
+export async function requisitar(caminho, { metodo = 'GET', corpo, sinal, tipoConteudo } = {}) {
+  const cru = corpo instanceof FormData || !!tipoConteudo;
   const cabecalhos = {};
-  if (corpo && !formulario) cabecalhos['Content-Type'] = 'application/json';
+  if (tipoConteudo) cabecalhos['Content-Type'] = tipoConteudo;
+  else if (corpo && !cru) cabecalhos['Content-Type'] = 'application/json';
   if (tokenAtual) cabecalhos.Authorization = `Bearer ${tokenAtual}`;
 
   let resposta;
@@ -73,7 +74,7 @@ export async function requisitar(caminho, { metodo = 'GET', corpo, sinal } = {})
     resposta = await fetch(`${BASE_URL}${caminho}`, {
       method: metodo,
       headers: cabecalhos,
-      body: corpo ? (formulario ? corpo : JSON.stringify(corpo)) : undefined,
+      body: corpo ? (cru ? corpo : JSON.stringify(corpo)) : undefined,
       signal: sinal,
     });
   } catch (e) {

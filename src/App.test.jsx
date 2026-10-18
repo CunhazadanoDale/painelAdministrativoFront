@@ -205,6 +205,57 @@ describe('roteamento do App', () => {
     expect(await screen.findByText('Novo Local')).toBeInTheDocument();
   });
 
+  it('libera /clientes, o detalhe e /grupos-clientes para qualquer autenticado, só para leitura', async () => {
+    gravarSessao(false);
+
+    renderizar('/clientes');
+
+    expect(await screen.findByText('Nenhum cliente cadastrado.')).toBeInTheDocument();
+    expect(screen.getByTestId('caminho')).toHaveTextContent('/clientes');
+    expect(screen.getByRole('link', { name: 'Clientes' })).toHaveAttribute('href', '/clientes');
+    expect(screen.getByRole('link', { name: 'Grupos de Clientes' })).toHaveAttribute('href', '/grupos-clientes');
+    expect(screen.queryByText('Novo Cliente')).toBeNull();
+  });
+
+  it('abre o detalhe do cliente pela rota com o id', async () => {
+    gravarSessao(false);
+
+    renderizar('/clientes/cli-1');
+
+    await waitFor(() => expect(screen.getByTestId('caminho')).toHaveTextContent('/clientes/cli-1'));
+    await waitFor(() =>
+      expect(fetch.mock.calls.some(([url]) => String(url).includes('/api/v1/clientes/cli-1'))).toBe(true)
+    );
+  });
+
+  it('redireciona quem não é comercial que acessa /representantes e esconde a entrada', async () => {
+    gravarSessao(false);
+
+    renderizar('/representantes');
+
+    await waitFor(() => expect(screen.getByTestId('caminho')).toHaveTextContent(/^\/$/));
+    expect(screen.queryByRole('link', { name: 'Representantes' })).toBeNull();
+  });
+
+  it('libera /representantes para o comercial, sem o cadastro do administrador', async () => {
+    localStorage.setItem(
+      'mia.sessao',
+      JSON.stringify({
+        token: 'token-de-teste',
+        expira_em: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+        administrador: false,
+        comercial: true,
+        usuario: { usuario_id: 1, nome: 'Pessoa Teste', email: 'teste@exemplo.com' },
+      })
+    );
+
+    renderizar('/representantes');
+
+    expect(await screen.findByText('Nenhum representante cadastrado.')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Representantes' })).toHaveAttribute('href', '/representantes');
+    expect(screen.queryByText('Novo Representante')).toBeNull();
+  });
+
   it('redireciona /pagamentos para /solicitacoes', async () => {
     gravarSessao(false);
 
