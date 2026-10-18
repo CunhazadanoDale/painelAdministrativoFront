@@ -21,6 +21,7 @@ import {
   rotuloModelo,
   statusDoPedido,
 } from './pedidosUtils';
+import { EntregasDoPedido } from './EntregasDoPedido';
 import { PropostaFormModal } from './PropostaFormModal';
 import { usePedidoDetalhe } from './usePedidoDetalhe';
 import { usePedidoHistorico } from './usePedidoHistorico';
@@ -232,6 +233,16 @@ export default function PedidoDetalhe() {
         <div className="pedidos-itens-total">
           Total: <strong>{formatarMoeda(pedido.valor_total_centavos)}</strong>
         </div>
+      </Panel>
+
+      <Panel title="Entregas">
+        <EntregasDoPedido
+          pedido={pedido}
+          comercial={comercial}
+          geracao={geracao}
+          nomeProduto={nomeProduto}
+          onAlterou={recarregar}
+        />
       </Panel>
 
       {acao === 'editar' && (

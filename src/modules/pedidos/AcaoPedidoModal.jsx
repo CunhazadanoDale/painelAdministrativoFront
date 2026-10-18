@@ -4,14 +4,23 @@ import { Modal } from '../../app/components/Modal';
 import { ehConflitoDeConcorrencia } from '../../lib/api';
 import './Pedidos.css';
 
-export function AcaoPedidoModal({ titulo, rotuloConfirmar, validar, onConfirmar, onFechar, onRecarregar, children }) {
+export function AcaoPedidoModal({
+  titulo,
+  rotuloConfirmar,
+  validar,
+  onConfirmar,
+  onFechar,
+  onRecarregar,
+  largura = '480px',
+  children,
+}) {
   const [erro, setErro] = useState(null);
   const [conflito, setConflito] = useState(null);
   const [salvando, setSalvando] = useState(false);
 
   const confirmar = async () => {
     const erroValidacao = validar ? validar() : null;
-    if (erroValidacao) {
+    if (Array.isArray(erroValidacao) ? erroValidacao.length > 0 : erroValidacao) {
       setErro(erroValidacao);
       return;
     }
@@ -39,7 +48,7 @@ export function AcaoPedidoModal({ titulo, rotuloConfirmar, validar, onConfirmar,
       aberto
       titulo={titulo}
       onFechar={salvando ? () => {} : onFechar}
-      largura="480px"
+      largura={largura}
       rodape={
         <>
           <button
@@ -64,10 +73,18 @@ export function AcaoPedidoModal({ titulo, rotuloConfirmar, validar, onConfirmar,
       }
     >
       <div className="pedidos-form">
-        {erro && (
-          <div className="pedidos-form-erro-api" role="alert">
-            {erro}
-          </div>
+        {Array.isArray(erro) ? (
+          <ul className="pedidos-form-erros" role="alert">
+            {erro.map((mensagem) => (
+              <li key={mensagem}>{mensagem}</li>
+            ))}
+          </ul>
+        ) : (
+          erro && (
+            <div className="pedidos-form-erro-api" role="alert">
+              {erro}
+            </div>
+          )
         )}
         {conflito && <AvisoConflito mensagem={conflito} onRecarregar={recarregar} />}
         {children}

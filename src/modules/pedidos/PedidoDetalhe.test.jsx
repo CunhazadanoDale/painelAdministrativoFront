@@ -13,6 +13,7 @@ import * as representantesService from '../../services/representantes';
 import PedidoDetalhe from './PedidoDetalhe';
 
 vi.mock('../../app/autenticacao/useAutenticacao', () => ({ useAutenticacao: vi.fn() }));
+vi.mock('../../services/locais', () => ({ listarTodosLocais: vi.fn(async () => []) }));
 vi.mock('../../services/empresas', () => ({ listarTodasEmpresas: vi.fn() }));
 vi.mock('../../services/clienteGrupos', () => ({ listarTodosGrupos: vi.fn() }));
 vi.mock('../../services/representantes', () => ({ listarTodosRepresentantes: vi.fn() }));
@@ -333,5 +334,12 @@ describe('PedidoDetalhe', () => {
     expect(screen.getByText('cliente desistiu')).toBeInTheDocument();
     expect(screen.getByText('R$ 250,00')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Cancelar pedido' })).toBeNull();
+  });
+
+  it('mostra o painel de entregas do pedido', async () => {
+    await carregar();
+
+    expect(await screen.findByText('Nenhuma entrega programada.')).toBeInTheDocument();
+    expect(svc.listarEntregasDoPedido).toHaveBeenCalledWith('ped-12', expect.anything());
   });
 });
