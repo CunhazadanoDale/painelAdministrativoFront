@@ -58,5 +58,42 @@ export function dataEmBrasilia(iso) {
 export function dataHoraEmBrasilia(iso) {
   if (!iso) return '—';
   const data = new Date(iso);
-  return Number.isNaN(data.getTime()) ? '—' : formatoDataHoraBrasilia.format(data);
+  return Number.isNaN(data.getTime()) ? '—' : formatoDataHoraBrasilia.format(data).replace(', ', ' ');
+}
+
+const ROTULOS_EVENTO = { cancelamento: 'Cancelamento', carta_correcao: 'Carta de correção' };
+
+const ROTULOS_FINALIDADE = {
+  normal: 'Normal',
+  complementar: 'Complementar',
+  ajuste: 'Ajuste',
+  devolucao: 'Devolução',
+};
+
+export function rotuloEventoNota(tipo) {
+  return ROTULOS_EVENTO[tipo] ?? tipo;
+}
+
+export function rotuloFinalidade(finalidade) {
+  return ROTULOS_FINALIDADE[finalidade] ?? finalidade;
+}
+
+export function formatarDocumento(documento) {
+  const texto = String(documento ?? '');
+  if (texto.length === 14) {
+    return `${texto.slice(0, 2)}.${texto.slice(2, 5)}.${texto.slice(5, 8)}/${texto.slice(8, 12)}-${texto.slice(12)}`;
+  }
+  if (texto.length === 11) return `${texto.slice(0, 3)}.${texto.slice(3, 6)}.${texto.slice(6, 9)}-${texto.slice(9)}`;
+  return texto || '—';
+}
+
+export function formatarChave(chave) {
+  return String(chave ?? '').replace(/(.{4})(?=.)/g, '$1 ');
+}
+
+const formatoQuantidade = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 4 });
+
+export function formatarQuantidade(quantidade) {
+  const numero = Number(quantidade);
+  return Number.isFinite(numero) ? formatoQuantidade.format(numero) : String(quantidade ?? '—');
 }
