@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import React, { useState } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as categoriasService from '../../services/categoriasFinanceiras';
-import { SeletorCategoriaDespesa } from './SeletorCategoriaDespesa';
+import { SeletorCategoriaDespesa, SeletorCategoriaReceita } from './SeletorCategoriaDespesa';
 
 vi.mock('../../services/categoriasFinanceiras', () => ({ obterArvoreFinanceira: vi.fn() }));
 
@@ -83,5 +83,17 @@ describe('SeletorCategoriaDespesa', () => {
 
     expect(await screen.findByText('falha de rede')).toBeInTheDocument();
     await waitFor(() => expect(screen.getByLabelText('Categoria')).toBeDisabled());
+  });
+
+  it('na versão de receita oferece só as subcategorias lançáveis de receita', async () => {
+    render(
+      <>
+        <label htmlFor="receita">Categoria de receita</label>
+        <SeletorCategoriaReceita id="receita" valor="" onAlterar={() => {}} />
+      </>
+    );
+
+    expect(await screen.findByRole('option', { name: 'Juros recebidos' })).toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: 'Aluguel' })).toBeNull();
   });
 });

@@ -2,14 +2,15 @@ import React, { useEffect, useState } from 'react';
 import * as categoriasService from '../../services/categoriasFinanceiras';
 import '../../app/components/SeletorRemoto.css';
 
-function gruposDeDespesa(arvore) {
+function gruposDaNatureza(arvore, natureza) {
   return (arvore || [])
-    .filter((raiz) => raiz.natureza === 'despesa')
+    .filter((raiz) => raiz.natureza === natureza)
     .map((raiz) => ({ ...raiz, subcategorias: (raiz.subcategorias || []).filter((sub) => sub.lancavel) }))
     .filter((raiz) => raiz.subcategorias.length > 0);
 }
 
-export function SeletorCategoriaDespesa({
+export function SeletorCategoriaLancavel({
+  natureza,
   id,
   valor,
   onAlterar,
@@ -25,14 +26,14 @@ export function SeletorCategoriaDespesa({
     categoriasService
       .obterArvoreFinanceira({ ativas: true, sinal: controle.signal })
       .then((resposta) => {
-        if (!controle.signal.aborted) setEstado({ grupos: gruposDeDespesa(resposta?.dados), erro: null });
+        if (!controle.signal.aborted) setEstado({ grupos: gruposDaNatureza(resposta?.dados, natureza), erro: null });
       })
       .catch((e) => {
         if (controle.signal.aborted) return;
         setEstado({ grupos: null, erro: (e && e.message) || 'Erro ao carregar o plano de contas.' });
       });
     return () => controle.abort();
-  }, []);
+  }, [natureza]);
 
   const { grupos, erro } = estado;
   const conhecida = (grupos || []).some((grupo) => grupo.subcategorias.some((sub) => sub.id === valor));
@@ -68,4 +69,12 @@ export function SeletorCategoriaDespesa({
       )}
     </>
   );
+}
+
+export function SeletorCategoriaDespesa(props) {
+  return <SeletorCategoriaLancavel natureza="despesa" {...props} />;
+}
+
+export function SeletorCategoriaReceita(props) {
+  return <SeletorCategoriaLancavel natureza="receita" {...props} />;
 }
