@@ -50,6 +50,11 @@ export function usePedidoDetalhe(id) {
       executar(() => pedidosService.registrarEntrada(id, { versao, pago_em, valor_centavos })),
     [executar, id, versao]
   );
+  const gerarTituloEntrada = useCallback(
+    ({ vencimento, conta_bancaria_id }) =>
+      executar(() => pedidosService.gerarTituloEntrada(id, { vencimento, conta_bancaria_id })),
+    [executar, id]
+  );
   const cancelar = useCallback(
     ({ motivo, valor_a_devolver_centavos }) =>
       executar(() => pedidosService.cancelarPedido(id, { versao, motivo, valor_a_devolver_centavos })),
@@ -66,6 +71,7 @@ export function usePedidoDetalhe(id) {
     confirmar,
     reservarPendencias,
     registrarEntrada,
+    gerarTituloEntrada,
     cancelar,
   };
 }

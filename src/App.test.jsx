@@ -335,6 +335,56 @@ describe('roteamento do App', () => {
     expect(screen.getByTestId('caminho')).toHaveTextContent('/contas-a-pagar/resumo');
   });
 
+  it('redireciona quem não é financeiro das telas de contas a receber, sem as entradas', async () => {
+    gravarSessao(false);
+
+    renderizar('/titulos-receber');
+
+    await waitFor(() => expect(screen.getByTestId('caminho')).toHaveTextContent(/^\/$/));
+    for (const nome of ['Contas a Receber', 'Antecipações', 'Resumo a Receber', 'Boletos Pendentes']) {
+      expect(screen.queryByRole('link', { name: nome })).toBeNull();
+    }
+  });
+
+  it.each([
+    ['/titulos-receber/tit-1'],
+    ['/antecipacoes'],
+    ['/antecipacoes/ant-1'],
+    ['/contas-a-receber/resumo'],
+    ['/contas-a-receber/boletos'],
+  ])('redireciona quem não é financeiro de %s', async (caminho) => {
+    gravarSessao(false);
+
+    renderizar(caminho);
+
+    await waitFor(() => expect(screen.getByTestId('caminho')).toHaveTextContent(/^\/$/));
+  });
+
+  it('libera os títulos a receber para o financeiro, com as entradas na sidebar', async () => {
+    gravarSessaoFinanceiro();
+
+    renderizar('/titulos-receber');
+
+    expect(await screen.findByText('Nenhum título a receber nas empresas do seu acesso.')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Contas a Receber' })).toHaveAttribute('href', '/titulos-receber');
+    expect(screen.getByRole('link', { name: 'Antecipações' })).toHaveAttribute('href', '/antecipacoes');
+    expect(screen.getByRole('link', { name: 'Resumo a Receber' })).toHaveAttribute('href', '/contas-a-receber/resumo');
+    expect(screen.getByRole('link', { name: 'Boletos Pendentes' })).toHaveAttribute('href', '/contas-a-receber/boletos');
+  });
+
+  it.each([
+    ['/antecipacoes', 'Nenhuma antecipação registrada.'],
+    ['/contas-a-receber/resumo', 'Resumo de Contas a Receber'],
+    ['/contas-a-receber/boletos', 'Nenhum boleto pendente de envio no prazo.'],
+  ])('abre %s para o financeiro', async (caminho, texto) => {
+    gravarSessaoFinanceiro();
+
+    renderizar(caminho);
+
+    expect(await screen.findByText(texto)).toBeInTheDocument();
+    expect(screen.getByTestId('caminho')).toHaveTextContent(caminho);
+  });
+
   it('redireciona /pagamentos para /solicitacoes', async () => {
     gravarSessao(false);
 

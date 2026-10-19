@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { centavosParaTexto, formatarMoeda, paraCentavos } from '../../lib/formatar';
 import { AcaoModal } from '../../app/components/AcaoModal';
+import { SeletorRemoto } from '../../app/components/SeletorRemoto';
+import * as contasService from '../../services/contasBancarias';
 import { entradaSugerida, hojeEmBrasilia } from './pedidosUtils';
 
 const LIMITE_MOTIVO = 1000;
@@ -165,6 +167,65 @@ export function CancelarPedidoModal({ pedido, onConfirmar, onFechar, onRecarrega
           </span>
         </div>
       )}
+    </AcaoModal>
+  );
+}
+
+const opcaoDeConta = (conta) => ({ valor: conta.id, rotulo: `${conta.apelido} · ${conta.banco_nome}` });
+
+export function GerarTituloEntradaModal({ pedido, onConfirmar, onFechar, onRecarregar }) {
+  const [vencimento, setVencimento] = useState(hojeEmBrasilia());
+  const [contaId, setContaId] = useState('');
+  const empresaId = pedido.empresa_id;
+  const carregarContas = useCallback(
+    (sinal) => contasService.listarTodasContasBancarias({ empresa: empresaId, ativa: true, sinal }),
+    [empresaId]
+  );
+
+  return (
+    <AcaoModal
+      titulo={`Título de entrada do pedido ${pedido.numero}`}
+      rotuloConfirmar="Gerar título"
+      validar={() => (vencimento ? null : 'Informe o vencimento.')}
+      onConfirmar={() => onConfirmar({ vencimento, conta_bancaria_id: contaId || null })}
+      onFechar={onFechar}
+      onRecarregar={onRecarregar}
+    >
+      <p className="pedidos-texto">
+        Gera o título a receber da entrada de {formatarMoeda(entradaSugerida(pedido))}, número PED-{pedido.numero}. Quando
+        o título for recebido por inteiro, a entrada fica registrada no pedido.
+      </p>
+      <div className="pedidos-form-linha">
+        <div className="pedidos-form-campo">
+          <label className="filter-label" htmlFor="titulo-entrada-vencimento">
+            Vencimento *
+          </label>
+          <input
+            id="titulo-entrada-vencimento"
+            className="filter-input"
+            type="date"
+            value={vencimento}
+            onChange={(evento) => setVencimento(evento.target.value)}
+          />
+        </div>
+        <div className="pedidos-form-campo">
+          <label className="filter-label" htmlFor="titulo-entrada-conta">
+            Conta de cobrança
+          </label>
+          <SeletorRemoto
+            id="titulo-entrada-conta"
+            className="filter-select"
+            valor={contaId}
+            onAlterar={setContaId}
+            carregar={carregarContas}
+            opcaoDe={opcaoDeConta}
+            placeholder="Sem conta (fica em carteira)"
+            textoVazio="Nenhuma conta ativa nesta empresa"
+            textoErro="Erro ao carregar as contas bancárias."
+            selecionarUnica={false}
+          />
+        </div>
+      </div>
     </AcaoModal>
   );
 }

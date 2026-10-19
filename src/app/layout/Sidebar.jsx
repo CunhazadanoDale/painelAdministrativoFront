@@ -28,7 +28,11 @@ import {
   PackageCheck,
   SearchCheck,
   Repeat,
-  CalendarRange
+  CalendarRange,
+  HandCoins,
+  BadgePercent,
+  CalendarClock,
+  MailWarning
 } from 'lucide-react';
 import { useAutenticacao } from '../autenticacao/useAutenticacao';
 import { usePendenciasSolicitacao } from '../../modules/solicitacoes/usePendenciasSolicitacao';
@@ -69,6 +73,10 @@ export function Sidebar() {
         { label: 'Plano de Contas', icon: <ListTree size={18} />, path: '/plano-de-contas' },
         { label: 'Despesas Recorrentes', icon: <Repeat size={18} />, path: '/despesas-recorrentes', financeiro: true },
         { label: 'Resumo a Pagar', icon: <CalendarRange size={18} />, path: '/contas-a-pagar/resumo', financeiro: true },
+        { label: 'Contas a Receber', icon: <HandCoins size={18} />, path: '/titulos-receber', financeiro: true },
+        { label: 'Antecipações', icon: <BadgePercent size={18} />, path: '/antecipacoes', financeiro: true },
+        { label: 'Resumo a Receber', icon: <CalendarClock size={18} />, path: '/contas-a-receber/resumo', financeiro: true },
+        { label: 'Boletos Pendentes', icon: <MailWarning size={18} />, path: '/contas-a-receber/boletos', financeiro: true },
         { label: 'Aprovadores', icon: <ShieldCheck size={18} />, path: '/aprovadores', admin: true }
       ]
     },

@@ -104,3 +104,10 @@ export function listarCancelamentos({
     sinal,
   });
 }
+
+export function gerarTituloEntrada(pedidoId, { vencimento, conta_bancaria_id }) {
+  return requisitar(`${CAMINHO}/${pedidoId}/titulo-entrada`, {
+    metodo: 'POST',
+    corpo: { vencimento, conta_bancaria_id },
+  });
+}
