@@ -12,6 +12,7 @@ import * as pedidosService from '../services/pedidos';
 import { useEntregasDoPedido } from './pedidos/useEntregasDoPedido';
 import { usePedidoDetalhe } from './pedidos/usePedidoDetalhe';
 import { usePedidoHistorico } from './pedidos/usePedidoHistorico';
+import { useNotas } from './notas/useNotas';
 import { usePedidos } from './pedidos/usePedidos';
 import { useTituloDeEntrada } from './pedidos/useTituloDeEntrada';
 import { useDashboard } from './dashboard/useDashboard';
@@ -146,6 +147,7 @@ describe('cancelamento das requisições ao desmontar', () => {
     ['useObrasCliente', () => useObrasCliente('cli-1', 0)],
     ['useClienteDoLead', () => useClienteDoLead('lead-1')],
     ['usePedidos', () => usePedidos()],
+    ['useNotas', () => useNotas()],
     ['useTituloDeEntrada', () => useTituloDeEntrada('ped-1', true, 0)],
     ['usePedidoDetalhe', () => usePedidoDetalhe('ped-1')],
     ['usePedidoHistorico', () => usePedidoHistorico('ped-1', 0)],
