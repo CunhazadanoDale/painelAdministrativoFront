@@ -26,7 +26,9 @@ import {
   Handshake,
   ClipboardList,
   PackageCheck,
-  SearchCheck
+  SearchCheck,
+  Repeat,
+  CalendarRange
 } from 'lucide-react';
 import { useAutenticacao } from '../autenticacao/useAutenticacao';
 import { usePendenciasSolicitacao } from '../../modules/solicitacoes/usePendenciasSolicitacao';
@@ -65,6 +67,8 @@ export function Sidebar() {
         { label: 'Fornecedores', icon: <Truck size={18} />, path: '/fornecedores' },
         { label: 'Contas Bancárias', icon: <Landmark size={18} />, path: '/contas-bancarias', financeiro: true },
         { label: 'Plano de Contas', icon: <ListTree size={18} />, path: '/plano-de-contas' },
+        { label: 'Despesas Recorrentes', icon: <Repeat size={18} />, path: '/despesas-recorrentes', financeiro: true },
+        { label: 'Resumo a Pagar', icon: <CalendarRange size={18} />, path: '/contas-a-pagar/resumo', financeiro: true },
         { label: 'Aprovadores', icon: <ShieldCheck size={18} />, path: '/aprovadores', admin: true }
       ]
     },
