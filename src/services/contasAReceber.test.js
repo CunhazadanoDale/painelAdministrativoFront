@@ -12,6 +12,7 @@ import {
   listarHistoricoTitulo,
   listarRecebimentos,
   listarTitulos,
+  listarTitulosAntecipaveis,
   obterResumoContasAReceber,
   obterTitulo,
   prorrogarTitulo,
@@ -221,5 +222,31 @@ describe('services de antecipações', () => {
     await estornarAntecipacao('ant-1', { motivo: 'lançado errado', versao: 2 });
     expect(ultimaChamada()).toMatchObject({ metodo: 'POST', corpo: { motivo: 'lançado errado', versao: 2 } });
     expect(ultimaChamada().url).toMatch(/\/api\/v1\/antecipacoes\/ant-1\/estorno$/);
+  });
+});
+
+describe('listarTitulosAntecipaveis', () => {
+  it('junta carteira e em banco da empresa, sem origem cancelada nem saldo zerado, por vencimento', async () => {
+    fetchMock.mockImplementation(async (url) => {
+      const status = new URL(String(url), 'http://local').searchParams.get('status');
+      const dados =
+        status === 'carteira'
+          ? [
+              { id: 't-2', vencimento: '2026-11-20', saldo_centavos: 100, origem_cancelada_em: null },
+              { id: 't-x', vencimento: '2026-11-01', saldo_centavos: 100, origem_cancelada_em: '2026-10-01T00:00:00Z' },
+            ]
+          : [
+              { id: 't-1', vencimento: '2026-11-10', saldo_centavos: 100, origem_cancelada_em: null },
+              { id: 't-0', vencimento: '2026-11-05', saldo_centavos: 0, origem_cancelada_em: null },
+            ];
+      return { ok: true, status: 200, text: async () => JSON.stringify({ dados }) };
+    });
+
+    const titulos = await listarTitulosAntecipaveis({ empresa: 'emp-1' });
+
+    expect(titulos.map((titulo) => titulo.id)).toEqual(['t-1', 't-2']);
+    const urls = fetchMock.mock.calls.map(([url]) => new URL(String(url), 'http://local').searchParams);
+    expect(urls.map((consulta) => consulta.get('status')).sort()).toEqual(['carteira', 'em_banco']);
+    expect(urls.every((consulta) => consulta.get('empresa') === 'emp-1')).toBe(true);
   });
 });

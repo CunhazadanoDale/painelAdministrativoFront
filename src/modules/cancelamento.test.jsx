@@ -25,10 +25,13 @@ import { useEmpresas } from './empresas/useEmpresas';
 import { useContasBancarias } from './financeiro/useContasBancarias';
 import { useDespesasRecorrentes } from './financeiro/useDespesasRecorrentes';
 import { useResumoContasAPagar } from './financeiro/useResumoContasAPagar';
+import { useAntecipacaoDetalhe } from './receber/useAntecipacaoDetalhe';
+import { useAntecipacoes } from './receber/useAntecipacoes';
 import { useRecebimentos } from './receber/useRecebimentos';
 import { useTituloDetalhe } from './receber/useTituloDetalhe';
 import { useTituloHistorico } from './receber/useTituloHistorico';
 import { useTitulos } from './receber/useTitulos';
+import { useTitulosAntecipaveis } from './receber/useTitulosAntecipaveis';
 import { usePlanoContas } from './financeiro/usePlanoContas';
 import { useFornecedores } from './fornecedores/useFornecedores';
 import { useFunis } from './funis/useFunis';
@@ -121,6 +124,9 @@ describe('cancelamento das requisições ao desmontar', () => {
     ['useTituloDetalhe', () => useTituloDetalhe('tit-1')],
     ['useTituloHistorico', () => useTituloHistorico('tit-1', 0)],
     ['useRecebimentos', () => useRecebimentos('tit-1', 0)],
+    ['useAntecipacoes', () => useAntecipacoes()],
+    ['useAntecipacaoDetalhe', () => useAntecipacaoDetalhe('ant-1')],
+    ['useTitulosAntecipaveis', () => useTitulosAntecipaveis('emp-1')],
     ['usePlanoContas', () => usePlanoContas()],
     ['useLocais', () => useLocais()],
     ['useSaldosDoLocal', () => useSaldosDoLocal('loc-1')],

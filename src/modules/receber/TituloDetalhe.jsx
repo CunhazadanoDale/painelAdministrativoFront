@@ -14,6 +14,7 @@ import {
   CancelarTituloModal,
   EnviarAoBancoModal,
   ProrrogarTituloModal,
+  RecompraModal,
   RetirarDoBancoModal,
 } from './AcoesDoTitulo';
 import { RecebimentoModal, RecebimentosDoTitulo } from './RecebimentosDoTitulo';
@@ -73,6 +74,7 @@ export default function TituloDetalhe() {
     registrarBoleto,
     receber,
     estornarRecebimento,
+    recomprar,
     cancelar,
   } = useTituloDetalhe(id);
   const nomeCliente = useNomesPorId([titulo?.cliente_id], clientesService.obterCliente);
@@ -187,6 +189,11 @@ export default function TituloDetalhe() {
               </button>
             </>
           )}
+          {titulo.status === 'antecipado' && semRecebimento && (
+            <button type="button" className="filter-btn filter-btn-secondary" style={BOTAO} onClick={() => setAcao('recomprar')}>
+              Recomprar
+            </button>
+          )}
           {aberto && semRecebimento && (
             <button type="button" className="filter-btn receber-perigo" style={BOTAO} onClick={() => setAcao('cancelar')}>
               Cancelar título
@@ -255,6 +262,9 @@ export default function TituloDetalhe() {
       )}
       {acao === 'boleto' && (
         <BoletoEnviadoModal titulo={titulo} onConfirmar={registrarBoleto} onFechar={fechar} onRecarregar={recarregar} />
+      )}
+      {acao === 'recomprar' && (
+        <RecompraModal titulo={titulo} onConfirmar={recomprar} onFechar={fechar} onRecarregar={recarregar} />
       )}
       {acao === 'cancelar' && (
         <CancelarTituloModal titulo={titulo} onConfirmar={cancelar} onFechar={fechar} onRecarregar={recarregar} />

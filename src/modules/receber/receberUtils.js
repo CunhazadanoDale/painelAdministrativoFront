@@ -85,3 +85,23 @@ export function agoraEmBrasilia() {
 export function instanteDeBrasilia(dataHora) {
   return `${dataHora}:00-03:00`;
 }
+
+export const STATUS_ANTECIPACAO = [
+  { valor: 'ativa', rotulo: 'Ativa', cor: 'info' },
+  { valor: 'estornada', rotulo: 'Estornada', cor: 'danger' },
+];
+
+export function statusDaAntecipacao(status) {
+  return STATUS_ANTECIPACAO.find((item) => item.valor === status) ?? { valor: status, rotulo: status, cor: 'neutral' };
+}
+
+export function textoDaTaxa(taxaBp) {
+  return `${(taxaBp / 100).toFixed(2).replace('.', ',')}% ao mês`;
+}
+
+export function taxaParaPontosBase(texto) {
+  const limpo = String(texto ?? '').trim().replace(',', '.');
+  if (!limpo) return 0;
+  if (!/^\d+(\.\d{1,2})?$/.test(limpo)) return Number.NaN;
+  return Math.round(Number(limpo) * 100);
+}

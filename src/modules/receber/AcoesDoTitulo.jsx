@@ -1,13 +1,15 @@
 import React, { useCallback, useState } from 'react';
 import { AcaoModal } from '../../app/components/AcaoModal';
 import { SeletorRemoto } from '../../app/components/SeletorRemoto';
-import { formatarData } from '../../lib/formatar';
+import { formatarData, formatarMoeda, paraCentavos } from '../../lib/formatar';
 import * as contasService from '../../services/contasBancarias';
+import { SeletorCategoriaDespesa } from '../financeiro/SeletorCategoriaDespesa';
 import { hojeEmBrasilia } from '../pedidos/pedidosUtils';
 import { CANAIS_BOLETO, agoraEmBrasilia, instanteDeBrasilia, numeroDoTitulo } from './receberUtils';
 
 const LIMITE_MOTIVO_PRORROGACAO = 500;
 const LIMITE_MOTIVO_CANCELAMENTO = 1000;
+const LIMITE_MOTIVO_RECOMPRA = 500;
 
 const opcaoDeConta = (conta) => ({ valor: conta.id, rotulo: `${conta.apelido} · ${conta.banco_nome}` });
 
@@ -212,6 +214,125 @@ export function CancelarTituloModal({ titulo, onConfirmar, onFechar, onRecarrega
           rows={3}
           value={motivo}
           maxLength={LIMITE_MOTIVO_CANCELAMENTO}
+          onChange={(evento) => setMotivo(evento.target.value)}
+        />
+      </div>
+    </AcaoModal>
+  );
+}
+
+export function RecompraModal({ titulo, onConfirmar, onFechar, onRecarregar }) {
+  const hoje = hojeEmBrasilia();
+  const [recompradoEm, setRecompradoEm] = useState(hoje);
+  const [encargos, setEncargos] = useState('');
+  const [vencimento, setVencimento] = useState('');
+  const [categoria, setCategoria] = useState('');
+  const [motivo, setMotivo] = useState('');
+  const centavosEncargos = encargos.trim() ? paraCentavos(encargos) : 0;
+  const encargosValidos = Number.isFinite(centavosEncargos) && centavosEncargos >= 0;
+
+  const validar = () => {
+    const erros = [];
+    if (!recompradoEm) erros.push('Informe a data da recompra.');
+    else if (recompradoEm > hoje) erros.push('A data da recompra não pode estar no futuro.');
+    if (!encargosValidos) erros.push('Os encargos não podem ser negativos.');
+    if (!vencimento) erros.push('Informe o vencimento da conta a pagar.');
+    if (!categoria) erros.push('Escolha a categoria de despesa da conta a pagar.');
+    if (!motivo.trim()) erros.push('Informe o motivo da recompra.');
+    else if (motivo.trim().length > LIMITE_MOTIVO_RECOMPRA) {
+      erros.push(`O motivo tem no máximo ${LIMITE_MOTIVO_RECOMPRA} caracteres.`);
+    }
+    return erros;
+  };
+
+  const confirmar = () =>
+    onConfirmar({
+      recomprado_em: recompradoEm,
+      encargos_centavos: centavosEncargos,
+      vencimento,
+      categoria_financeira_id: categoria,
+      motivo: motivo.trim(),
+    });
+
+  return (
+    <AcaoModal
+      titulo={`Recomprar título ${numeroDoTitulo(titulo)}`}
+      rotuloConfirmar="Recomprar"
+      validar={validar}
+      onConfirmar={confirmar}
+      onFechar={onFechar}
+      onRecarregar={onRecarregar}
+      largura="560px"
+    >
+      <p className="receber-texto">
+        O título sai do borderô e volta para a carteira, e a empresa cobra o cliente de novo. Nasce a conta a pagar ao
+        fomento de{' '}
+        <strong>{formatarMoeda(titulo.saldo_centavos + (encargosValidos ? centavosEncargos : 0))}</strong> (saldo mais
+        encargos), aguardando aprovação.
+      </p>
+      <div className="receber-form-linha">
+        <div className="receber-form-campo">
+          <label className="filter-label" htmlFor="recompra-data">
+            Recomprado em *
+          </label>
+          <input
+            id="recompra-data"
+            className="filter-input"
+            type="date"
+            max={hoje}
+            value={recompradoEm}
+            onChange={(evento) => setRecompradoEm(evento.target.value)}
+          />
+        </div>
+        <div className="receber-form-campo">
+          <label className="filter-label" htmlFor="recompra-encargos">
+            Encargos
+          </label>
+          <input
+            id="recompra-encargos"
+            className="filter-input"
+            type="text"
+            inputMode="decimal"
+            value={encargos}
+            onChange={(evento) => setEncargos(evento.target.value)}
+          />
+        </div>
+      </div>
+      <div className="receber-form-linha">
+        <div className="receber-form-campo">
+          <label className="filter-label" htmlFor="recompra-vencimento">
+            Vencimento da conta a pagar *
+          </label>
+          <input
+            id="recompra-vencimento"
+            className="filter-input"
+            type="date"
+            value={vencimento}
+            onChange={(evento) => setVencimento(evento.target.value)}
+          />
+        </div>
+        <div className="receber-form-campo">
+          <label className="filter-label" htmlFor="recompra-categoria">
+            Categoria da conta a pagar *
+          </label>
+          <SeletorCategoriaDespesa
+            id="recompra-categoria"
+            valor={categoria}
+            onAlterar={setCategoria}
+            placeholder="Selecione…"
+          />
+        </div>
+      </div>
+      <div className="receber-form-campo">
+        <label className="filter-label" htmlFor="recompra-motivo">
+          Motivo *
+        </label>
+        <textarea
+          id="recompra-motivo"
+          className="filter-input"
+          rows={3}
+          value={motivo}
+          maxLength={LIMITE_MOTIVO_RECOMPRA}
           onChange={(evento) => setMotivo(evento.target.value)}
         />
       </div>

@@ -30,6 +30,7 @@ vi.mock('../../services/titulosReceber', () => ({
   retirarDoBanco: vi.fn(),
   registrarBoletoEnviado: vi.fn(),
   cancelarTitulo: vi.fn(),
+  recomprarTitulo: vi.fn(),
 }));
 
 const svc = titulosService;
@@ -107,7 +108,7 @@ beforeEach(() => {
   ]);
   svc.listarHistoricoTitulo.mockResolvedValue({ dados: HISTORICO });
   svc.listarRecebimentos.mockResolvedValue({ dados: [] });
-  for (const nome of ['atualizarTitulo', 'prorrogarTitulo', 'enviarAoBanco', 'retirarDoBanco', 'registrarBoletoEnviado', 'cancelarTitulo']) {
+  for (const nome of ['atualizarTitulo', 'prorrogarTitulo', 'enviarAoBanco', 'retirarDoBanco', 'registrarBoletoEnviado', 'cancelarTitulo', 'recomprarTitulo']) {
     svc[nome].mockResolvedValue({ dados: CARTEIRA });
   }
 });
@@ -306,6 +307,50 @@ describe('TituloDetalhe', () => {
     await waitFor(() =>
       expect(svc.atualizarTitulo).toHaveBeenLastCalledWith('tit-1', expect.objectContaining({ numero: 'ALG-11', versao: 5 }))
     );
+  });
+
+  it('título antecipado oferece a recompra e não oferece banco nem cancelamento', async () => {
+    await abrir({ ...CARTEIRA, status: 'antecipado' });
+
+    expect(screen.getByRole('button', { name: 'Recomprar' })).toBeInTheDocument();
+    for (const nome of ['Editar', 'Prorrogar', 'Enviar ao banco', 'Cancelar título']) {
+      expect(screen.queryByRole('button', { name: nome })).toBeNull();
+    }
+  });
+
+  it('recompra gerando a conta a pagar ao fomento com saldo mais encargos', async () => {
+    categoriasService.obterArvoreFinanceira.mockResolvedValue({
+      dados: [{ id: 'raiz-fin', nome: 'Despesas financeiras', natureza: 'despesa', subcategorias: [{ id: 'sub-recompra', nome: 'Recompra de títulos', lancavel: true }] }],
+    });
+    await abrir({ ...CARTEIRA, status: 'antecipado' });
+    fireEvent.click(screen.getByRole('button', { name: 'Recomprar' }));
+    const dialogo = screen.getByRole('dialog', { name: 'Recomprar título ALG-10' });
+    expect(within(dialogo).getByLabelText('Recomprado em *')).toHaveValue('2026-10-18');
+
+    fireEvent.click(within(dialogo).getByRole('button', { name: 'Recomprar' }));
+    expect(await within(dialogo).findByText('Informe o vencimento da conta a pagar.')).toBeInTheDocument();
+    expect(within(dialogo).getByText('Escolha a categoria de despesa da conta a pagar.')).toBeInTheDocument();
+    expect(within(dialogo).getByText('Informe o motivo da recompra.')).toBeInTheDocument();
+
+    fireEvent.change(within(dialogo).getByLabelText('Encargos'), { target: { value: '45,00' } });
+    expect(within(dialogo).getByText(/R\$ 1\.545,00/)).toBeInTheDocument();
+    fireEvent.change(within(dialogo).getByLabelText('Vencimento da conta a pagar *'), { target: { value: '2026-10-20' } });
+    await within(dialogo).findByRole('option', { name: 'Recompra de títulos' });
+    fireEvent.change(within(dialogo).getByLabelText('Categoria da conta a pagar *'), { target: { value: 'sub-recompra' } });
+    fireEvent.change(within(dialogo).getByLabelText('Motivo *'), { target: { value: 'cliente não pagou' } });
+    fireEvent.click(within(dialogo).getByRole('button', { name: 'Recomprar' }));
+
+    await waitFor(() =>
+      expect(svc.recomprarTitulo).toHaveBeenCalledWith('tit-1', {
+        versao: 4,
+        recomprado_em: '2026-10-18',
+        encargos_centavos: 4500,
+        vencimento: '2026-10-20',
+        categoria_financeira_id: 'sub-recompra',
+        motivo: 'cliente não pagou',
+      })
+    );
+    await waitFor(() => expect(svc.obterTitulo).toHaveBeenCalledTimes(2));
   });
 
   it('mostra o erro de carga com nova tentativa', async () => {

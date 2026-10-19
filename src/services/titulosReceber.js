@@ -1,4 +1,4 @@
-import { montarConsulta, requisitar } from '../lib/api';
+import { listarTodas, montarConsulta, requisitar } from '../lib/api';
 
 const CAMINHO = '/api/v1/titulos-receber';
 
@@ -32,6 +32,15 @@ export function listarTitulos({
     origem_cancelada: origemCancelada ? 'true' : '',
   });
   return requisitar(`${CAMINHO}${consulta}`, { sinal });
+}
+
+export async function listarTitulosAntecipaveis({ empresa, sinal } = {}) {
+  const [carteira, emBanco] = await Promise.all(
+    ['carteira', 'em_banco'].map((status) => listarTodas(CAMINHO, { empresa, status }, { sinal }))
+  );
+  return [...carteira, ...emBanco]
+    .filter((titulo) => titulo.saldo_centavos > 0 && !titulo.origem_cancelada_em)
+    .sort((a, b) => a.vencimento.localeCompare(b.vencimento));
 }
 
 export function obterTitulo(id, { sinal } = {}) {

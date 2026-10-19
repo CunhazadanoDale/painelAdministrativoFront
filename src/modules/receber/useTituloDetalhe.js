@@ -67,6 +67,10 @@ export function useTituloDetalhe(id) {
       executar(() => titulosService.estornarRecebimento(id, recebimentoId, { motivo, estornado_em, versao })),
     [executar, id, versao]
   );
+  const recomprar = useCallback(
+    (dados) => executar(() => titulosService.recomprarTitulo(id, { versao, ...dados })),
+    [executar, id, versao]
+  );
   const cancelar = useCallback(
     (motivo) => executar(() => titulosService.cancelarTitulo(id, { motivo, versao })),
     [executar, id, versao]
@@ -85,6 +89,7 @@ export function useTituloDetalhe(id) {
     registrarBoleto,
     receber,
     estornarRecebimento,
+    recomprar,
     cancelar,
   };
 }
