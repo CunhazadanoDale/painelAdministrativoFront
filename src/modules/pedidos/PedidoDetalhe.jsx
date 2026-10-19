@@ -12,6 +12,7 @@ import { useCadastrosCliente } from '../clientes/useCadastrosCliente';
 import {
   CancelarPedidoModal,
   ConfirmarPedidoModal,
+  GerarTituloEntradaModal,
   RegistrarEntradaModal,
   ReservarPendenciasModal,
 } from './AcoesDoPedido';
@@ -25,6 +26,8 @@ import { EntregasDoPedido } from './EntregasDoPedido';
 import { PropostaFormModal } from './PropostaFormModal';
 import { usePedidoDetalhe } from './usePedidoDetalhe';
 import { usePedidoHistorico } from './usePedidoHistorico';
+import { useTituloDeEntrada } from './useTituloDeEntrada';
+import { numeroDoTitulo, statusDoTitulo } from '../receber/receberUtils';
 import { AlertCircle, ChevronLeft } from 'lucide-react';
 import '../../app/components/DataGrid.css';
 import './Pedidos.css';
@@ -77,6 +80,7 @@ export default function PedidoDetalhe() {
     confirmar,
     reservarPendencias,
     registrarEntrada,
+    gerarTituloEntrada,
     cancelar,
   } = usePedidoDetalhe(id);
   const nomeCliente = useNomesPorId([pedido?.cliente_id], clientesService.obterCliente);
@@ -86,6 +90,8 @@ export default function PedidoDetalhe() {
     produtosService.obterProduto
   );
   const [acao, setAcao] = useState(null);
+  const consultaEntrada = !!financeiro && pedido?.modelo === 'importacao';
+  const tituloEntrada = useTituloDeEntrada(id, consultaEntrada, geracao);
 
   const voltar = (
     <Link className="pedidos-voltar" to="/pedidos">
@@ -117,6 +123,8 @@ export default function PedidoDetalhe() {
   const faltaCobrir = (pedido.itens ?? []).some((item) => (item.falta_cobrir ?? 0) > 0);
   const podeEntrada = financeiro && pedido.modelo === 'importacao' && aberto && !pedido.entrada_paga_em;
   const fechar = () => setAcao(null);
+  const podeGerarTitulo =
+    podeEntrada && !tituloEntrada.titulo && !tituloEntrada.carregando && !tituloEntrada.erro;
 
   const dados = [
     ['Empresa', nomeEmpresa(pedido.empresa_id)],
@@ -134,6 +142,24 @@ export default function PedidoDetalhe() {
       pedido.entrada_paga_em
         ? `${formatarMoeda(pedido.entrada_paga_centavos)} em ${formatarData(pedido.entrada_paga_em)}`
         : 'Ainda não registrada',
+    ]);
+  }
+  if (consultaEntrada) {
+    const situacaoTitulo = tituloEntrada.titulo ? statusDoTitulo(tituloEntrada.titulo.status) : null;
+    dados.push([
+      'Título de entrada',
+      tituloEntrada.erro ? (
+        tituloEntrada.erro
+      ) : tituloEntrada.carregando ? (
+        'Consultando…'
+      ) : tituloEntrada.titulo ? (
+        <span key="titulo-entrada" className="pedidos-titulo-entrada">
+          <Link to={`/titulos-receber/${tituloEntrada.titulo.id}`}>{numeroDoTitulo(tituloEntrada.titulo)}</Link>
+          <StatusBadge status={situacaoTitulo.cor} label={situacaoTitulo.rotulo} />
+        </span>
+      ) : (
+        'Não gerado'
+      ),
     ]);
   }
   if (pedido.status === 'cancelado') {
@@ -166,6 +192,11 @@ export default function PedidoDetalhe() {
           {comercial && aberto && faltaCobrir && (
             <button type="button" className="filter-btn filter-btn-secondary" style={BOTAO} onClick={() => setAcao('reservar')}>
               Reservar pendências
+            </button>
+          )}
+          {podeGerarTitulo && (
+            <button type="button" className="filter-btn filter-btn-secondary" style={BOTAO} onClick={() => setAcao('titulo-entrada')}>
+              Gerar título de entrada
             </button>
           )}
           {podeEntrada && (
@@ -269,6 +300,14 @@ export default function PedidoDetalhe() {
       )}
       {acao === 'entrada' && (
         <RegistrarEntradaModal pedido={pedido} onConfirmar={registrarEntrada} onFechar={fechar} onRecarregar={recarregar} />
+      )}
+      {acao === 'titulo-entrada' && (
+        <GerarTituloEntradaModal
+          pedido={pedido}
+          onConfirmar={gerarTituloEntrada}
+          onFechar={fechar}
+          onRecarregar={recarregar}
+        />
       )}
       {acao === 'cancelar' && (
         <CancelarPedidoModal pedido={pedido} onConfirmar={cancelar} onFechar={fechar} onRecarregar={recarregar} />

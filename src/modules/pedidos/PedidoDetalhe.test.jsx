@@ -6,10 +6,12 @@ import { useAutenticacao } from '../../app/autenticacao/useAutenticacao';
 import { ErroApi } from '../../lib/api';
 import * as gruposService from '../../services/clienteGrupos';
 import * as clientesService from '../../services/clientes';
+import * as contasService from '../../services/contasBancarias';
 import * as empresasService from '../../services/empresas';
 import * as pedidosService from '../../services/pedidos';
 import * as produtosService from '../../services/produtos';
 import * as representantesService from '../../services/representantes';
+import * as titulosService from '../../services/titulosReceber';
 import PedidoDetalhe from './PedidoDetalhe';
 
 vi.mock('../../app/autenticacao/useAutenticacao', () => ({ useAutenticacao: vi.fn() }));
@@ -33,7 +35,10 @@ vi.mock('../../services/pedidos', () => ({
   cancelarPedido: vi.fn(),
   listarHistoricoPedido: vi.fn(),
   listarEntregasDoPedido: vi.fn(),
+  gerarTituloEntrada: vi.fn(),
 }));
+vi.mock('../../services/titulosReceber', () => ({ listarTitulos: vi.fn() }));
+vi.mock('../../services/contasBancarias', () => ({ listarTodasContasBancarias: vi.fn() }));
 
 const svc = pedidosService;
 const CONFLITO = 'o pedido foi alterado por outra pessoa; recarregue e tente de novo';
@@ -125,6 +130,12 @@ beforeEach(() => {
     dados: [{ id: 'h1', acao: 'criado', status_anterior: null, status_novo: 'proposta', detalhe: '', criado_em: '2026-10-10T13:00:00Z' }],
   });
   svc.listarEntregasDoPedido.mockResolvedValue({ dados: [] });
+  svc.gerarTituloEntrada.mockResolvedValue({ dados: { id: 'tit-9' } });
+  titulosService.listarTitulos.mockResolvedValue({ dados: [] });
+  contasService.listarTodasContasBancarias.mockResolvedValue([
+    { id: 'cb-sic', apelido: 'Sicredi movimento', banco_nome: 'Sicredi' },
+    { id: 'cb-itau', apelido: 'Itaú cobrança', banco_nome: 'Itaú' },
+  ]);
   [svc.atualizarPedido, svc.confirmarPedido, svc.reservarPendencias, svc.registrarEntrada, svc.cancelarPedido].forEach(
     (funcao) => funcao.mockResolvedValue({ dados: PROPOSTA })
   );
@@ -334,6 +345,54 @@ describe('PedidoDetalhe', () => {
     expect(screen.getByText('cliente desistiu')).toBeInTheDocument();
     expect(screen.getByText('R$ 250,00')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Cancelar pedido' })).toBeNull();
+  });
+
+  it('o financeiro gera o título de entrada da importação com vencimento e conta de cobrança', async () => {
+    perfil({ comercial: false, financeiro: true });
+    svc.obterPedido.mockResolvedValue({ dados: IMPORTACAO });
+    await carregar();
+
+    expect(await screen.findByText('Não gerado')).toBeInTheDocument();
+    expect(titulosService.listarTitulos).toHaveBeenCalledWith(
+      expect.objectContaining({ origem: 'pedido', origem_id: 'ped-12' })
+    );
+    fireEvent.click(botao('Gerar título de entrada'));
+    const dialogo = screen.getByRole('dialog', { name: 'Título de entrada do pedido 12' });
+    expect(within(dialogo).getByText(/R\$ 300,00/)).toBeInTheDocument();
+    expect(within(dialogo).getByLabelText('Vencimento *')).toHaveValue('2026-10-18');
+    fireEvent.change(within(dialogo).getByLabelText('Vencimento *'), { target: { value: '2026-10-25' } });
+    await within(dialogo).findByRole('option', { name: 'Itaú cobrança · Itaú' });
+    fireEvent.change(within(dialogo).getByLabelText('Conta de cobrança'), { target: { value: 'cb-itau' } });
+    fireEvent.click(within(dialogo).getByRole('button', { name: 'Gerar título' }));
+
+    await waitFor(() =>
+      expect(svc.gerarTituloEntrada).toHaveBeenCalledWith('ped-12', { vencimento: '2026-10-25', conta_bancaria_id: 'cb-itau' })
+    );
+    expect(contasService.listarTodasContasBancarias).toHaveBeenCalledWith(
+      expect.objectContaining({ empresa: 'emp-mia', ativa: true })
+    );
+    await waitFor(() => expect(titulosService.listarTitulos).toHaveBeenCalledTimes(2));
+  });
+
+  it('com o título de entrada já gerado mostra o link e não oferece gerar de novo', async () => {
+    perfil({ comercial: false, financeiro: true });
+    svc.obterPedido.mockResolvedValue({ dados: IMPORTACAO });
+    titulosService.listarTitulos.mockResolvedValue({
+      dados: [{ id: 'tit-9', numero: 'PED-12', parcela: 1, origem: 'pedido', status: 'em_banco' }],
+    });
+    await carregar();
+
+    expect(await screen.findByRole('link', { name: 'PED-12' })).toHaveAttribute('href', '/titulos-receber/tit-9');
+    expect(screen.getByText('Em banco')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Gerar título de entrada' })).toBeNull();
+  });
+
+  it('o comercial não consulta o título de entrada', async () => {
+    svc.obterPedido.mockResolvedValue({ dados: IMPORTACAO });
+    await carregar();
+
+    expect(screen.queryByText('Título de entrada')).toBeNull();
+    expect(titulosService.listarTitulos).not.toHaveBeenCalled();
   });
 
   it('mostra o painel de entregas do pedido', async () => {
