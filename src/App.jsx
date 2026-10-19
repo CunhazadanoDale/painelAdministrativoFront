@@ -19,6 +19,12 @@ import DespesasRecorrentes from './modules/financeiro/DespesasRecorrentes';
 import ResumoContasAPagar from './modules/financeiro/ResumoContasAPagar';
 import ContasBancarias from './modules/financeiro/ContasBancarias';
 import PlanoContas from './modules/financeiro/PlanoContas';
+import AntecipacaoDetalhe from './modules/receber/AntecipacaoDetalhe';
+import Antecipacoes from './modules/receber/Antecipacoes';
+import BoletosPendentes from './modules/receber/BoletosPendentes';
+import ResumoContasAReceber from './modules/receber/ResumoContasAReceber';
+import TituloDetalhe from './modules/receber/TituloDetalhe';
+import Titulos from './modules/receber/Titulos';
 import Produtos from './modules/produtos/Produtos';
 import ProdutoDetalhe from './modules/produtos/ProdutoDetalhe';
 import Categorias from './modules/produtos/Categorias';
@@ -119,6 +125,24 @@ function App() {
             <Route
               path="/contas-a-pagar/resumo"
               element={financeiro ? <ResumoContasAPagar /> : <Navigate to="/" replace />}
+            />
+            <Route path="/titulos-receber" element={financeiro ? <Titulos /> : <Navigate to="/" replace />} />
+            <Route
+              path="/titulos-receber/:id"
+              element={financeiro ? <TituloDetalhe /> : <Navigate to="/" replace />}
+            />
+            <Route path="/antecipacoes" element={financeiro ? <Antecipacoes /> : <Navigate to="/" replace />} />
+            <Route
+              path="/antecipacoes/:id"
+              element={financeiro ? <AntecipacaoDetalhe /> : <Navigate to="/" replace />}
+            />
+            <Route
+              path="/contas-a-receber/resumo"
+              element={financeiro ? <ResumoContasAReceber /> : <Navigate to="/" replace />}
+            />
+            <Route
+              path="/contas-a-receber/boletos"
+              element={financeiro ? <BoletosPendentes /> : <Navigate to="/" replace />}
             />
             <Route path="/formularios" element={<Formularios />} />
             <Route path="/produtos" element={<Produtos />} />
