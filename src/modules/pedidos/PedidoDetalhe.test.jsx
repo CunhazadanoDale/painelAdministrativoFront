@@ -220,6 +220,38 @@ describe('PedidoDetalhe', () => {
     );
   });
 
+  it('mostra a revisão, a validade, o frete estimado e o desconto de cada item da proposta', async () => {
+    svc.obterPedido.mockResolvedValue({
+      dados: {
+        ...PROPOSTA,
+        revisao: 2,
+        validade: '2026-11-03T00:00:00Z',
+        vencida: false,
+        frete_tipo: 'cif',
+        frete_estimado_centavos: 18000,
+        itens: [{ ...PROPOSTA.itens[0], preco_tabela_centavos: 3800, desconto_unitario_centavos: 210 }],
+      },
+    });
+    await carregar();
+
+    expect(screen.getByText('Proposta 12-R2')).toBeInTheDocument();
+    expect(screen.getByText('03/11/2026')).toBeInTheDocument();
+    expect(screen.getByText('CIF, estimado em R$ 180,00')).toBeInTheDocument();
+    const item = (await screen.findByText('Cimento CP II 50')).closest('tr');
+    expect(within(item).getByText('R$ 38,00')).toBeInTheDocument();
+    expect(within(item).getByText('R$ 2,10')).toBeInTheDocument();
+  });
+
+  it('marca a proposta vencida e avisa na confirmação', async () => {
+    svc.obterPedido.mockResolvedValue({ dados: { ...PROPOSTA, validade: '2026-10-10T00:00:00Z', vencida: true } });
+    await carregar();
+
+    expect(screen.getByText('Vencida')).toBeInTheDocument();
+    fireEvent.click(botao('Confirmar'));
+    const dialogo = screen.getByRole('dialog', { name: 'Confirmar pedido 12' });
+    expect(within(dialogo).getByText(/venceu em 10\/10\/2026/)).toBeInTheDocument();
+  });
+
   it('confirma o pedido depois de avisar sobre a reserva', async () => {
     await carregar();
 
