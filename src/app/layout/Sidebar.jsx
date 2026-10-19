@@ -30,6 +30,7 @@ import {
   Repeat,
   CalendarRange,
   HandCoins,
+  Percent,
   BadgePercent,
   CalendarClock,
   MailWarning,
@@ -64,7 +65,8 @@ export function Sidebar() {
         { label: 'Consultas de Pedidos', icon: <SearchCheck size={18} />, path: '/pedidos/consultas' },
         { label: 'Clientes', icon: <Contact size={18} />, path: '/clientes' },
         { label: 'Grupos de Clientes', icon: <Network size={18} />, path: '/grupos-clientes' },
-        { label: 'Representantes', icon: <Handshake size={18} />, path: '/representantes', comercial: true }
+        { label: 'Representantes', icon: <Handshake size={18} />, path: '/representantes', comercial: true },
+        { label: 'Minhas Comissões', icon: <Percent size={18} />, path: '/comissoes', comercial: true, semFinanceiro: true }
       ]
     },
     {
@@ -80,6 +82,7 @@ export function Sidebar() {
         { label: 'Antecipações', icon: <BadgePercent size={18} />, path: '/antecipacoes', financeiro: true },
         { label: 'Resumo a Receber', icon: <CalendarClock size={18} />, path: '/contas-a-receber/resumo', financeiro: true },
         { label: 'Boletos Pendentes', icon: <MailWarning size={18} />, path: '/contas-a-receber/boletos', financeiro: true },
+        { label: 'Comissões', icon: <Percent size={18} />, path: '/comissoes', financeiro: true },
         { label: 'Notas Fiscais', icon: <FileText size={18} />, path: '/notas-fiscais', end: true },
         { label: 'Itens sem Produto', icon: <PackageX size={18} />, path: '/notas-fiscais/itens-sem-produto', financeiro: true },
         { label: 'Entregas sem NF', icon: <FileWarning size={18} />, path: '/notas-fiscais/entregas-sem-nota', financeiro: true },
@@ -114,7 +117,8 @@ export function Sidebar() {
         (item) =>
           (!item.admin || administrador) &&
           (!item.comercial || comercial) &&
-          (!item.financeiro || financeiro)
+          (!item.financeiro || financeiro) &&
+          (!item.semFinanceiro || !financeiro)
       )
     }))
     .filter((group) => group.items.length > 0);

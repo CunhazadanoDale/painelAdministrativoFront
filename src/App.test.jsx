@@ -417,6 +417,49 @@ describe('roteamento do App', () => {
     expect(screen.getByRole('link', { name: 'Entregas sem NF' })).toHaveAttribute('href', '/notas-fiscais/entregas-sem-nota');
   });
 
+  it('abre as comissões para o financeiro, com a entrada na sidebar', async () => {
+    gravarSessaoFinanceiro();
+
+    renderizar('/comissoes');
+
+    expect(await screen.findByRole('heading', { name: 'Comissões' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Comissões' })).toHaveAttribute('href', '/comissoes');
+    expect(screen.queryByRole('link', { name: 'Minhas Comissões' })).toBeNull();
+  });
+
+  it('mostra Minhas Comissões ao comercial sem financeiro e nada a quem não é nenhum dos dois', async () => {
+    localStorage.setItem(
+      'mia.sessao',
+      JSON.stringify({
+        token: 'token-de-teste',
+        expira_em: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+        administrador: false,
+        comercial: true,
+        usuario: { usuario_id: 1, nome: 'Pessoa Teste', email: 'teste@exemplo.com' },
+      })
+    );
+    const { unmount } = renderizar('/comissoes');
+
+    expect(await screen.findByRole('heading', { name: 'Minhas comissões' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Minhas Comissões' })).toHaveAttribute('href', '/comissoes');
+    unmount();
+
+    gravarSessao(false);
+    renderizar('/');
+    await screen.findByTestId('caminho');
+    expect(screen.queryByRole('link', { name: 'Minhas Comissões' })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Comissões' })).toBeNull();
+  });
+
+  it('abre o detalhe do fechamento de comissão pela rota', async () => {
+    gravarSessaoFinanceiro();
+
+    renderizar('/comissoes/fechamentos/fec-1');
+
+    expect(await screen.findByRole('link', { name: /Voltar/ })).toHaveAttribute('href', '/comissoes');
+    expect(screen.getByTestId('caminho')).toHaveTextContent('/comissoes/fechamentos/fec-1');
+  });
+
   it('redireciona /pagamentos para /solicitacoes', async () => {
     gravarSessao(false);
 

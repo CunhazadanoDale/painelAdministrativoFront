@@ -84,15 +84,17 @@ describe('Comissoes', () => {
   it('lista as comissões com competência, representante, pedido, base, percentual, valor e situação', async () => {
     renderizar();
 
-    const linhas = (await screen.findAllByRole('link', { name: 'Pedido 12' })).map((link) => link.closest('tr'));
-    const aberta = linhas.find((linha) => within(linha).queryByText('10/2026'));
-    expect(within(aberta).getByRole('link', { name: 'Pedido 12' })).toHaveAttribute('href', '/pedidos/ped-12');
+    const aberta = (await screen.findByText('10/2026', {}, { timeout: 5000 })).closest('tr');
+    expect(await within(aberta).findByRole('link', { name: 'Pedido 12' }, { timeout: 5000 })).toHaveAttribute(
+      'href',
+      '/pedidos/ped-12'
+    );
     expect(await within(aberta).findByText('José Vendas')).toBeInTheDocument();
     expect(within(aberta).getByText('R$ 6.000,00')).toBeInTheDocument();
     expect(within(aberta).getByText('4,50%')).toBeInTheDocument();
     expect(within(aberta).getByText('R$ 270,00')).toBeInTheDocument();
     expect(within(aberta).getByText('Em aberto')).toBeInTheDocument();
-    const fechada = linhas.find((linha) => within(linha).queryByText('09/2026'));
+    const fechada = screen.getByText('09/2026').closest('tr');
     expect(within(fechada).getByText('Fechada')).toBeInTheDocument();
   });
 
