@@ -66,3 +66,22 @@ export function textoDoSaldo(titulo) {
     ? formatarMoeda(titulo.valor_centavos)
     : `${formatarMoeda(titulo.saldo_centavos)} de ${formatarMoeda(titulo.valor_centavos)}`;
 }
+
+const formatoAgoraBrasilia = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'America/Sao_Paulo',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+});
+
+export function agoraEmBrasilia() {
+  const partes = Object.fromEntries(formatoAgoraBrasilia.formatToParts(new Date()).map((parte) => [parte.type, parte.value]));
+  return `${partes.year}-${partes.month}-${partes.day}T${partes.hour}:${partes.minute}`;
+}
+
+export function instanteDeBrasilia(dataHora) {
+  return `${dataHora}:00-03:00`;
+}

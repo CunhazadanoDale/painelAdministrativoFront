@@ -1,13 +1,17 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { AvisoConflito } from '../../app/components/AvisoConflito';
 import { BuscaRemota } from '../../app/components/BuscaRemota';
 import { Modal } from '../../app/components/Modal';
 import { SeletorEmpresa } from '../../app/components/SeletorEmpresa';
 import { SeletorRemoto } from '../../app/components/SeletorRemoto';
-import { paraCentavos } from '../../lib/formatar';
+import { ehConflitoDeConcorrencia } from '../../lib/api';
+import { centavosParaTexto, paraCentavos } from '../../lib/formatar';
 import * as clientesService from '../../services/clientes';
 import * as contasService from '../../services/contasBancarias';
+import * as titulosService from '../../services/titulosReceber';
 import { SeletorCategoriaReceita } from '../financeiro/SeletorCategoriaDespesa';
 import { hojeEmBrasilia } from '../pedidos/pedidosUtils';
+import { numeroDoTitulo } from './receberUtils';
 import './Receber.css';
 
 const LIMITE_NUMERO = 30;
@@ -21,24 +25,63 @@ const buscarClientes = (texto, sinal) =>
 const opcaoDeCliente = (cliente) => ({ valor: cliente.id, rotulo: cliente.nome });
 const opcaoDeConta = (conta) => ({ valor: conta.id, rotulo: `${conta.apelido} · ${conta.banco_nome}` });
 
-export function TituloFormModal({ onFechar, onSalvar }) {
-  const hoje = hojeEmBrasilia();
-  const [form, setForm] = useState({
-    empresa_id: '',
-    cliente_id: '',
-    numero: '',
-    parcela: '1',
-    vencimento: hoje,
-    valor: '',
-    categoria_financeira_id: '',
-    competencia: '',
+function formularioDe(titulo, hoje) {
+  return {
+    empresa_id: titulo?.empresa_id ?? '',
+    cliente_id: titulo?.cliente_id ?? '',
+    numero: titulo?.numero ?? '',
+    parcela: titulo ? String(titulo.parcela) : '1',
+    vencimento: titulo?.vencimento ?? hoje,
+    valor: titulo ? centavosParaTexto(titulo.valor_centavos) : '',
+    categoria_financeira_id: titulo?.categoria_financeira_id ?? '',
+    competencia: titulo?.competencia ?? '',
     conta_bancaria_id: '',
-    observacao: '',
-  });
+    observacao: titulo?.observacao ?? '',
+  };
+}
+
+export function TituloFormModal({ titulo, nomeEmpresa, nomeCliente, onFechar, onSalvar }) {
+  const editando = !!titulo;
+  const hoje = hojeEmBrasilia();
+  const [form, setForm] = useState(() => formularioDe(titulo, hoje));
   const [clienteNome, setClienteNome] = useState('');
   const [erros, setErros] = useState([]);
   const [erroApi, setErroApi] = useState(null);
   const [salvando, setSalvando] = useState(false);
+  const [versao, setVersao] = useState(titulo?.versao ?? null);
+  const [conflito, setConflito] = useState(null);
+  const [recarga, setRecarga] = useState(0);
+  const [recarregando, setRecarregando] = useState(false);
+  const [recarregado, setRecarregado] = useState(false);
+
+  const tituloId = titulo?.id ?? null;
+
+  useEffect(() => {
+    if (!tituloId || recarga === 0) return undefined;
+    const controle = new AbortController();
+    titulosService
+      .obterTitulo(tituloId, { sinal: controle.signal })
+      .then((resposta) => {
+        if (controle.signal.aborted) return;
+        setVersao(resposta?.dados?.versao ?? null);
+        setConflito(null);
+        setRecarregado(true);
+      })
+      .catch((e) => {
+        if (controle.signal.aborted) return;
+        setConflito(null);
+        setErroApi(e.message || 'Erro ao recarregar o título.');
+      })
+      .finally(() => {
+        if (!controle.signal.aborted) setRecarregando(false);
+      });
+    return () => controle.abort();
+  }, [tituloId, recarga]);
+
+  const recarregar = () => {
+    setRecarregando(true);
+    setRecarga((valor) => valor + 1);
+  };
 
   const empresaId = form.empresa_id;
   const carregarContas = useCallback(
@@ -59,14 +102,14 @@ export function TituloFormModal({ onFechar, onSalvar }) {
 
   const validar = () => {
     const novos = [];
-    if (!form.empresa_id) novos.push('Selecione a empresa.');
-    if (!form.cliente_id) novos.push('Selecione o cliente.');
+    if (!editando && !form.empresa_id) novos.push('Selecione a empresa.');
+    if (!editando && !form.cliente_id) novos.push('Selecione o cliente.');
     if (!form.numero.trim()) novos.push('Informe o número do documento.');
     else if (form.numero.trim().length > LIMITE_NUMERO) novos.push(`O número tem no máximo ${LIMITE_NUMERO} caracteres.`);
     const parcela = Number(form.parcela);
     if (!Number.isInteger(parcela) || parcela < 1 || parcela > 999) novos.push('A parcela vai de 1 a 999.');
     if (!form.vencimento) novos.push('Informe o vencimento.');
-    else if (form.vencimento < hoje) novos.push('O vencimento não pode ser antes de hoje.');
+    else if (form.vencimento < hoje && form.vencimento !== titulo?.vencimento) novos.push('O vencimento não pode ser antes de hoje.');
     const centavos = paraCentavos(form.valor);
     if (!form.valor.trim() || !Number.isFinite(centavos) || centavos <= 0) novos.push('Informe um valor maior que zero.');
     if (!form.categoria_financeira_id) novos.push('Escolha a categoria de receita.');
@@ -81,26 +124,34 @@ export function TituloFormModal({ onFechar, onSalvar }) {
     evento.preventDefault();
     if (!validar()) return;
 
-    const corpo = {
-      empresa_id: form.empresa_id,
-      cliente_id: form.cliente_id,
+    const dados = {
       numero: form.numero.trim(),
       parcela: Number(form.parcela),
       vencimento: form.vencimento,
       valor_centavos: paraCentavos(form.valor),
       categoria_financeira_id: form.categoria_financeira_id,
       ...(form.competencia ? { competencia: form.competencia } : {}),
-      ...(form.conta_bancaria_id ? { conta_bancaria_id: form.conta_bancaria_id } : {}),
       observacao: form.observacao.trim(),
     };
+    const corpo = editando
+      ? { ...dados, versao }
+      : {
+          empresa_id: form.empresa_id,
+          cliente_id: form.cliente_id,
+          ...dados,
+          ...(form.conta_bancaria_id ? { conta_bancaria_id: form.conta_bancaria_id } : {}),
+        };
 
     setSalvando(true);
     setErroApi(null);
+    setConflito(null);
+    setRecarregado(false);
     try {
       await onSalvar(corpo);
       onFechar();
     } catch (e) {
-      setErroApi(e.message || 'Erro ao salvar o título.');
+      if (ehConflitoDeConcorrencia(e)) setConflito(e.message);
+      else setErroApi(e.message || 'Erro ao salvar o título.');
     } finally {
       setSalvando(false);
     }
@@ -109,7 +160,7 @@ export function TituloFormModal({ onFechar, onSalvar }) {
   return (
     <Modal
       aberto
-      titulo="Novo título a receber"
+      titulo={editando ? `Editar título ${numeroDoTitulo(titulo)}` : 'Novo título a receber'}
       onFechar={salvando ? () => {} : onFechar}
       largura="640px"
       rodape={
@@ -128,7 +179,7 @@ export function TituloFormModal({ onFechar, onSalvar }) {
             form="titulo-form"
             className="filter-btn filter-btn-primary"
             style={{ flex: 'none', padding: '8px 16px' }}
-            disabled={salvando}
+            disabled={salvando || recarregando}
           >
             {salvando ? 'Salvando…' : 'Salvar'}
           </button>
@@ -141,6 +192,13 @@ export function TituloFormModal({ onFechar, onSalvar }) {
             {erroApi}
           </div>
         )}
+        {conflito && <AvisoConflito mensagem={conflito} onRecarregar={recarregar} recarregando={recarregando} />}
+        {recarregado && (
+          <div className="receber-form-ajuda" role="status">
+            Dados recarregados (versão {versao}). Confira o formulário e salve de novo para gravar por cima da outra
+            alteração.
+          </div>
+        )}
         {erros.length > 0 && (
           <ul className="receber-form-erros" role="alert">
             {erros.map((erro) => (
@@ -149,39 +207,52 @@ export function TituloFormModal({ onFechar, onSalvar }) {
           </ul>
         )}
 
-        <div className="receber-form-linha">
-          <div className="receber-form-campo">
-            <label className="filter-label" htmlFor="titulo-empresa">
-              Empresa *
-            </label>
-            <SeletorEmpresa
-              id="titulo-empresa"
-              className="filter-input"
-              valor={form.empresa_id}
-              onAlterar={alterarEmpresa}
-              disabled={salvando}
-            />
+        {editando ? (
+          <div className="receber-form-linha">
+            <div className="receber-form-campo">
+              <span className="filter-label">Empresa</span>
+              <span>{nomeEmpresa(titulo.empresa_id)}</span>
+            </div>
+            <div className="receber-form-campo">
+              <span className="filter-label">Cliente</span>
+              <span>{nomeCliente(titulo.cliente_id)}</span>
+            </div>
           </div>
-          <div className="receber-form-campo">
-            <label className="filter-label" htmlFor="titulo-cliente">
-              Cliente *
-            </label>
-            <BuscaRemota
-              id="titulo-cliente"
-              nomeBusca="cliente do título"
-              valor={form.cliente_id}
-              rotuloAtual={clienteNome}
-              buscar={buscarClientes}
-              opcaoDe={opcaoDeCliente}
-              onEscolher={(cliente) => {
-                setClienteNome(cliente ? cliente.nome : '');
-                setForm((atual) => ({ ...atual, cliente_id: cliente ? cliente.id : '' }));
-              }}
-              placeholderBusca="Nome ou documento"
-              disabled={salvando}
-            />
+        ) : (
+          <div className="receber-form-linha">
+            <div className="receber-form-campo">
+              <label className="filter-label" htmlFor="titulo-empresa">
+                Empresa *
+              </label>
+              <SeletorEmpresa
+                id="titulo-empresa"
+                className="filter-input"
+                valor={form.empresa_id}
+                onAlterar={alterarEmpresa}
+                disabled={salvando}
+              />
+            </div>
+            <div className="receber-form-campo">
+              <label className="filter-label" htmlFor="titulo-cliente">
+                Cliente *
+              </label>
+              <BuscaRemota
+                id="titulo-cliente"
+                nomeBusca="cliente do título"
+                valor={form.cliente_id}
+                rotuloAtual={clienteNome}
+                buscar={buscarClientes}
+                opcaoDe={opcaoDeCliente}
+                onEscolher={(cliente) => {
+                  setClienteNome(cliente ? cliente.nome : '');
+                  setForm((atual) => ({ ...atual, cliente_id: cliente ? cliente.id : '' }));
+                }}
+                placeholderBusca="Nome ou documento"
+                disabled={salvando}
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="receber-form-linha">
           <div className="receber-form-campo">
@@ -275,33 +346,35 @@ export function TituloFormModal({ onFechar, onSalvar }) {
           </div>
         </div>
 
-        <div className="receber-form-campo">
-          <label className="filter-label" htmlFor="titulo-conta">
-            Conta de cobrança
-          </label>
-          {empresaId ? (
-            <SeletorRemoto
-              id="titulo-conta"
-              className="filter-select"
-              valor={form.conta_bancaria_id}
-              onAlterar={alterarConta}
-              carregar={carregarContas}
-              opcaoDe={opcaoDeConta}
-              placeholder="Sem conta (fica em carteira)"
-              textoVazio="Nenhuma conta ativa nesta empresa"
-              textoErro="Erro ao carregar as contas bancárias."
-              selecionarUnica={false}
-              disabled={salvando}
-            />
-          ) : (
-            <select id="titulo-conta" className="filter-select" value="" disabled>
-              <option value="">Escolha a empresa primeiro</option>
-            </select>
-          )}
-          <span className="receber-form-ajuda">
-            {form.conta_bancaria_id ? 'Com a conta, o título nasce em banco.' : 'Sem conta, o título fica em carteira.'}
-          </span>
-        </div>
+        {!editando && (
+          <div className="receber-form-campo">
+            <label className="filter-label" htmlFor="titulo-conta">
+              Conta de cobrança
+            </label>
+            {empresaId ? (
+              <SeletorRemoto
+                id="titulo-conta"
+                className="filter-select"
+                valor={form.conta_bancaria_id}
+                onAlterar={alterarConta}
+                carregar={carregarContas}
+                opcaoDe={opcaoDeConta}
+                placeholder="Sem conta (fica em carteira)"
+                textoVazio="Nenhuma conta ativa nesta empresa"
+                textoErro="Erro ao carregar as contas bancárias."
+                selecionarUnica={false}
+                disabled={salvando}
+              />
+            ) : (
+              <select id="titulo-conta" className="filter-select" value="" disabled>
+                <option value="">Escolha a empresa primeiro</option>
+              </select>
+            )}
+            <span className="receber-form-ajuda">
+              {form.conta_bancaria_id ? 'Com a conta, o título nasce em banco.' : 'Sem conta, o título fica em carteira.'}
+            </span>
+          </div>
+        )}
 
         <div className="receber-form-campo">
           <label className="filter-label" htmlFor="titulo-observacao">
