@@ -40,6 +40,7 @@ import { useLotesProduto } from './produtos/useLotesProduto';
 import { useReservasProduto } from './produtos/useReservasProduto';
 import { useSaldoProduto } from './produtos/useSaldoProduto';
 import { useSolicitacaoDetalhe } from './solicitacoes/useSolicitacaoDetalhe';
+import { usePendenciasSolicitacao } from './solicitacoes/usePendenciasSolicitacao';
 import { useSolicitacoes } from './solicitacoes/useSolicitacoes';
 import { useAcessoEmpresas } from './usuarios/useAcessoEmpresas';
 import { useUsuarios } from './usuarios/useUsuarios';
@@ -93,6 +94,7 @@ describe('cancelamento das requisições ao desmontar', () => {
     ['useCategorias', () => useCategorias()],
     ['useProdutoDetalhe', () => useProdutoDetalhe('prod-1')],
     ['useSolicitacoes', () => useSolicitacoes()],
+    ['usePendenciasSolicitacao', () => usePendenciasSolicitacao()],
     ['useSolicitacaoDetalhe', () => useSolicitacaoDetalhe('sol-1')],
     ['useAprovadores', () => useAprovadores()],
     ['useCargos', () => useCargos()],
