@@ -56,7 +56,9 @@ export default function PropostaImpressao() {
   if (carregando && !documento) return <div className="proposta-pagina">Carregando proposta…</div>;
   if (!documento) return null;
 
-  const { empresa, cliente, obra, representante } = documento;
+  const { empresa = {}, cliente = {}, obra, representante } = documento;
+  const itens = documento.itens ?? [];
+  const condicoes = documento.condicoes ?? [];
 
   return (
     <div className="proposta-pagina">
@@ -127,7 +129,7 @@ export default function PropostaImpressao() {
             </tr>
           </thead>
           <tbody>
-            {documento.itens.map((item) => (
+            {itens.map((item) => (
               <tr key={item.item_id}>
                 <td>{item.codigo || '—'}</td>
                 <td>{item.nome}</td>
@@ -152,7 +154,7 @@ export default function PropostaImpressao() {
         <section className="proposta-condicoes">
           <h2>Condições</h2>
           <ul>
-            {documento.condicoes.map((condicao) => (
+            {condicoes.map((condicao) => (
               <li key={condicao}>{condicao}</li>
             ))}
           </ul>
