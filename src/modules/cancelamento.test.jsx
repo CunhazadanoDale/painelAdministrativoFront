@@ -12,7 +12,9 @@ import * as pedidosService from '../services/pedidos';
 import { useEntregasDoPedido } from './pedidos/useEntregasDoPedido';
 import { usePedidoDetalhe } from './pedidos/usePedidoDetalhe';
 import { usePedidoHistorico } from './pedidos/usePedidoHistorico';
+import { useEntregasSemNota } from './notas/useEntregasSemNota';
 import { useEventosNota } from './notas/useEventosNota';
+import { useItensSemProduto } from './notas/useItensSemProduto';
 import { useNotaDetalhe } from './notas/useNotaDetalhe';
 import { useNotas } from './notas/useNotas';
 import { useTitulosDaNota } from './notas/useTitulosDaNota';
@@ -154,6 +156,8 @@ describe('cancelamento das requisições ao desmontar', () => {
     ['useNotaDetalhe', () => useNotaDetalhe('nf-1')],
     ['useEventosNota', () => useEventosNota('nf-1', 0)],
     ['useTitulosDaNota', () => useTitulosDaNota(['dup-1'], 0)],
+    ['useItensSemProduto', () => useItensSemProduto()],
+    ['useEntregasSemNota', () => useEntregasSemNota()],
     ['useTituloDeEntrada', () => useTituloDeEntrada('ped-1', true, 0)],
     ['usePedidoDetalhe', () => usePedidoDetalhe('ped-1')],
     ['usePedidoHistorico', () => usePedidoHistorico('ped-1', 0)],
