@@ -29,3 +29,7 @@ export function ativarRepresentante(id) {
 export function desativarRepresentante(id) {
   return requisitar(`${CAMINHO}/${id}/desativar`, { metodo: 'PATCH' });
 }
+
+export function definirFornecedorDoRepresentante(id, fornecedorId) {
+  return requisitar(`${CAMINHO}/${id}/fornecedor`, { metodo: 'PUT', corpo: { fornecedor_id: fornecedorId || null } });
+}
