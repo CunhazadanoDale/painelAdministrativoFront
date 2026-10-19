@@ -385,6 +385,38 @@ describe('roteamento do App', () => {
     expect(screen.getByTestId('caminho')).toHaveTextContent(caminho);
   });
 
+  it.each([
+    ['/notas-fiscais', 'Nenhuma nota fiscal nas empresas do seu acesso.'],
+    ['/notas-fiscais/itens-sem-produto', 'Nenhum item de nota sem produto.'],
+    ['/notas-fiscais/entregas-sem-nota', 'Todas as entregas que saíram têm nota fiscal.'],
+  ])('abre %s para qualquer autenticado', async (caminho, texto) => {
+    gravarSessao(false);
+
+    renderizar(caminho);
+
+    expect(await screen.findByText(texto)).toBeInTheDocument();
+    expect(screen.getByTestId('caminho')).toHaveTextContent(caminho);
+  });
+
+  it('mostra Notas Fiscais a todos e as pendências de nota só ao financeiro', async () => {
+    gravarSessao(false);
+
+    const { unmount } = renderizar('/notas-fiscais');
+
+    expect(await screen.findByRole('link', { name: 'Notas Fiscais' })).toHaveAttribute('href', '/notas-fiscais');
+    expect(screen.queryByRole('link', { name: 'Itens sem Produto' })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Entregas sem NF' })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Importar NF-e/ })).toBeNull();
+    unmount();
+
+    gravarSessaoFinanceiro();
+    renderizar('/notas-fiscais');
+
+    expect(await screen.findByRole('button', { name: /Importar NF-e/ })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Itens sem Produto' })).toHaveAttribute('href', '/notas-fiscais/itens-sem-produto');
+    expect(screen.getByRole('link', { name: 'Entregas sem NF' })).toHaveAttribute('href', '/notas-fiscais/entregas-sem-nota');
+  });
+
   it('redireciona /pagamentos para /solicitacoes', async () => {
     gravarSessao(false);
 

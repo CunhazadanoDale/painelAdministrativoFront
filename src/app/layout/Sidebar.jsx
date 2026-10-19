@@ -32,7 +32,10 @@ import {
   HandCoins,
   BadgePercent,
   CalendarClock,
-  MailWarning
+  MailWarning,
+  FileText,
+  PackageX,
+  FileWarning
 } from 'lucide-react';
 import { useAutenticacao } from '../autenticacao/useAutenticacao';
 import { usePendenciasSolicitacao } from '../../modules/solicitacoes/usePendenciasSolicitacao';
@@ -77,6 +80,9 @@ export function Sidebar() {
         { label: 'Antecipações', icon: <BadgePercent size={18} />, path: '/antecipacoes', financeiro: true },
         { label: 'Resumo a Receber', icon: <CalendarClock size={18} />, path: '/contas-a-receber/resumo', financeiro: true },
         { label: 'Boletos Pendentes', icon: <MailWarning size={18} />, path: '/contas-a-receber/boletos', financeiro: true },
+        { label: 'Notas Fiscais', icon: <FileText size={18} />, path: '/notas-fiscais', end: true },
+        { label: 'Itens sem Produto', icon: <PackageX size={18} />, path: '/notas-fiscais/itens-sem-produto', financeiro: true },
+        { label: 'Entregas sem NF', icon: <FileWarning size={18} />, path: '/notas-fiscais/entregas-sem-nota', financeiro: true },
         { label: 'Aprovadores', icon: <ShieldCheck size={18} />, path: '/aprovadores', admin: true }
       ]
     },
