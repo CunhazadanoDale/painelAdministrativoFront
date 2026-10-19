@@ -37,6 +37,10 @@ import Pedidos from './modules/pedidos/Pedidos';
 import PedidoDetalhe from './modules/pedidos/PedidoDetalhe';
 import Entregas from './modules/pedidos/Entregas';
 import ConsultasPedidos from './modules/pedidos/ConsultasPedidos';
+import EntregasSemNota from './modules/notas/EntregasSemNota';
+import ItensSemProduto from './modules/notas/ItensSemProduto';
+import NotaDetalhe from './modules/notas/NotaDetalhe';
+import Notas from './modules/notas/Notas';
 import Perfil from './modules/perfil/Perfil';
 
 const Negociacoes = () => <div>Negociações Module</div>;
@@ -86,6 +90,10 @@ function App() {
             <Route path="/pedidos/consultas" element={<ConsultasPedidos />} />
             <Route path="/pedidos/:id" element={<PedidoDetalhe />} />
             <Route path="/entregas" element={<Entregas />} />
+            <Route path="/notas-fiscais" element={<Notas />} />
+            <Route path="/notas-fiscais/itens-sem-produto" element={<ItensSemProduto />} />
+            <Route path="/notas-fiscais/entregas-sem-nota" element={<EntregasSemNota />} />
+            <Route path="/notas-fiscais/:id" element={<NotaDetalhe />} />
             <Route path="/clientes" element={<Clientes />} />
             <Route path="/clientes/:id" element={<ClienteDetalhe />} />
             <Route path="/grupos-clientes" element={<GruposClientes />} />
