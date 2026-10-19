@@ -6,6 +6,7 @@ import { useAutenticacao } from '../../app/autenticacao/useAutenticacao';
 import { ErroApi } from '../../lib/api';
 import * as gruposService from '../../services/clienteGrupos';
 import * as clientesService from '../../services/clientes';
+import * as comissoesService from '../../services/comissoes';
 import * as contasService from '../../services/contasBancarias';
 import * as empresasService from '../../services/empresas';
 import * as pedidosService from '../../services/pedidos';
@@ -39,6 +40,7 @@ vi.mock('../../services/pedidos', () => ({
 }));
 vi.mock('../../services/titulosReceber', () => ({ listarTitulos: vi.fn() }));
 vi.mock('../../services/contasBancarias', () => ({ listarTodasContasBancarias: vi.fn() }));
+vi.mock('../../services/comissoes', () => ({ obterComissaoDoPedido: vi.fn(), definirComissaoDoPedido: vi.fn() }));
 
 const svc = pedidosService;
 const CONFLITO = 'o pedido foi alterado por outra pessoa; recarregue e tente de novo';
@@ -132,6 +134,9 @@ beforeEach(() => {
   svc.listarEntregasDoPedido.mockResolvedValue({ dados: [] });
   svc.gerarTituloEntrada.mockResolvedValue({ dados: { id: 'tit-9' } });
   titulosService.listarTitulos.mockResolvedValue({ dados: [] });
+  comissoesService.obterComissaoDoPedido.mockResolvedValue({
+    dados: { pedido_id: 'ped-12', representante_id: 'rep-jose', percentual_bp: 300, origem: 'padrao', definido: false, versao: null },
+  });
   contasService.listarTodasContasBancarias.mockResolvedValue([
     { id: 'cb-sic', apelido: 'Sicredi movimento', banco_nome: 'Sicredi' },
     { id: 'cb-itau', apelido: 'Itaú cobrança', banco_nome: 'Itaú' },
@@ -393,6 +398,20 @@ describe('PedidoDetalhe', () => {
 
     expect(screen.queryByText('Título de entrada')).toBeNull();
     expect(titulosService.listarTitulos).not.toHaveBeenCalled();
+  });
+
+  it('mostra a comissão do representante para o comercial', async () => {
+    await carregar();
+    expect(await screen.findByText('3,00%')).toBeInTheDocument();
+    expect(comissoesService.obterComissaoDoPedido).toHaveBeenCalledWith('ped-12', expect.anything());
+  });
+
+  it('não consulta a comissão para quem não é comercial nem financeiro', async () => {
+    perfil({ comercial: false });
+    await carregar();
+
+    expect(screen.queryByText('Comissão do representante')).toBeNull();
+    expect(comissoesService.obterComissaoDoPedido).not.toHaveBeenCalled();
   });
 
   it('mostra o painel de entregas do pedido', async () => {

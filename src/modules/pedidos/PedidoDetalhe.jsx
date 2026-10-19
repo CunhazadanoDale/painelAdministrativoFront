@@ -28,6 +28,7 @@ import { usePedidoDetalhe } from './usePedidoDetalhe';
 import { usePedidoHistorico } from './usePedidoHistorico';
 import { useTituloDeEntrada } from './useTituloDeEntrada';
 import { numeroDoTitulo, statusDoTitulo } from '../receber/receberUtils';
+import { ComissaoDoPedido } from '../comissoes/ComissaoDoPedido';
 import { AlertCircle, ChevronLeft } from 'lucide-react';
 import '../../app/components/DataGrid.css';
 import './Pedidos.css';
@@ -229,6 +230,12 @@ export default function PedidoDetalhe() {
           <HistoricoDoPedido pedidoId={pedido.id} geracao={geracao} />
         </Panel>
       </div>
+
+      {(comercial || financeiro) && pedido.representante_id && (
+        <Panel title="Comissão do representante">
+          <ComissaoDoPedido pedido={pedido} comercial={comercial} geracao={geracao} />
+        </Panel>
+      )}
 
       <Panel title="Itens">
         <div className="datagrid-container">

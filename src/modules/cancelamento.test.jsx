@@ -19,6 +19,7 @@ import { useNotaDetalhe } from './notas/useNotaDetalhe';
 import { useNotas } from './notas/useNotas';
 import { useTitulosDaNota } from './notas/useTitulosDaNota';
 import { usePedidos } from './pedidos/usePedidos';
+import { useComissaoDoPedido } from './comissoes/useComissaoDoPedido';
 import { useTituloDeEntrada } from './pedidos/useTituloDeEntrada';
 import { useDashboard } from './dashboard/useDashboard';
 import { useCadastrosCliente } from './clientes/useCadastrosCliente';
@@ -152,6 +153,7 @@ describe('cancelamento das requisições ao desmontar', () => {
     ['useObrasCliente', () => useObrasCliente('cli-1', 0)],
     ['useClienteDoLead', () => useClienteDoLead('lead-1')],
     ['usePedidos', () => usePedidos()],
+    ['useComissaoDoPedido', () => useComissaoDoPedido('ped-1', 0)],
     ['useNotas', () => useNotas()],
     ['useNotaDetalhe', () => useNotaDetalhe('nf-1')],
     ['useEventosNota', () => useEventosNota('nf-1', 0)],

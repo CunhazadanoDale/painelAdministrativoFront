@@ -3,6 +3,7 @@ import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAutenticacao } from '../../app/autenticacao/useAutenticacao';
 import { ErroApi } from '../../lib/api';
+import * as fornecedoresService from '../../services/fornecedores';
 import * as representantesService from '../../services/representantes';
 import * as usuariosService from '../../services/usuarios';
 import Representantes from './Representantes';
@@ -10,6 +11,7 @@ import Representantes from './Representantes';
 vi.mock('../../app/autenticacao/useAutenticacao', () => ({ useAutenticacao: vi.fn() }));
 
 vi.mock('../../services/usuarios', () => ({ listarTodosUsuarios: vi.fn() }));
+vi.mock('../../services/fornecedores', () => ({ listarFornecedores: vi.fn(), obterFornecedor: vi.fn() }));
 
 vi.mock('../../services/representantes', () => ({
   listarRepresentantes: vi.fn(),
@@ -17,6 +19,7 @@ vi.mock('../../services/representantes', () => ({
   atualizarRepresentante: vi.fn(),
   ativarRepresentante: vi.fn(),
   desativarRepresentante: vi.fn(),
+  definirFornecedorDoRepresentante: vi.fn(),
 }));
 
 const {
@@ -25,6 +28,7 @@ const {
   atualizarRepresentante,
   ativarRepresentante,
   desativarRepresentante,
+  definirFornecedorDoRepresentante,
 } = representantesService;
 const { listarTodosUsuarios } = usuariosService;
 
@@ -38,6 +42,7 @@ const JOSE = {
   telefone: null,
   comissao_pronta_entrega_bp: 300,
   comissao_importacao_bp: 150,
+  fornecedor_id: 'for-jose',
   ativo: true,
 };
 
@@ -99,6 +104,14 @@ beforeEach(() => {
   atualizarRepresentante.mockResolvedValue({ dados: JOSE });
   ativarRepresentante.mockResolvedValue({ dados: MARIA });
   desativarRepresentante.mockResolvedValue({ dados: JOSE });
+  definirFornecedorDoRepresentante.mockResolvedValue({ dados: JOSE });
+  fornecedoresService.obterFornecedor.mockResolvedValue({ dados: { id: 'for-jose', nome: 'José Vendas ME' } });
+  fornecedoresService.listarFornecedores.mockResolvedValue({
+    dados: [
+      { id: 'for-jose', nome: 'José Vendas ME' },
+      { id: 'for-maria', nome: 'Maria Rep ME' },
+    ],
+  });
 });
 
 describe('Representantes', () => {
@@ -242,5 +255,53 @@ describe('Representantes', () => {
     fireEvent.click(within(linhaDe('Maria Representações')).getByRole('button', { name: 'Ativar representante' }));
     await waitFor(() => expect(ativarRepresentante).toHaveBeenCalledWith('rep-maria'));
     expect(desativarRepresentante).toHaveBeenCalledWith('rep-jose');
+  });
+
+  it('o administrador vê e define o fornecedor que recebe as comissões', async () => {
+    await carregar();
+    expect(await within(linhaDe('José Vendas')).findByText('José Vendas ME')).toBeInTheDocument();
+    expect(within(linhaDe('Maria Representações')).getByText('Sem fornecedor')).toBeInTheDocument();
+
+    fireEvent.click(within(linhaDe('Maria Representações')).getByRole('button', { name: 'Fornecedor das comissões' }));
+    const dialogo = screen.getByRole('dialog', { name: 'Fornecedor das comissões de Maria Representações' });
+    await within(dialogo).findByRole('option', { name: 'Maria Rep ME' });
+    fireEvent.change(within(dialogo).getByLabelText('Fornecedor'), { target: { value: 'for-maria' } });
+    fireEvent.click(within(dialogo).getByRole('button', { name: 'Salvar' }));
+
+    await waitFor(() => expect(definirFornecedorDoRepresentante).toHaveBeenCalledWith('rep-maria', 'for-maria'));
+    await waitFor(() => expect(listarRepresentantes).toHaveBeenCalledTimes(2));
+  });
+
+  it('tira o fornecedor do representante escolhendo nenhum', async () => {
+    await carregar();
+    fireEvent.click(within(linhaDe('José Vendas')).getByRole('button', { name: 'Fornecedor das comissões' }));
+    const dialogo = screen.getByRole('dialog', { name: 'Fornecedor das comissões de José Vendas' });
+    await within(dialogo).findByRole('option', { name: 'Maria Rep ME' });
+    fireEvent.change(within(dialogo).getByLabelText('Fornecedor'), { target: { value: '' } });
+    fireEvent.click(within(dialogo).getByRole('button', { name: 'Salvar' }));
+
+    await waitFor(() => expect(definirFornecedorDoRepresentante).toHaveBeenCalledWith('rep-jose', null));
+  });
+
+  it('mostra a recusa do fornecedor inativo', async () => {
+    definirFornecedorDoRepresentante.mockRejectedValue(
+      new ErroApi(400, 'erro de validação: fornecedor inativo não pode receber as comissões do representante')
+    );
+    await carregar();
+    fireEvent.click(within(linhaDe('Maria Representações')).getByRole('button', { name: 'Fornecedor das comissões' }));
+    const dialogo = screen.getByRole('dialog', { name: 'Fornecedor das comissões de Maria Representações' });
+    await within(dialogo).findByRole('option', { name: 'Maria Rep ME' });
+    fireEvent.change(within(dialogo).getByLabelText('Fornecedor'), { target: { value: 'for-maria' } });
+    fireEvent.click(within(dialogo).getByRole('button', { name: 'Salvar' }));
+
+    expect(await within(dialogo).findByText(/fornecedor inativo não pode receber/)).toBeInTheDocument();
+  });
+
+  it('o comercial não vê o fornecedor das comissões', async () => {
+    perfil({ administrador: false });
+    await carregar();
+
+    expect(screen.queryByText('Fornecedor das comissões')).toBeNull();
+    expect(fornecedoresService.obterFornecedor).not.toHaveBeenCalled();
   });
 });
