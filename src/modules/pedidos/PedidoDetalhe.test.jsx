@@ -37,7 +37,9 @@ vi.mock('../../services/pedidos', () => ({
   listarHistoricoPedido: vi.fn(),
   listarEntregasDoPedido: vi.fn(),
   gerarTituloEntrada: vi.fn(),
+  listarModelosVenda: vi.fn(async () => ({ dados: [] })),
 }));
+vi.mock('../../services/tabelaPrecos', () => ({ listarPrecosVigentes: vi.fn(async () => ({ dados: [] })) }));
 vi.mock('../../services/titulosReceber', () => ({ listarTitulos: vi.fn() }));
 vi.mock('../../services/contasBancarias', () => ({ listarTodasContasBancarias: vi.fn() }));
 vi.mock('../../services/comissoes', () => ({ obterComissaoDoPedido: vi.fn(), definirComissaoDoPedido: vi.fn() }));
