@@ -58,11 +58,15 @@ export function removerArquivo(id) {
   return requisitar(`${CAMINHO}/${id}`, { metodo: 'DELETE' });
 }
 
-export async function obterArquivoBlob(id, { sinal } = {}) {
+export function obterArquivoBlob(id, opcoes) {
+  return obterBlob(`${CAMINHO}/${id}`, opcoes);
+}
+
+async function obterBlob(caminho, { sinal } = {}) {
   const token = obterToken();
   let resposta;
   try {
-    resposta = await fetch(`${obterUrlBase()}${CAMINHO}/${id}`, {
+    resposta = await fetch(`${obterUrlBase()}${caminho}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
       signal: sinal,
     });
@@ -87,8 +91,12 @@ export async function obterArquivoBlob(id, { sinal } = {}) {
   return resposta.blob();
 }
 
-export async function baixarArquivo(id, nome) {
-  const blob = await obterArquivoBlob(id);
+export function baixarArquivo(id, nome) {
+  return baixarDoCaminho(`${CAMINHO}/${id}`, nome);
+}
+
+export async function baixarDoCaminho(caminho, nome) {
+  const blob = await obterBlob(caminho);
   const url = URL.createObjectURL(blob);
   const ancora = document.createElement('a');
   ancora.href = url;

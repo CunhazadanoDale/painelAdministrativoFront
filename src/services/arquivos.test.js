@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ErroApi, definirToken } from '../lib/api';
-import { baixarArquivo, enviarArquivo } from './arquivos';
+import { baixarArquivo, baixarDoCaminho, enviarArquivo } from './arquivos';
 
 function simularXhr(status, responseText) {
   const instancias = [];
@@ -99,5 +99,29 @@ describe('baixarArquivo', () => {
     vi.advanceTimersByTime(60000);
 
     expect(revogar).toHaveBeenCalledWith('blob:download-1');
+  });
+});
+
+describe('baixarDoCaminho', () => {
+  it('baixa pelo caminho da API com o token e o nome pedido', async () => {
+    URL.createObjectURL = vi.fn(() => 'blob:xml-1');
+    URL.revokeObjectURL = vi.fn();
+    const clique = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    const busca = vi.fn(async () => ({ ok: true, status: 200, blob: async () => new Blob(['<nfeProc/>']) }));
+    vi.stubGlobal('fetch', busca);
+
+    await baixarDoCaminho('/api/v1/notas-fiscais/nf-1/xml', 'NF 1-123.xml');
+
+    expect(String(busca.mock.calls[0][0])).toMatch(/\/api\/v1\/notas-fiscais\/nf-1\/xml$/);
+    expect(clique).toHaveBeenCalledTimes(1);
+  });
+
+  it('mostra a mensagem da API quando o download falha', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({ ok: false, status: 403, json: async () => ({ erro: { mensagem: 'perfil sem acesso a esta empresa' } }) }))
+    );
+
+    await expect(baixarDoCaminho('/api/v1/notas-fiscais/nf-1/xml', 'x.xml')).rejects.toThrow('perfil sem acesso a esta empresa');
   });
 });
