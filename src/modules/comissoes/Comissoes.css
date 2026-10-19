@@ -458,3 +458,11 @@
 .comissoes-negativo {
   color: var(--danger-text);
 }
+
+h1.comissoes-toolbar-titulo {
+  margin: 0;
+}
+
+.comissoes-total {
+  align-self: flex-end;
+}

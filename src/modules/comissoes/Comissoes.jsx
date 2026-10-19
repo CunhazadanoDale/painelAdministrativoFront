@@ -6,6 +6,7 @@ import { ListaAjustes } from './ListaAjustes';
 import { ListaComissoes } from './ListaComissoes';
 import { ListaFechamentos } from './ListaFechamentos';
 import { PendenciasApuracao } from './PendenciasApuracao';
+import { ResumoComissoes } from './ResumoComissoes';
 import { Calculator } from 'lucide-react';
 import './Comissoes.css';
 
@@ -13,6 +14,7 @@ const ABAS = [
   { valor: 'comissoes', rotulo: 'Comissões' },
   { valor: 'ajustes', rotulo: 'Ajustes' },
   { valor: 'fechamentos', rotulo: 'Fechamentos' },
+  { valor: 'resumo', rotulo: 'Resumo' },
   { valor: 'pendencias', rotulo: 'Pendências de apuração', financeiro: true },
 ];
 
@@ -49,7 +51,7 @@ export default function Comissoes() {
   return (
     <div className="comissoes-container">
       <div className="comissoes-toolbar">
-        <div className="comissoes-toolbar-titulo">Comissões</div>
+        <h1 className="comissoes-toolbar-titulo">{financeiro ? 'Comissões' : 'Minhas comissões'}</h1>
         <div className="comissoes-abas" role="tablist" aria-label="Comissões">
           {abas.map((item) => (
             <button
@@ -80,6 +82,11 @@ export default function Comissoes() {
         )}
       </div>
 
+      {!financeiro && (
+        <span className="comissoes-form-ajuda">
+          Aqui aparecem só as comissões do seu cadastro de representante; o financeiro apura, ajusta e fecha.
+        </span>
+      )}
       {resultado && <ResultadoApuracao resultado={resultado} />}
 
       <div
@@ -91,6 +98,7 @@ export default function Comissoes() {
         {aba === 'comissoes' && <ListaComissoes key={geracao} financeiro={financeiro} />}
         {aba === 'ajustes' && <ListaAjustes key={geracao} financeiro={financeiro} />}
         {aba === 'fechamentos' && <ListaFechamentos key={geracao} financeiro={financeiro} />}
+        {aba === 'resumo' && <ResumoComissoes key={geracao} financeiro={financeiro} />}
         {aba === 'pendencias' && <PendenciasApuracao key={geracao} />}
       </div>
 
