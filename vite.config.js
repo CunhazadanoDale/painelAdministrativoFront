@@ -55,6 +55,7 @@ export default defineConfig(({ mode }) => {
     },
     test: {
       environment: 'jsdom',
+      pool: 'vmThreads',
       setupFiles: ['./src/test/setup.js'],
       testTimeout: 15000,
       env: { TZ: 'America/Sao_Paulo' },
