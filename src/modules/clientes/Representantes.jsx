@@ -1,12 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useAutenticacao } from '../../app/autenticacao/useAutenticacao';
 import { DataGrid } from '../../app/components/DataGrid';
+import { useNomesPorId } from '../../app/nomes/useNomesPorId';
 import { StatusBadge } from '../../app/components/StatusBadge';
+import * as fornecedoresService from '../../services/fornecedores';
 import * as usuariosService from '../../services/usuarios';
+import { FornecedorDoRepresentanteModal } from './FornecedorDoRepresentanteModal';
 import { formatarPercentual } from './clientesUtils';
 import { RepresentanteFormModal } from './RepresentanteFormModal';
 import { useRepresentantes } from './useRepresentantes';
-import { AlertCircle, ChevronLeft, ChevronRight, Pencil, Plus, Power, PowerOff, Search } from 'lucide-react';
+import { AlertCircle, ChevronLeft, ChevronRight, Pencil, Plus, Power, PowerOff, Search, Wallet } from 'lucide-react';
 import './Clientes.css';
 
 function useUsuariosParaVinculo(ativo) {
@@ -49,6 +52,11 @@ export default function Representantes() {
     alternarSituacao,
   } = useRepresentantes();
   const { usuarios, erro: erroUsuarios } = useUsuariosParaVinculo(administrador);
+  const nomeFornecedor = useNomesPorId(
+    administrador ? representantes.map((representante) => representante.fornecedor_id) : [],
+    fornecedoresService.obterFornecedor
+  );
+  const [fornecedorModal, setFornecedorModal] = useState(null);
 
   const [termo, setTermo] = useState('');
   const [representanteModal, setRepresentanteModal] = useState(undefined);
@@ -125,10 +133,16 @@ export default function Representantes() {
   ];
 
   if (administrador) {
+    colunas.splice(colunas.length - 1, 0, {
+      label: 'Fornecedor das comissões',
+      field: 'fornecedor_id',
+      width: '16%',
+      render: (fornecedorId) => (fornecedorId ? nomeFornecedor(fornecedorId) : 'Sem fornecedor'),
+    });
     colunas.push({
       label: 'Ações',
       field: 'id',
-      width: '100px',
+      width: '130px',
       render: (id, representante) => (
         <div className="leads-acoes">
           <button
@@ -149,6 +163,15 @@ export default function Representantes() {
             disabled={alternando === id}
           >
             {representante.ativo ? <PowerOff size={14} /> : <Power size={14} />}
+          </button>
+          <button
+            type="button"
+            className="leads-acao-btn"
+            title="Fornecedor das comissões"
+            aria-label="Fornecedor das comissões"
+            onClick={() => setFornecedorModal(representante)}
+          >
+            <Wallet size={14} />
           </button>
         </div>
       ),
@@ -277,6 +300,15 @@ export default function Representantes() {
           erroUsuarios={erroUsuarios}
           onFechar={() => setRepresentanteModal(undefined)}
           onSalvar={(dados) => (representanteModal ? atualizar(representanteModal.id, dados) : criar(dados))}
+        />
+      )}
+
+      {fornecedorModal && (
+        <FornecedorDoRepresentanteModal
+          representante={fornecedorModal}
+          nomeAtual={fornecedorModal.fornecedor_id ? nomeFornecedor(fornecedorModal.fornecedor_id) : ''}
+          onSalvo={recarregar}
+          onFechar={() => setFornecedorModal(null)}
         />
       )}
     </div>
