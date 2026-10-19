@@ -26,14 +26,18 @@ import {
   Handshake,
   ClipboardList,
   PackageCheck,
-  SearchCheck
+  SearchCheck,
+  Repeat,
+  CalendarRange
 } from 'lucide-react';
 import { useAutenticacao } from '../autenticacao/useAutenticacao';
+import { usePendenciasSolicitacao } from '../../modules/solicitacoes/usePendenciasSolicitacao';
 import './Sidebar.css';
 
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const { administrador, comercial, financeiro } = useAutenticacao();
+  const pendencias = usePendenciasSolicitacao();
 
   const navGroups = [
     {
@@ -59,10 +63,12 @@ export function Sidebar() {
     {
       title: 'Financeiro',
       items: [
-        { label: 'Solicitações', icon: <CreditCard size={18} />, path: '/solicitacoes' },
+        { label: 'Solicitações', icon: <CreditCard size={18} />, path: '/solicitacoes', contador: pendencias },
         { label: 'Fornecedores', icon: <Truck size={18} />, path: '/fornecedores' },
         { label: 'Contas Bancárias', icon: <Landmark size={18} />, path: '/contas-bancarias', financeiro: true },
         { label: 'Plano de Contas', icon: <ListTree size={18} />, path: '/plano-de-contas' },
+        { label: 'Despesas Recorrentes', icon: <Repeat size={18} />, path: '/despesas-recorrentes', financeiro: true },
+        { label: 'Resumo a Pagar', icon: <CalendarRange size={18} />, path: '/contas-a-pagar/resumo', financeiro: true },
         { label: 'Aprovadores', icon: <ShieldCheck size={18} />, path: '/aprovadores', admin: true }
       ]
     },
@@ -121,6 +127,11 @@ export function Sidebar() {
                   >
                     <span className="sidebar-icon">{item.icon}</span>
                     <span className="sidebar-label">{item.label}</span>
+                    {item.contador && (
+                      <span className="sidebar-contador" title={item.contador.titulo}>
+                        {item.contador.total}
+                      </span>
+                    )}
                   </NavLink>
                 </li>
               ))}

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -14,6 +14,17 @@ vi.mock('../../services/empresas', () => ({
 vi.mock('../../services/solicitacoes', () => ({
   listarSolicitacoes: vi.fn(),
   criarSolicitacao: vi.fn(),
+}));
+
+vi.mock('../../services/fornecedores', () => ({
+  listarFornecedores: vi.fn(async () => ({ dados: [{ id: 'for-1', nome: 'Imobiliária Sol' }] })),
+  obterFornecedor: vi.fn(async (id) => ({ dados: { id, nome: 'Imobiliária Sol' } })),
+}));
+
+vi.mock('../../services/categoriasFinanceiras', () => ({
+  obterArvoreFinanceira: vi.fn(async () => ({
+    dados: [{ id: 'raiz', nome: 'Despesas fixas', natureza: 'despesa', subcategorias: [{ id: 'sub-aluguel', nome: 'Aluguel', lancavel: true }] }],
+  })),
 }));
 
 const { listarTodasEmpresas } = empresasService;
@@ -78,5 +89,69 @@ describe('Solicitacoes', () => {
         expect.objectContaining({ escopo: 'minhas', empresa: 'e-mia', pagina: 1 })
       )
     );
+  });
+
+  it('mostra a competência, o fornecedor e o selo de vencida', async () => {
+    listarSolicitacoes.mockResolvedValue({
+      dados: [{ ...SOLICITACAO, competencia: '2026-10', fornecedor_id: 'for-1', vencida: true }],
+    });
+
+    renderizar();
+
+    const linha = (await screen.findByText('Compra de cimento')).closest('tr');
+    expect(within(linha).getByText('10/2026')).toBeInTheDocument();
+    expect(await within(linha).findByText('Imobiliária Sol')).toBeInTheDocument();
+    expect(within(linha).getByText('Vencida')).toBeInTheDocument();
+  });
+
+  it('filtra por fornecedor, categoria, competência, vencimento, origem e vencidas', async () => {
+    renderizar();
+    await screen.findByText('Compra de cimento');
+
+    fireEvent.click(screen.getByRole('button', { name: /Mais filtros/ }));
+    await screen.findByRole('option', { name: 'Imobiliária Sol' });
+    await screen.findByRole('option', { name: 'Aluguel' });
+    fireEvent.change(screen.getByLabelText('Fornecedor'), { target: { value: 'for-1' } });
+    fireEvent.change(screen.getByLabelText('Categoria'), { target: { value: 'sub-aluguel' } });
+    fireEvent.change(screen.getByLabelText('Competência'), { target: { value: '2026-10' } });
+    fireEvent.change(screen.getByLabelText('Vencimento de'), { target: { value: '2026-10-01' } });
+    fireEvent.change(screen.getByLabelText('Vencimento até'), { target: { value: '2026-10-31' } });
+    fireEvent.change(screen.getByLabelText('Origem'), { target: { value: 'recorrencia' } });
+    fireEvent.click(screen.getByLabelText('Só vencidas'));
+
+    await waitFor(() =>
+      expect(listarSolicitacoes).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          pagina: 1,
+          fornecedor: 'for-1',
+          categoria: 'sub-aluguel',
+          competencia: '2026-10',
+          vencimento_de: '2026-10-01',
+          vencimento_ate: '2026-10-31',
+          origem: 'recorrencia',
+          vencidas: true,
+        })
+      )
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Limpar filtros' }));
+
+    await waitFor(() =>
+      expect(listarSolicitacoes).toHaveBeenLastCalledWith(
+        expect.objectContaining({ fornecedor: '', categoria: '', competencia: '', origem: '', vencidas: false })
+      )
+    );
+  });
+
+  it('recusa o vencimento final antes do inicial sem buscar', async () => {
+    renderizar();
+    await screen.findByText('Compra de cimento');
+    fireEvent.click(screen.getByRole('button', { name: /Mais filtros/ }));
+
+    fireEvent.change(screen.getByLabelText('Vencimento de'), { target: { value: '2026-10-31' } });
+    fireEvent.change(screen.getByLabelText('Vencimento até'), { target: { value: '2026-10-01' } });
+
+    expect(screen.getByText('O vencimento final não pode ser antes do inicial.')).toBeInTheDocument();
+    expect(listarSolicitacoes).not.toHaveBeenLastCalledWith(expect.objectContaining({ vencimento_ate: '2026-10-01' }));
   });
 });

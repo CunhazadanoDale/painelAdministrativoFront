@@ -4,7 +4,7 @@ import { StatusBadge } from '../../app/components/StatusBadge';
 import { useNomesLocais } from '../../app/estoque/useNomesLocais';
 import { formatarData, paraCentavos } from '../../lib/formatar';
 import * as pedidosService from '../../services/pedidos';
-import { AcaoPedidoModal } from './AcaoPedidoModal';
+import { AcaoModal } from '../../app/components/AcaoModal';
 import { STATUS_ENTREGA, dataParaCampo, hojeEmBrasilia, textoDoFrete } from './pedidosUtils';
 import { useEntregasDoPedido } from './useEntregasDoPedido';
 import { AlertCircle, Plus } from 'lucide-react';
@@ -73,7 +73,7 @@ function ProgramarEntregaModal({ pedido, itens, nomeProduto, onFechar, onAlterou
   };
 
   return (
-    <AcaoPedidoModal
+    <AcaoModal
       titulo={`Programar entrega do pedido ${pedido.numero}`}
       rotuloConfirmar="Programar"
       largura="760px"
@@ -191,7 +191,7 @@ function ProgramarEntregaModal({ pedido, itens, nomeProduto, onFechar, onAlterou
           </tbody>
         </table>
       </div>
-    </AcaoPedidoModal>
+    </AcaoModal>
   );
 }
 
@@ -205,7 +205,7 @@ function SaidaModal({ entrega, onFechar, onAlterou }) {
   };
 
   return (
-    <AcaoPedidoModal
+    <AcaoModal
       titulo="Dar saída na entrega"
       rotuloConfirmar="Dar saída"
       validar={validar}
@@ -233,7 +233,7 @@ function SaidaModal({ entrega, onFechar, onAlterou }) {
           onChange={(evento) => setData(evento.target.value)}
         />
       </div>
-    </AcaoPedidoModal>
+    </AcaoModal>
   );
 }
 
@@ -249,7 +249,7 @@ function EntregueModal({ entrega, onFechar, onAlterou }) {
   };
 
   return (
-    <AcaoPedidoModal
+    <AcaoModal
       titulo="Marcar entrega como entregue"
       rotuloConfirmar="Marcar entregue"
       validar={validar}
@@ -274,13 +274,13 @@ function EntregueModal({ entrega, onFechar, onAlterou }) {
           onChange={(evento) => setData(evento.target.value)}
         />
       </div>
-    </AcaoPedidoModal>
+    </AcaoModal>
   );
 }
 
 function CancelarEntregaModal({ entrega, onFechar, onAlterou }) {
   return (
-    <AcaoPedidoModal
+    <AcaoModal
       titulo="Cancelar entrega"
       rotuloConfirmar="Cancelar a entrega"
       onConfirmar={async () => {
@@ -291,7 +291,7 @@ function CancelarEntregaModal({ entrega, onFechar, onAlterou }) {
       onRecarregar={onAlterou}
     >
       <p className="pedidos-texto">A entrega pendente é cancelada sem mexer no estoque; os itens voltam a poder ser programados.</p>
-    </AcaoPedidoModal>
+    </AcaoModal>
   );
 }
 

@@ -24,6 +24,8 @@ export const FORMAS_PAGAMENTO = [
   { valor: 'pix', rotulo: 'PIX' },
   { valor: 'cartao', rotulo: 'Cartão' },
   { valor: 'boleto', rotulo: 'Boleto' },
+  { valor: 'transferencia', rotulo: 'Transferência' },
+  { valor: 'debito_automatico', rotulo: 'Débito automático' },
 ];
 
 export const ESCOPOS = [
@@ -68,4 +70,37 @@ export function arquivoPermitido(arquivo) {
     return 'arquivo excede o limite de 10MB';
   }
   return null;
+}
+
+const ROTULOS_EVENTO = {
+  criada: 'Solicitação criada',
+  aprovada: 'Aprovada',
+  rejeitada: 'Rejeitada',
+  cancelada: 'Cancelada',
+  paga: 'Paga',
+  editada: 'Editada',
+  classificada: 'Classificada',
+  adiada: 'Vencimento adiado',
+  estornada: 'Pagamento estornado',
+};
+
+export const ORIGENS = [
+  { valor: 'manual', rotulo: 'Manual' },
+  { valor: 'recorrencia', rotulo: 'Despesa recorrente' },
+  { valor: 'recompra', rotulo: 'Recompra de título' },
+  { valor: 'repasse_fomento', rotulo: 'Repasse ao fomento' },
+];
+
+export function rotuloEvento(evento) {
+  return ROTULOS_EVENTO[evento] || evento || '—';
+}
+
+export function rotuloOrigem(origem) {
+  return ORIGENS.find((item) => item.valor === origem)?.rotulo ?? origem ?? '—';
+}
+
+export function formatarCompetencia(competencia) {
+  if (!competencia) return '—';
+  const [ano, mes] = String(competencia).split('-');
+  return mes ? `${mes}/${ano}` : competencia;
 }

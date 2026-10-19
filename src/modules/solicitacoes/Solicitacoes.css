@@ -478,3 +478,40 @@
     margin-left: 0;
   }
 }
+
+.solicitacoes-form-ajuda {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.solicitacoes-form-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.solicitacoes-filtros-extras {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+.solicitacoes-filtro-campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 160px;
+}
+
+.solicitacoes-status-celula {
+  display: inline-flex;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+}

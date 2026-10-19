@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { AvisoConflito } from '../../app/components/AvisoConflito';
-import { Modal } from '../../app/components/Modal';
+import { AvisoConflito } from './AvisoConflito';
+import { Modal } from './Modal';
 import { ehConflitoDeConcorrencia } from '../../lib/api';
-import './Pedidos.css';
+import './AcaoModal.css';
 
-export function AcaoPedidoModal({
+export function AcaoModal({
   titulo,
   rotuloConfirmar,
   validar,
@@ -72,16 +72,16 @@ export function AcaoPedidoModal({
         </>
       }
     >
-      <div className="pedidos-form">
+      <div className="acao-modal">
         {Array.isArray(erro) ? (
-          <ul className="pedidos-form-erros" role="alert">
+          <ul className="acao-modal-erros" role="alert">
             {erro.map((mensagem) => (
               <li key={mensagem}>{mensagem}</li>
             ))}
           </ul>
         ) : (
           erro && (
-            <div className="pedidos-form-erro-api" role="alert">
+            <div className="acao-modal-erro-api" role="alert">
               {erro}
             </div>
           )

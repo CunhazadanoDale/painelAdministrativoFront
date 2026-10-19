@@ -306,6 +306,35 @@ describe('roteamento do App', () => {
     expect(await screen.findByText('Nova Proposta')).toBeInTheDocument();
   });
 
+  it('redireciona quem não é financeiro das despesas recorrentes e do resumo, sem as entradas', async () => {
+    gravarSessao(false);
+
+    renderizar('/despesas-recorrentes');
+
+    await waitFor(() => expect(screen.getByTestId('caminho')).toHaveTextContent(/^\/$/));
+    expect(screen.queryByRole('link', { name: 'Despesas Recorrentes' })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Resumo a Pagar' })).toBeNull();
+  });
+
+  it('libera as despesas recorrentes e o resumo para o financeiro, com entradas na sidebar', async () => {
+    gravarSessaoFinanceiro();
+
+    renderizar('/despesas-recorrentes');
+
+    expect(await screen.findByText('Nenhuma despesa recorrente cadastrada.')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Despesas Recorrentes' })).toHaveAttribute('href', '/despesas-recorrentes');
+    expect(screen.getByRole('link', { name: 'Resumo a Pagar' })).toHaveAttribute('href', '/contas-a-pagar/resumo');
+  });
+
+  it('abre o resumo de contas a pagar pela rota', async () => {
+    gravarSessaoFinanceiro();
+
+    renderizar('/contas-a-pagar/resumo');
+
+    expect(await screen.findByText('Resumo de Contas a Pagar')).toBeInTheDocument();
+    expect(screen.getByTestId('caminho')).toHaveTextContent('/contas-a-pagar/resumo');
+  });
+
   it('redireciona /pagamentos para /solicitacoes', async () => {
     gravarSessao(false);
 

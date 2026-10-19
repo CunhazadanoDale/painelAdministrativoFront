@@ -1,0 +1,34 @@
+.acao-modal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.acao-modal-erro-api {
+  padding: var(--space-2);
+  background-color: var(--danger-bg);
+  color: var(--danger-text);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+.acao-modal-erros {
+  margin: 0;
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-5);
+  background-color: var(--danger-bg);
+  color: var(--danger-text);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+.acao-modal-texto {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.acao-modal-campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}

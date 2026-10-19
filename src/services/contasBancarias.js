@@ -1,4 +1,4 @@
-import { montarConsulta, requisitar } from '../lib/api';
+import { listarTodas, montarConsulta, requisitar } from '../lib/api';
 
 const CAMINHO = '/api/v1/contas-bancarias';
 
@@ -14,6 +14,10 @@ export function listarContasBancarias({
   return requisitar(`${CAMINHO}${montarConsulta({ pagina, tamanho, empresa, banco, tipo, ativa })}`, {
     sinal,
   });
+}
+
+export function listarTodasContasBancarias({ empresa = '', ativa = '', sinal } = {}) {
+  return listarTodas(CAMINHO, { empresa, ativa }, { sinal });
 }
 
 export function obterContaBancaria(id, { sinal } = {}) {

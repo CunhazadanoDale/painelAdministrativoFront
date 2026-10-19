@@ -3,6 +3,16 @@ import { useAutenticacao } from '../../app/autenticacao/useAutenticacao';
 import * as solicitacoesService from '../../services/solicitacoes';
 import { ESCOPOS, TAMANHO_PAGINA } from './solicitacoesUtils';
 
+export const FILTROS_CONTA_A_PAGAR = {
+  fornecedor: '',
+  categoria: '',
+  competencia: '',
+  origem: '',
+  vencimento_de: '',
+  vencimento_ate: '',
+  vencidas: false,
+};
+
 export function useSolicitacoes() {
   const { permissoes, administrador } = useAutenticacao();
 
@@ -12,6 +22,7 @@ export function useSolicitacoes() {
   const [escopo, setEscopo] = useState('minhas');
   const [status, setStatus] = useState('');
   const [empresa, setEmpresa] = useState('');
+  const [filtros, setFiltros] = useState(FILTROS_CONTA_A_PAGAR);
   const [recarga, setRecarga] = useState(0);
   const [chaveDados, setChaveDados] = useState(null);
   const [falha, setFalha] = useState(null);
@@ -28,7 +39,7 @@ export function useSolicitacoes() {
   );
 
   const escopoAtivo = escopos.some((item) => item.valor === escopo) ? escopo : 'minhas';
-  const chave = `${pagina}|${escopoAtivo}|${status}|${empresa}|${recarga}`;
+  const chave = JSON.stringify([pagina, escopoAtivo, status, empresa, filtros, recarga]);
   const erro = falha && falha.chave === chave ? falha.mensagem : null;
   const carregando = !erro && chaveDados !== chave;
 
@@ -43,6 +54,7 @@ export function useSolicitacoes() {
           escopo: escopoAtivo,
           status,
           empresa,
+          ...filtros,
           sinal: controle.signal,
         });
         const daPagina = (resposta && resposta.dados) || [];
@@ -67,7 +79,7 @@ export function useSolicitacoes() {
     return () => {
       controle.abort();
     };
-  }, [pagina, escopoAtivo, status, empresa, recarga, chave]);
+  }, [pagina, escopoAtivo, status, empresa, filtros, chave]);
 
   const recarregar = useCallback(() => setRecarga((valor) => valor + 1), []);
 
@@ -84,6 +96,16 @@ export function useSolicitacoes() {
 
   const trocarEmpresa = useCallback((valor) => {
     setEmpresa(valor);
+    setPagina(1);
+  }, []);
+
+  const filtrar = useCallback((mudancas) => {
+    setFiltros((atual) => ({ ...atual, ...mudancas }));
+    setPagina(1);
+  }, []);
+
+  const limparFiltros = useCallback(() => {
+    setFiltros(FILTROS_CONTA_A_PAGAR);
     setPagina(1);
   }, []);
 
@@ -107,6 +129,7 @@ export function useSolicitacoes() {
     escopo: escopoAtivo,
     status,
     empresa,
+    filtros,
     pagina,
     temProxima,
     carregando,
@@ -114,6 +137,8 @@ export function useSolicitacoes() {
     trocarEscopo,
     trocarStatus,
     trocarEmpresa,
+    filtrar,
+    limparFiltros,
     irParaAnterior,
     irParaProxima,
     criar,

@@ -15,6 +15,8 @@ import Cargos from './modules/cargos/Cargos';
 import Aprovadores from './modules/aprovadores/Aprovadores';
 import Empresas from './modules/empresas/Empresas';
 import Fornecedores from './modules/fornecedores/Fornecedores';
+import DespesasRecorrentes from './modules/financeiro/DespesasRecorrentes';
+import ResumoContasAPagar from './modules/financeiro/ResumoContasAPagar';
 import ContasBancarias from './modules/financeiro/ContasBancarias';
 import PlanoContas from './modules/financeiro/PlanoContas';
 import Produtos from './modules/produtos/Produtos';
@@ -110,6 +112,14 @@ function App() {
               element={financeiro ? <ContasBancarias /> : <Navigate to="/" replace />}
             />
             <Route path="/plano-de-contas" element={<PlanoContas />} />
+            <Route
+              path="/despesas-recorrentes"
+              element={financeiro ? <DespesasRecorrentes /> : <Navigate to="/" replace />}
+            />
+            <Route
+              path="/contas-a-pagar/resumo"
+              element={financeiro ? <ResumoContasAPagar /> : <Navigate to="/" replace />}
+            />
             <Route path="/formularios" element={<Formularios />} />
             <Route path="/produtos" element={<Produtos />} />
             <Route path="/produtos/:id" element={<ProdutoDetalhe />} />

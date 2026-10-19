@@ -185,3 +185,102 @@
     gap: var(--space-2);
   }
 }
+
+.financeiro-form-erros {
+  margin: 0;
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-5);
+  background-color: var(--danger-bg);
+  color: var(--danger-text);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+.financeiro-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.financeiro-relatorio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  background-color: var(--info-bg);
+  color: var(--info-text);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+.financeiro-relatorio ul {
+  margin: 0;
+  padding-left: var(--space-4);
+}
+
+.financeiro-totais {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-3);
+}
+
+.financeiro-total {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+.financeiro-total strong {
+  font-size: var(--font-size-xl);
+}
+
+.financeiro-total-rotulo {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.financeiro-total-quantidade {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+.financeiro-total-alerta strong,
+.financeiro-alerta {
+  color: var(--danger-text);
+  font-weight: 600;
+}
+
+.financeiro-atrasadas {
+  padding: var(--space-3);
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+.financeiro-atrasadas-titulo {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.financeiro-atrasadas ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.financeiro-atrasadas li {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-sm);
+}

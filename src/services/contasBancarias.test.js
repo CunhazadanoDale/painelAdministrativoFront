@@ -7,6 +7,7 @@ import {
   desativarContaBancaria,
   listarBancos,
   listarContasBancarias,
+  listarTodasContasBancarias,
   obterContaBancaria,
   removerContaBancaria,
 } from './contasBancarias';
@@ -131,5 +132,19 @@ describe('services de contas bancárias', () => {
     const chamada = ultimaChamada();
     expect(chamada.url).toMatch(/\/api\/v1\/bancos$/);
     expect(chamada.sinal).toBe(controle.signal);
+  });
+
+  it('lista todas as contas ativas da empresa sem o corte de 100', async () => {
+    const controle = new AbortController();
+    fetchMock.mockResolvedValueOnce({ ok: true, status: 200, text: async () => JSON.stringify({ dados: [] }) });
+
+    await listarTodasContasBancarias({ empresa: 'emp-1', ativa: true, sinal: controle.signal });
+
+    const consulta = new URL(ultimaChamada().url, 'http://local').searchParams;
+    expect(ultimaChamada().url).toContain('/api/v1/contas-bancarias?');
+    expect(consulta.get('empresa')).toBe('emp-1');
+    expect(consulta.get('ativa')).toBe('true');
+    expect(consulta.get('tamanho')).toBe('100');
+    expect(ultimaChamada().sinal).toBe(controle.signal);
   });
 });

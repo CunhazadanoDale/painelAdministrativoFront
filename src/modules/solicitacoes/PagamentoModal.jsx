@@ -1,14 +1,24 @@
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Modal } from '../../app/components/Modal';
+import { SeletorRemoto } from '../../app/components/SeletorRemoto';
 import { AlertCircle, Trash2 } from 'lucide-react';
 import { centavosParaTexto, formatarMoeda, paraCentavos } from '../../lib/formatar';
 import * as arquivosService from '../../services/arquivos';
+import * as contasService from '../../services/contasBancarias';
 import { LIMITE_ARQUIVO } from './solicitacoesUtils';
 import './Solicitacoes.css';
 
+const opcaoDeConta = (conta) => ({ valor: conta.id, rotulo: `${conta.apelido} · ${conta.banco_nome}` });
+
 export function PagamentoModal({ solicitacao, onFechar, onConfirmar }) {
   const sequencia = useRef(0);
+  const [contaId, setContaId] = useState('');
   const [valor, setValor] = useState(centavosParaTexto(solicitacao.valor_centavos));
+  const empresaId = solicitacao.empresa_id;
+  const carregarContas = useCallback(
+    (sinal) => contasService.listarTodasContasBancarias({ empresa: empresaId, ativa: true, sinal }),
+    [empresaId]
+  );
   const [pagoEm, setPagoEm] = useState('');
   const [comprovante, setComprovante] = useState(null);
   const [erro, setErro] = useState(null);
@@ -74,6 +84,10 @@ export function PagamentoModal({ solicitacao, onFechar, onConfirmar }) {
   const enviar = async (event) => {
     event.preventDefault();
     const centavos = paraCentavos(valor);
+    if (!contaId) {
+      setErro('Escolha a conta bancária de onde o dinheiro saiu.');
+      return;
+    }
     if (!valor.trim() || !Number.isFinite(centavos) || centavos <= 0) {
       setErro('Informe um valor maior que zero.');
       return;
@@ -91,7 +105,7 @@ export function PagamentoModal({ solicitacao, onFechar, onConfirmar }) {
     setEnviando(true);
     setErroApi(null);
     try {
-      const dados = { valor_centavos: centavos };
+      const dados = { conta_bancaria_id: contaId, valor_centavos: centavos };
       if (comprovante && comprovante.id) dados.comprovante_arquivo_id = comprovante.id;
       if (pagoEm) dados.pago_em = new Date(pagoEm).toISOString();
       await onConfirmar(dados);
@@ -134,6 +148,23 @@ export function PagamentoModal({ solicitacao, onFechar, onConfirmar }) {
     >
       <form id="pagamento-form" className="solicitacoes-form" onSubmit={enviar} noValidate>
         {erroApi && <div className="solicitacoes-form-erro-api">{erroApi}</div>}
+
+        <div className="solicitacoes-form-campo solicitacoes-form-campo-full">
+          <label className="filter-label" htmlFor="pagamento-conta">
+            Conta bancária *
+          </label>
+          <SeletorRemoto
+            id="pagamento-conta"
+            className="filter-select"
+            valor={contaId}
+            onAlterar={setContaId}
+            carregar={carregarContas}
+            opcaoDe={opcaoDeConta}
+            textoVazio="Nenhuma conta ativa nesta empresa"
+            textoErro="Erro ao carregar as contas bancárias."
+            disabled={enviando}
+          />
+        </div>
 
         <div className="solicitacoes-form-campo">
           <label className="filter-label" htmlFor="pagamento-valor">
