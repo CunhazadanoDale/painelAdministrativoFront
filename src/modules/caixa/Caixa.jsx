@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAutenticacao } from '../../app/autenticacao/useAutenticacao';
 import { ConciliacaoExtrato } from './ConciliacaoExtrato';
 import { ListaImportacoes } from './ListaImportacoes';
+import { RegistrosCaixa } from './RegistrosCaixa';
 import { SaldosCaixa } from './SaldosCaixa';
 import './Caixa.css';
 
@@ -9,6 +10,7 @@ const ABAS = [
   { valor: 'saldos', rotulo: 'Saldos' },
   { valor: 'importacoes', rotulo: 'Importações' },
   { valor: 'conciliacao', rotulo: 'Conciliação' },
+  { valor: 'registros', rotulo: 'Registros' },
 ];
 
 export default function Caixa() {
@@ -41,6 +43,7 @@ export default function Caixa() {
         {aba === 'saldos' && <SaldosCaixa />}
         {aba === 'importacoes' && <ListaImportacoes administrador={administrador} />}
         {aba === 'conciliacao' && <ConciliacaoExtrato />}
+        {aba === 'registros' && <RegistrosCaixa />}
       </div>
     </div>
   );

@@ -470,3 +470,9 @@ h1.caixa-toolbar-titulo {
 .caixa-positivo {
   color: var(--success-text);
 }
+
+.caixa-visoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
