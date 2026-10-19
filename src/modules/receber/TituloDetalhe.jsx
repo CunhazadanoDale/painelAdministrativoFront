@@ -16,6 +16,7 @@ import {
   ProrrogarTituloModal,
   RetirarDoBancoModal,
 } from './AcoesDoTitulo';
+import { RecebimentoModal, RecebimentosDoTitulo } from './RecebimentosDoTitulo';
 import { numeroDoTitulo, rotuloCanal, rotuloEventoTitulo, rotuloOrigemTitulo, statusDoTitulo } from './receberUtils';
 import { TituloFormModal } from './TituloFormModal';
 import { useTituloDetalhe } from './useTituloDetalhe';
@@ -70,6 +71,8 @@ export default function TituloDetalhe() {
     enviarAoBanco,
     retirarDoBanco,
     registrarBoleto,
+    receber,
+    estornarRecebimento,
     cancelar,
   } = useTituloDetalhe(id);
   const nomeCliente = useNomesPorId([titulo?.cliente_id], clientesService.obterCliente);
@@ -105,6 +108,7 @@ export default function TituloDetalhe() {
   const aberto = titulo.status === 'carteira' || titulo.status === 'em_banco';
   const semRecebimento = !titulo.recebido_centavos;
   const origemCancelada = !!titulo.origem_cancelada_em;
+  const podeReceber = (aberto || titulo.status === 'antecipado') && titulo.saldo_centavos > 0;
   const podeEditar = titulo.origem === 'manual' && titulo.status === 'carteira' && semRecebimento;
   const fechar = () => setAcao(null);
 
@@ -153,6 +157,11 @@ export default function TituloDetalhe() {
           <StatusBadge status={situacao.cor} label={situacao.rotulo} />
         </div>
         <div className="receber-toolbar-acoes">
+          {podeReceber && (
+            <button type="button" className="filter-btn filter-btn-primary" style={BOTAO} onClick={() => setAcao('receber')}>
+              Registrar recebimento
+            </button>
+          )}
           {podeEditar && (
             <button type="button" className="filter-btn filter-btn-secondary" style={BOTAO} onClick={() => setAcao('editar')}>
               Editar
@@ -214,6 +223,18 @@ export default function TituloDetalhe() {
         </Panel>
       </div>
 
+      <Panel title="Recebimentos">
+        <RecebimentosDoTitulo
+          titulo={titulo}
+          geracao={geracao}
+          onEstornar={estornarRecebimento}
+          onRecarregar={recarregar}
+        />
+      </Panel>
+
+      {acao === 'receber' && (
+        <RecebimentoModal titulo={titulo} onConfirmar={receber} onFechar={fechar} onRecarregar={recarregar} />
+      )}
       {acao === 'editar' && (
         <TituloFormModal
           titulo={titulo}

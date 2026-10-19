@@ -23,6 +23,7 @@ vi.mock('../../services/contasBancarias', () => ({
 vi.mock('../../services/titulosReceber', () => ({
   obterTitulo: vi.fn(),
   listarHistoricoTitulo: vi.fn(),
+  listarRecebimentos: vi.fn(),
   atualizarTitulo: vi.fn(),
   prorrogarTitulo: vi.fn(),
   enviarAoBanco: vi.fn(),
@@ -105,6 +106,7 @@ beforeEach(() => {
     { id: 'cb-itau', apelido: 'Itaú cobrança', banco_nome: 'Itaú' },
   ]);
   svc.listarHistoricoTitulo.mockResolvedValue({ dados: HISTORICO });
+  svc.listarRecebimentos.mockResolvedValue({ dados: [] });
   for (const nome of ['atualizarTitulo', 'prorrogarTitulo', 'enviarAoBanco', 'retirarDoBanco', 'registrarBoletoEnviado', 'cancelarTitulo']) {
     svc[nome].mockResolvedValue({ dados: CARTEIRA });
   }

@@ -25,6 +25,7 @@ import { useEmpresas } from './empresas/useEmpresas';
 import { useContasBancarias } from './financeiro/useContasBancarias';
 import { useDespesasRecorrentes } from './financeiro/useDespesasRecorrentes';
 import { useResumoContasAPagar } from './financeiro/useResumoContasAPagar';
+import { useRecebimentos } from './receber/useRecebimentos';
 import { useTituloDetalhe } from './receber/useTituloDetalhe';
 import { useTituloHistorico } from './receber/useTituloHistorico';
 import { useTitulos } from './receber/useTitulos';
@@ -119,6 +120,7 @@ describe('cancelamento das requisições ao desmontar', () => {
     ['useTitulos', () => useTitulos()],
     ['useTituloDetalhe', () => useTituloDetalhe('tit-1')],
     ['useTituloHistorico', () => useTituloHistorico('tit-1', 0)],
+    ['useRecebimentos', () => useRecebimentos('tit-1', 0)],
     ['usePlanoContas', () => usePlanoContas()],
     ['useLocais', () => useLocais()],
     ['useSaldosDoLocal', () => useSaldosDoLocal('loc-1')],
