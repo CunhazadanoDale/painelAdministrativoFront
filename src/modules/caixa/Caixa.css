@@ -476,3 +476,23 @@ h1.caixa-toolbar-titulo {
   flex-wrap: wrap;
   gap: var(--space-2);
 }
+
+.caixa-totais {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-3);
+}
+
+.caixa-total {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+.caixa-total strong {
+  font-size: var(--font-size-xl);
+}

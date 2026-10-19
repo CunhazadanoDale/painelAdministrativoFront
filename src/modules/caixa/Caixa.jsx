@@ -3,6 +3,8 @@ import { useAutenticacao } from '../../app/autenticacao/useAutenticacao';
 import { ConciliacaoExtrato } from './ConciliacaoExtrato';
 import { FechamentosCaixa } from './FechamentosCaixa';
 import { ListaImportacoes } from './ListaImportacoes';
+import { MovimentoDiario } from './MovimentoDiario';
+import { ProjecaoCaixa } from './ProjecaoCaixa';
 import { RegistrosCaixa } from './RegistrosCaixa';
 import { SaldosCaixa } from './SaldosCaixa';
 import './Caixa.css';
@@ -13,6 +15,8 @@ const ABAS = [
   { valor: 'conciliacao', rotulo: 'Conciliação' },
   { valor: 'registros', rotulo: 'Registros' },
   { valor: 'fechamentos', rotulo: 'Fechamentos' },
+  { valor: 'projecao', rotulo: 'Projeção' },
+  { valor: 'movimento', rotulo: 'Movimento diário' },
 ];
 
 export default function Caixa() {
@@ -47,6 +51,8 @@ export default function Caixa() {
         {aba === 'conciliacao' && <ConciliacaoExtrato />}
         {aba === 'registros' && <RegistrosCaixa />}
         {aba === 'fechamentos' && <FechamentosCaixa administrador={administrador} />}
+        {aba === 'projecao' && <ProjecaoCaixa />}
+        {aba === 'movimento' && <MovimentoDiario />}
       </div>
     </div>
   );
