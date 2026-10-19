@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAutenticacao } from '../../app/autenticacao/useAutenticacao';
+import { ConciliacaoExtrato } from './ConciliacaoExtrato';
 import { ListaImportacoes } from './ListaImportacoes';
 import { SaldosCaixa } from './SaldosCaixa';
 import './Caixa.css';
@@ -7,6 +8,7 @@ import './Caixa.css';
 const ABAS = [
   { valor: 'saldos', rotulo: 'Saldos' },
   { valor: 'importacoes', rotulo: 'Importações' },
+  { valor: 'conciliacao', rotulo: 'Conciliação' },
 ];
 
 export default function Caixa() {
@@ -38,6 +40,7 @@ export default function Caixa() {
       <div id="painel-caixa" role="tabpanel" aria-labelledby={`aba-caixa-${aba}`} className="caixa-painel">
         {aba === 'saldos' && <SaldosCaixa />}
         {aba === 'importacoes' && <ListaImportacoes administrador={administrador} />}
+        {aba === 'conciliacao' && <ConciliacaoExtrato />}
       </div>
     </div>
   );

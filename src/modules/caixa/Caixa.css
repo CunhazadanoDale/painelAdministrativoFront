@@ -466,3 +466,7 @@ h1.caixa-toolbar-titulo {
 .caixa-total {
   align-self: flex-end;
 }
+
+.caixa-positivo {
+  color: var(--success-text);
+}
