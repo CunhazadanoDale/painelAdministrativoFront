@@ -6,6 +6,7 @@ import { useAutenticacao } from '../../app/autenticacao/useAutenticacao';
 import { ErroApi } from '../../lib/api';
 import * as empresasService from '../../services/empresas';
 import * as notasService from '../../services/notasFiscais';
+import * as pedidosService from '../../services/pedidos';
 import * as produtosService from '../../services/produtos';
 import * as titulosService from '../../services/titulosReceber';
 import NotaDetalhe from './NotaDetalhe';
@@ -14,6 +15,7 @@ vi.mock('../../app/autenticacao/useAutenticacao', () => ({ useAutenticacao: vi.f
 vi.mock('../../services/empresas', () => ({ listarTodasEmpresas: vi.fn() }));
 vi.mock('../../services/produtos', () => ({ listarProdutos: vi.fn(), obterProduto: vi.fn() }));
 vi.mock('../../services/titulosReceber', () => ({ listarTitulos: vi.fn() }));
+vi.mock('../../services/pedidos', () => ({ obterPedido: vi.fn(), obterEntrega: vi.fn() }));
 vi.mock('../../services/notasFiscais', () => ({
   obterNota: vi.fn(),
   listarEventosNota: vi.fn(),
@@ -127,6 +129,7 @@ beforeEach(() => {
         : [],
   }));
   svc.listarEventosNota.mockResolvedValue({ dados: EVENTOS });
+  pedidosService.obterPedido.mockResolvedValue({ dados: { id: 'ped-12', numero: 12 } });
   svc.ligarItemAoProduto.mockResolvedValue({ dados: NOTA });
   svc.sincronizarTitulosNota.mockResolvedValue({
     dados: { gerados: ['tit-2'], ja_existentes: ['tit-1'], cancelados: [], marcados: [], ignorados: 0 },
@@ -149,7 +152,7 @@ describe('NotaDetalhe', () => {
     expect(screen.getByText('R$ 1.090,00')).toBeInTheDocument();
     expect(screen.getByText('R$ 35,00')).toBeInTheDocument();
     expect(screen.getByText('PC-77')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Ver pedido' })).toHaveAttribute('href', '/pedidos/ped-12');
+    expect(await screen.findByRole('link', { name: 'Pedido 12' })).toHaveAttribute('href', '/pedidos/ped-12');
   });
 
   it('mostra a nota entre empresas com a empresa destinatária', async () => {

@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { AcaoModal } from '../../app/components/AcaoModal';
 import { BuscaRemota } from '../../app/components/BuscaRemota';
+import { SeletorRemoto } from '../../app/components/SeletorRemoto';
+import * as pedidosService from '../../services/pedidos';
 import * as produtosService from '../../services/produtos';
-import { numeroDaNota } from './notasUtils';
+import { statusDoPedido } from '../pedidos/pedidosUtils';
+import { descricaoDaEntrega, numeroDaNota } from './notasUtils';
 
 const buscarProdutos = (texto, sinal) =>
   produtosService
@@ -71,6 +74,97 @@ export function SincronizarTitulosModal({ nota, onConfirmar, onConcluido, onFech
           ? 'Cancela no contas a receber os títulos das duplicatas ainda sem movimento; os antecipados ou recebidos ficam marcados para o financeiro resolver.'
           : 'Gera no contas a receber os títulos das duplicatas que ainda não existem. Pode ser feito quantas vezes for preciso.'}
       </p>
+    </AcaoModal>
+  );
+}
+
+const STATUS_VINCULAVEIS = ['confirmado', 'parcialmente_entregue', 'entregue'];
+
+const opcaoDePedido = (pedido) => ({
+  valor: pedido.id,
+  rotulo: `Pedido ${pedido.numero} · ${statusDoPedido(pedido.status).rotulo}`,
+});
+
+const opcaoDeEntrega = (entrega) => ({ valor: entrega.id, rotulo: descricaoDaEntrega(entrega) });
+
+export function VinculoNotaModal({ nota, onConfirmar, onFechar, onRecarregar }) {
+  const [pedidoId, setPedidoId] = useState(nota.pedido_id ?? '');
+  const [entregaId, setEntregaId] = useState(nota.entrega_id ?? '');
+  const { empresa_id: empresa, cliente_id: cliente } = nota;
+
+  const carregarPedidos = useCallback(
+    (sinal) =>
+      pedidosService
+        .listarPedidos({ empresa, cliente, tamanho: 100, sinal })
+        .then((resposta) => (resposta?.dados ?? []).filter((pedido) => STATUS_VINCULAVEIS.includes(pedido.status))),
+    [empresa, cliente]
+  );
+  const carregarEntregas = useCallback(
+    (sinal) =>
+      pedidosService
+        .listarEntregasDoPedido(pedidoId, { sinal })
+        .then((resposta) => (resposta?.dados ?? []).filter((entrega) => entrega.status !== 'cancelada')),
+    [pedidoId]
+  );
+
+  const alterarPedido = useCallback((valor) => {
+    setPedidoId(valor);
+    setEntregaId('');
+  }, []);
+
+  return (
+    <AcaoModal
+      titulo={`Vínculo da NF-e ${numeroDaNota(nota)}`}
+      rotuloConfirmar="Salvar vínculo"
+      onConfirmar={() => onConfirmar({ pedido_id: pedidoId || null, entrega_id: (pedidoId && entregaId) || null })}
+      onFechar={onFechar}
+      onRecarregar={onRecarregar}
+      largura="560px"
+    >
+      <p className="notas-texto">
+        Pedidos confirmados, em entrega ou entregues da mesma empresa e do mesmo cliente da nota. A entrega é opcional e
+        só pode ter uma nota autorizada. Deixe sem pedido para desfazer o vínculo.
+      </p>
+      <div className="notas-form-campo">
+        <label className="filter-label" htmlFor="vinculo-pedido">
+          Pedido
+        </label>
+        <SeletorRemoto
+          id="vinculo-pedido"
+          className="filter-select"
+          valor={pedidoId}
+          onAlterar={alterarPedido}
+          carregar={carregarPedidos}
+          opcaoDe={opcaoDePedido}
+          placeholder="Sem pedido"
+          textoVazio="Nenhum pedido em aberto deste cliente na empresa"
+          textoErro="Erro ao carregar os pedidos."
+          selecionarUnica={false}
+        />
+      </div>
+      <div className="notas-form-campo">
+        <label className="filter-label" htmlFor="vinculo-entrega">
+          Entrega
+        </label>
+        {pedidoId ? (
+          <SeletorRemoto
+            id="vinculo-entrega"
+            className="filter-select"
+            valor={entregaId}
+            onAlterar={setEntregaId}
+            carregar={carregarEntregas}
+            opcaoDe={opcaoDeEntrega}
+            placeholder="Sem entrega"
+            textoVazio="O pedido não tem entregas"
+            textoErro="Erro ao carregar as entregas."
+            selecionarUnica={false}
+          />
+        ) : (
+          <select id="vinculo-entrega" className="filter-select" value="" disabled>
+            <option value="">Escolha o pedido primeiro</option>
+          </select>
+        )}
+      </div>
     </AcaoModal>
   );
 }

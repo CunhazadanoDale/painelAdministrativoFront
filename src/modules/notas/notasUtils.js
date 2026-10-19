@@ -1,3 +1,5 @@
+import { STATUS_ENTREGA } from '../pedidos/pedidosUtils';
+
 export const NATUREZAS = [
   { valor: 'venda', rotulo: 'Venda' },
   { valor: 'remessa', rotulo: 'Remessa' },
@@ -96,4 +98,21 @@ const formatoQuantidade = new Intl.NumberFormat('pt-BR', { maximumFractionDigits
 export function formatarQuantidade(quantidade) {
   const numero = Number(quantidade);
   return Number.isFinite(numero) ? formatoQuantidade.format(numero) : String(quantidade ?? '—');
+}
+
+export function descricaoDaEntrega(entrega) {
+  if (!entrega) return undefined;
+  const status = STATUS_ENTREGA[entrega.status]?.rotulo ?? entrega.status;
+  const momento = entrega.entregue_em
+    ? `Entregue em ${dataEmBrasilia(entrega.entregue_em)}`
+    : entrega.saiu_em
+      ? `Saída em ${dataEmBrasilia(entrega.saiu_em)}`
+      : entrega.previsao
+        ? `Previsão ${dataEmBrasilia(entrega.previsao)}`
+        : `Criada em ${dataEmBrasilia(entrega.criado_em)}`;
+  return `${momento} · ${status}`;
+}
+
+export function descricaoDoPedido(pedido) {
+  return pedido ? `Pedido ${pedido.numero}` : undefined;
 }

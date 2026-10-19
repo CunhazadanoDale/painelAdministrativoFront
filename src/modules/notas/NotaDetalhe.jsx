@@ -7,11 +7,14 @@ import { useNomesEmpresas } from '../../app/empresas/useNomesEmpresas';
 import { useNomesPorId } from '../../app/nomes/useNomesPorId';
 import { formatarData, formatarMoeda } from '../../lib/formatar';
 import * as notasService from '../../services/notasFiscais';
+import * as pedidosService from '../../services/pedidos';
 import * as produtosService from '../../services/produtos';
 import { numeroDoTitulo, statusDoTitulo } from '../receber/receberUtils';
-import { LigarProdutoModal, SincronizarTitulosModal } from './AcoesDaNota';
+import { LigarProdutoModal, SincronizarTitulosModal, VinculoNotaModal } from './AcoesDaNota';
 import {
   dataHoraEmBrasilia,
+  descricaoDaEntrega,
+  descricaoDoPedido,
   formatarChave,
   formatarDocumento,
   formatarQuantidade,
@@ -118,11 +121,14 @@ export default function NotaDetalhe() {
   const { id } = useParams();
   const { financeiro } = useAutenticacao();
   const nomeEmpresa = useNomesEmpresas();
-  const { nota, carregando, erro, geracao, recarregar, ligarProduto, sincronizarTitulos } = useNotaDetalhe(id);
+  const { nota, carregando, erro, geracao, recarregar, ligarProduto, atualizarVinculo, sincronizarTitulos } =
+    useNotaDetalhe(id);
   const nomeProduto = useNomesPorId(
     (nota?.itens ?? []).map((item) => item.produto_id),
     produtosService.obterProduto
   );
+  const nomePedido = useNomesPorId([nota?.pedido_id], pedidosService.obterPedido, descricaoDoPedido);
+  const nomeEntrega = useNomesPorId([nota?.entrega_id], pedidosService.obterEntrega, descricaoDaEntrega);
   const [acao, setAcao] = useState(null);
   const [resumoTitulos, setResumoTitulos] = useState(null);
   const [erroXml, setErroXml] = useState(null);
@@ -148,6 +154,7 @@ export default function NotaDetalhe() {
   const situacao = statusDaNota(nota.status);
   const autorizada = nota.status === 'autorizada';
   const geraTitulos = nota.natureza === 'venda' && !nota.entre_empresas;
+  const podeVincular = financeiro && autorizada && !nota.entre_empresas;
   const podeSincronizar = financeiro && ((autorizada && geraTitulos) || nota.status === 'cancelada');
   const numero = numeroDaNota(nota);
   const fechar = () => setAcao(null);
@@ -184,7 +191,19 @@ export default function NotaDetalhe() {
     ['Desconto', formatarMoeda(nota.valor_desconto_centavos)],
     ['Valor total', <strong key="total">{formatarMoeda(nota.valor_total_centavos)}</strong>],
     ['Pedido do cliente', nota.numero_pedido_cliente || '—'],
-    ['Pedido', nota.pedido_id ? <Link key="pedido" to={`/pedidos/${nota.pedido_id}`}>Ver pedido</Link> : '—'],
+    [
+      'Pedido',
+      nota.pedido_id ? (
+        <Link key="pedido" to={`/pedidos/${nota.pedido_id}`}>
+          {nomePedido(nota.pedido_id)}
+        </Link>
+      ) : nota.entre_empresas ? (
+        '—'
+      ) : (
+        'Sem pedido vinculado'
+      ),
+    ],
+    ['Entrega', nota.entrega_id ? nomeEntrega(nota.entrega_id) : '—'],
   ];
 
   return (
@@ -201,6 +220,11 @@ export default function NotaDetalhe() {
           <button type="button" className="filter-btn filter-btn-secondary" style={BOTAO} onClick={baixarXml}>
             <Download size={14} /> Baixar XML
           </button>
+          {podeVincular && (
+            <button type="button" className="filter-btn filter-btn-secondary" style={BOTAO} onClick={() => setAcao('vinculo')}>
+              {nota.pedido_id ? 'Alterar vínculo' : 'Vincular pedido'}
+            </button>
+          )}
           {podeSincronizar && (
             <button
               type="button"
@@ -308,6 +332,9 @@ export default function NotaDetalhe() {
 
       {acao?.tipo === 'ligar' && (
         <LigarProdutoModal item={acao.item} onConfirmar={ligarProduto} onFechar={fechar} onRecarregar={recarregar} />
+      )}
+      {acao === 'vinculo' && (
+        <VinculoNotaModal nota={nota} onConfirmar={atualizarVinculo} onFechar={fechar} onRecarregar={recarregar} />
       )}
       {acao === 'sincronizar' && (
         <SincronizarTitulosModal
