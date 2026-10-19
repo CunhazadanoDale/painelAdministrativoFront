@@ -34,6 +34,17 @@ import '../../app/components/DataGrid.css';
 import './Pedidos.css';
 
 const ABERTOS = ['confirmado', 'parcialmente_entregue'];
+
+function textoDoFreteEstimado(pedido) {
+  const tipo = pedido.frete_tipo.toUpperCase();
+  return pedido.frete_estimado_centavos ? `${tipo}, estimado em ${formatarMoeda(pedido.frete_estimado_centavos)}` : tipo;
+}
+
+function textoDoDescontoDoItem(item) {
+  const desconto = item.desconto_unitario_centavos;
+  if (!desconto) return '—';
+  return desconto > 0 ? formatarMoeda(desconto) : `${formatarMoeda(-desconto)} acima`;
+}
 const BOTAO = { flex: 'none', width: 'auto', padding: '4px 12px' };
 
 function HistoricoDoPedido({ pedidoId, geracao }) {
@@ -128,12 +139,25 @@ export default function PedidoDetalhe() {
     podeEntrada && !tituloEntrada.titulo && !tituloEntrada.carregando && !tituloEntrada.erro;
 
   const dados = [
+    ...(proposta
+      ? [
+          ['Identificação', `Proposta ${pedido.numero}-R${pedido.revisao ?? 1}`],
+          [
+            'Validade',
+            <span key="validade" className="pedidos-titulo-entrada">
+              {formatarData(pedido.validade)}
+              {pedido.vencida && <StatusBadge status="danger" label="Vencida" />}
+            </span>,
+          ],
+        ]
+      : []),
     ['Empresa', nomeEmpresa(pedido.empresa_id)],
     ['Cliente', <Link key="cliente" to={`/clientes/${pedido.cliente_id}`}>{nomeCliente(pedido.cliente_id)}</Link>],
     ['Obra', pedido.obra_id ? nomeObra(pedido.obra_id) : '—'],
     ['Representante', nomeRepresentante(pedido.representante_id)],
     ['Modelo', rotuloModelo(pedido.modelo)],
     ['Condição', descricaoDaCondicao(pedido.condicao)],
+    ...(pedido.frete_tipo ? [['Frete estimado', textoDoFreteEstimado(pedido)]] : []),
     ['Prazo limite', pedido.prazo_limite ? formatarData(pedido.prazo_limite) : '—'],
     ['Pedido do cliente', pedido.numero_pedido_cliente || '—'],
   ];
@@ -180,6 +204,9 @@ export default function PedidoDetalhe() {
           <StatusBadge status={situacao.cor} label={situacao.rotulo} />
         </div>
         <div className="pedidos-toolbar-acoes">
+          <Link className="filter-btn filter-btn-secondary pedidos-link-botao" style={BOTAO} to={`/pedidos/${pedido.id}/proposta`}>
+            {proposta ? 'Imprimir proposta' : 'Imprimir pedido'}
+          </Link>
           {comercial && proposta && (
             <>
               <button type="button" className="filter-btn filter-btn-secondary" style={BOTAO} onClick={() => setAcao('editar')}>
@@ -245,6 +272,8 @@ export default function PedidoDetalhe() {
                 <th>Produto</th>
                 <th>Quantidade</th>
                 <th>Preço</th>
+                <th>Tabela</th>
+                <th>Desconto</th>
                 <th>Subtotal</th>
                 <th>Entregue</th>
                 <th>Restante</th>
@@ -258,6 +287,8 @@ export default function PedidoDetalhe() {
                   <td>{nomeProduto(item.produto_id)}</td>
                   <td>{item.quantidade}</td>
                   <td>{formatarMoeda(item.preco_unitario_centavos)}</td>
+                  <td>{item.preco_tabela_centavos ? formatarMoeda(item.preco_tabela_centavos) : '—'}</td>
+                  <td>{textoDoDescontoDoItem(item)}</td>
                   <td>{formatarMoeda(item.subtotal_centavos)}</td>
                   <td>{item.quantidade_entregue}</td>
                   <td>{item.restante}</td>

@@ -111,3 +111,11 @@ export function gerarTituloEntrada(pedidoId, { vencimento, conta_bancaria_id }) 
     corpo: { vencimento, conta_bancaria_id },
   });
 }
+
+export function obterDocumentoProposta(id, { sinal } = {}) {
+  return requisitar(`${CAMINHO}/${id}/proposta`, { sinal });
+}
+
+export function listarModelosVenda({ sinal } = {}) {
+  return requisitar('/api/v1/modelos-venda', { sinal });
+}

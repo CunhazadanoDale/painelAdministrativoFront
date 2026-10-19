@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAutenticacao } from '../../app/autenticacao/useAutenticacao';
 import { ErroApi } from '../../lib/api';
 import * as gruposService from '../../services/clienteGrupos';
@@ -9,6 +9,7 @@ import * as clientesService from '../../services/clientes';
 import * as empresasService from '../../services/empresas';
 import * as pedidosService from '../../services/pedidos';
 import * as produtosService from '../../services/produtos';
+import * as precosService from '../../services/tabelaPrecos';
 import * as representantesService from '../../services/representantes';
 import Pedidos from './Pedidos';
 
@@ -18,7 +19,8 @@ vi.mock('../../services/clienteGrupos', () => ({ listarTodosGrupos: vi.fn() }));
 vi.mock('../../services/representantes', () => ({ listarTodosRepresentantes: vi.fn() }));
 vi.mock('../../services/clientes', () => ({ listarClientes: vi.fn(), obterCliente: vi.fn(), listarObras: vi.fn() }));
 vi.mock('../../services/produtos', () => ({ listarProdutos: vi.fn(), obterProduto: vi.fn() }));
-vi.mock('../../services/pedidos', () => ({ listarPedidos: vi.fn(), criarPedido: vi.fn() }));
+vi.mock('../../services/pedidos', () => ({ listarPedidos: vi.fn(), criarPedido: vi.fn(), listarModelosVenda: vi.fn() }));
+vi.mock('../../services/tabelaPrecos', () => ({ listarPrecosVigentes: vi.fn() }));
 
 const { listarPedidos, criarPedido } = pedidosService;
 const { listarClientes, obterCliente, listarObras } = clientesService;
@@ -82,7 +84,22 @@ async function abrirNova() {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.useFakeTimers({ toFake: ['Date'] });
+  vi.setSystemTime(new Date('2026-10-19T15:00:00Z'));
   perfil();
+  pedidosService.listarModelosVenda.mockResolvedValue({
+    dados: [
+      { modelo: 'pronta_entrega', condicao: { entrada_bp: 0, prazo_boleto_dias: 30, prazo_entrega_dias: null }, condicoes: ['Pagamento em boleto com vencimento em 30 dias após a entrega.'] },
+      { modelo: 'importacao', condicao: { entrada_bp: 3000, prazo_boleto_dias: null, prazo_entrega_dias: 120 }, condicoes: ['Entrada de 30% na confirmação do pedido.', 'Prazo de entrega de 120 dias contados do pagamento da entrada.'] },
+    ],
+  });
+  precosService.listarPrecosVigentes.mockImplementation(async ({ produto, modelo }) => ({
+    dados: [
+      produto === 'prod-cimento'
+        ? { produto_id: produto, preco_centavos: modelo === 'importacao' ? 3400 : 3800, origem: 'tabela' }
+        : { produto_id: produto, preco_centavos: null, origem: 'sem_preco' },
+    ],
+  }));
   empresasService.listarTodasEmpresas.mockResolvedValue(EMPRESAS);
   gruposService.listarTodosGrupos.mockResolvedValue([]);
   representantesService.listarTodosRepresentantes.mockResolvedValue([
@@ -97,6 +114,10 @@ beforeEach(() => {
   listarObras.mockResolvedValue({ dados: [{ id: 'obra-mar', nome: 'Residencial Mar Azul', ativo: true }] });
   listarProdutos.mockResolvedValue({ dados: [CIMENTO, AREIA] });
   criarPedido.mockResolvedValue({ dados: { ...PEDIDO_12, id: 'ped-13', numero: 13 } });
+});
+
+afterEach(() => {
+  vi.useRealTimers();
 });
 
 describe('Pedidos', () => {
@@ -172,7 +193,7 @@ describe('Pedidos', () => {
     expect(criarPedido).not.toHaveBeenCalled();
   });
 
-  it('cria a proposta com o preço sugerido do produto, o representante do cliente e o total', async () => {
+  it('cria a proposta com o preço da tabela, desconto, validade, boleto, frete e o total', async () => {
     const dialogo = await abrirNova();
     fireEvent.change(within(dialogo).getByLabelText('Empresa *'), { target: { value: 'emp-mia' } });
     fireEvent.change(within(dialogo).getByLabelText('Cliente *'), { target: { value: 'cli-aguia' } });
@@ -184,8 +205,19 @@ describe('Pedidos', () => {
 
     await within(dialogo).findByRole('option', { name: 'Cimento CP II 50 (SKU-1)' });
     fireEvent.change(within(dialogo).getByLabelText('Produto do item 1'), { target: { value: 'prod-cimento' } });
-    expect(within(dialogo).getByLabelText('Preço do item 1')).toHaveValue('35,90');
+    await waitFor(() => expect(within(dialogo).getByLabelText('Preço do item 1')).toHaveValue('38,00'));
+    expect(precosService.listarPrecosVigentes).toHaveBeenCalledWith(
+      expect.objectContaining({ modelo: 'pronta_entrega', produto: 'prod-cimento' })
+    );
+    fireEvent.change(within(dialogo).getByLabelText('Preço do item 1'), { target: { value: '35,90' } });
+    const linhaCimento = within(dialogo).getByLabelText('Preço do item 1').closest('tr');
+    expect(within(linhaCimento).getByText('R$ 38,00')).toBeInTheDocument();
+    expect(within(linhaCimento).getByText('R$ 2,10')).toBeInTheDocument();
     fireEvent.change(within(dialogo).getByLabelText('Quantidade do item 1'), { target: { value: '10' } });
+    expect(within(dialogo).getByLabelText('Validade da proposta *')).toHaveValue('2026-11-03');
+    fireEvent.change(within(dialogo).getByLabelText('Prazo do boleto (dias)'), { target: { value: '28' } });
+    fireEvent.change(within(dialogo).getByLabelText('Frete'), { target: { value: 'cif' } });
+    fireEvent.change(within(dialogo).getByLabelText('Frete estimado'), { target: { value: '180,00' } });
     fireEvent.click(within(dialogo).getByRole('button', { name: /Adicionar item/ }));
     await within(dialogo).findByLabelText('Produto do item 2');
     await waitFor(() =>
@@ -208,6 +240,10 @@ describe('Pedidos', () => {
         prazo_limite: '2026-12-20',
         numero_pedido_cliente: 'OC-778',
         observacoes: '',
+        validade: '2026-11-03',
+        prazo_boleto_dias: 28,
+        frete_tipo: 'cif',
+        frete_estimado_centavos: 18000,
         itens: [
           { produto_id: 'prod-cimento', quantidade: 10, preco_unitario_centavos: 3590 },
           { produto_id: 'prod-areia', quantidade: 2, preco_unitario_centavos: 15000 },
@@ -222,7 +258,9 @@ describe('Pedidos', () => {
     fireEvent.change(within(dialogo).getByLabelText('Modelo *'), { target: { value: 'importacao' } });
 
     expect(within(dialogo).queryByLabelText('Prazo limite')).toBeNull();
-    expect(within(dialogo).getByText(/Entrada de 30%/)).toBeInTheDocument();
+    expect(await within(dialogo).findByText(/Entrada de 30% na confirmação do pedido/)).toBeInTheDocument();
+    expect(within(dialogo).queryByLabelText('Prazo do boleto (dias)')).toBeNull();
+    expect(within(dialogo).getByLabelText('Entrada (%)')).toHaveAttribute('placeholder', '30,00');
     await within(dialogo).findByRole('option', { name: 'Cimento CP II 50 (SKU-1)' });
     fireEvent.change(within(dialogo).getByLabelText('Produto do item 1'), { target: { value: 'prod-cimento' } });
     fireEvent.click(within(dialogo).getByRole('button', { name: /Adicionar item/ }));
@@ -247,10 +285,73 @@ describe('Pedidos', () => {
     fireEvent.change(within(dialogo).getByLabelText('Cliente *'), { target: { value: 'cli-joao' } });
     await within(dialogo).findByRole('option', { name: 'Cimento CP II 50 (SKU-1)' });
     fireEvent.change(within(dialogo).getByLabelText('Produto do item 1'), { target: { value: 'prod-cimento' } });
+    await waitFor(() => expect(within(dialogo).getByLabelText('Preço do item 1')).toHaveValue('38,00'));
     fireEvent.change(within(dialogo).getByLabelText('Quantidade do item 1'), { target: { value: '1' } });
     fireEvent.click(within(dialogo).getByRole('button', { name: 'Salvar' }));
 
     expect(await within(dialogo).findByText(/cliente inativo não recebe pedido novo/)).toBeInTheDocument();
     expect(within(dialogo).getByLabelText('Cliente *')).toHaveValue('cli-joao');
+  });
+
+  it('na importação envia entrada e prazo de entrega e usa a tabela do modelo', async () => {
+    const dialogo = await abrirNova();
+    fireEvent.change(within(dialogo).getByLabelText('Empresa *'), { target: { value: 'emp-mia' } });
+    fireEvent.change(within(dialogo).getByLabelText('Cliente *'), { target: { value: 'cli-joao' } });
+    await within(dialogo).findByRole('option', { name: 'Cimento CP II 50 (SKU-1)' });
+    fireEvent.change(within(dialogo).getByLabelText('Produto do item 1'), { target: { value: 'prod-cimento' } });
+    await waitFor(() => expect(within(dialogo).getByLabelText('Preço do item 1')).toHaveValue('38,00'));
+    fireEvent.change(within(dialogo).getByLabelText('Modelo *'), { target: { value: 'importacao' } });
+    const linha = within(dialogo).getByLabelText('Preço do item 1').closest('tr');
+    expect(await within(linha).findByText('R$ 34,00')).toBeInTheDocument();
+    expect(within(linha).getByText('R$ 4,00 acima')).toBeInTheDocument();
+    fireEvent.change(within(dialogo).getByLabelText('Quantidade do item 1'), { target: { value: '5' } });
+    fireEvent.change(within(dialogo).getByLabelText('Entrada (%)'), { target: { value: '40' } });
+    fireEvent.change(within(dialogo).getByLabelText('Prazo de entrega (dias)'), { target: { value: '90' } });
+    fireEvent.click(within(dialogo).getByRole('button', { name: 'Salvar' }));
+
+    await waitFor(() =>
+      expect(criarPedido).toHaveBeenCalledWith(
+        expect.objectContaining({
+          modelo: 'importacao',
+          entrada_bp: 4000,
+          prazo_entrega_dias: 90,
+          validade: '2026-11-03',
+          frete_tipo: null,
+          frete_estimado_centavos: null,
+          itens: [{ produto_id: 'prod-cimento', quantidade: 5, preco_unitario_centavos: 3800 }],
+        })
+      )
+    );
+    expect(criarPedido.mock.calls[0][0]).not.toHaveProperty('prazo_boleto_dias');
+  });
+
+  it('valida validade, condições e frete da proposta', async () => {
+    const dialogo = await abrirNova();
+    fireEvent.change(within(dialogo).getByLabelText('Validade da proposta *'), { target: { value: '2026-10-18' } });
+    fireEvent.change(within(dialogo).getByLabelText('Prazo do boleto (dias)'), { target: { value: '400' } });
+    fireEvent.change(within(dialogo).getByLabelText('Frete'), { target: { value: 'cif' } });
+    fireEvent.click(within(dialogo).getByRole('button', { name: 'Salvar' }));
+
+    expect(await within(dialogo).findByText('A validade não pode ser antes de hoje.')).toBeInTheDocument();
+    expect(within(dialogo).getByText('O prazo do boleto vai de 1 a 365 dias.')).toBeInTheDocument();
+    expect(within(dialogo).getByText('Informe o frete estimado do CIF.')).toBeInTheDocument();
+
+    fireEvent.change(within(dialogo).getByLabelText('Modelo *'), { target: { value: 'importacao' } });
+    fireEvent.change(within(dialogo).getByLabelText('Entrada (%)'), { target: { value: '120' } });
+    fireEvent.change(within(dialogo).getByLabelText('Prazo de entrega (dias)'), { target: { value: '0' } });
+    fireEvent.click(within(dialogo).getByRole('button', { name: 'Salvar' }));
+
+    expect(await within(dialogo).findByText('A entrada vai de 0 a 100%, com até duas casas.')).toBeInTheDocument();
+    expect(within(dialogo).getByText('O prazo de entrega vai de 1 a 730 dias.')).toBeInTheDocument();
+    expect(criarPedido).not.toHaveBeenCalled();
+  });
+
+  it('sem preço na tabela cai no preço do produto e, sem nenhum, deixa o preço em branco', async () => {
+    precosService.listarPrecosVigentes.mockRejectedValue(new ErroApi(403, 'perfil sem permissão para ver a tabela de preços'));
+    const dialogo = await abrirNova();
+    await within(dialogo).findByRole('option', { name: 'Cimento CP II 50 (SKU-1)' });
+    fireEvent.change(within(dialogo).getByLabelText('Produto do item 1'), { target: { value: 'prod-cimento' } });
+
+    await waitFor(() => expect(within(dialogo).getByLabelText('Preço do item 1')).toHaveValue('35,90'));
   });
 });

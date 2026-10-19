@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { centavosParaTexto, formatarMoeda, paraCentavos } from '../../lib/formatar';
+import { centavosParaTexto, formatarData, formatarMoeda, paraCentavos } from '../../lib/formatar';
 import { AcaoModal } from '../../app/components/AcaoModal';
 import { SeletorRemoto } from '../../app/components/SeletorRemoto';
 import * as contasService from '../../services/contasBancarias';
@@ -16,6 +16,12 @@ export function ConfirmarPedidoModal({ pedido, onConfirmar, onFechar, onRecarreg
       onFechar={onFechar}
       onRecarregar={onRecarregar}
     >
+      {pedido.vencida && (
+        <div className="pedidos-form-erro-api" role="alert">
+          A proposta venceu em {formatarData(pedido.validade)} e não pode ser confirmada. Edite a proposta para renovar a
+          validade.
+        </div>
+      )}
       <p className="pedidos-texto">
         Confirmar reserva o disponível de cada item nos locais ativos da empresa, começando pelo local com mais
         disponível. O que faltar fica a cobrir. Depois de confirmado, os itens não mudam mais; o pedido só pode ser

@@ -31,6 +31,7 @@ import {
   CalendarRange,
   HandCoins,
   Percent,
+  Tags,
   BadgePercent,
   CalendarClock,
   MailWarning,
@@ -63,6 +64,7 @@ export function Sidebar() {
         { label: 'Pedidos', icon: <ClipboardList size={18} />, path: '/pedidos', end: true },
         { label: 'Entregas', icon: <PackageCheck size={18} />, path: '/entregas' },
         { label: 'Consultas de Pedidos', icon: <SearchCheck size={18} />, path: '/pedidos/consultas' },
+        { label: 'Tabela de Preços', icon: <Tags size={18} />, path: '/tabela-precos', comercialOuFinanceiro: true },
         { label: 'Clientes', icon: <Contact size={18} />, path: '/clientes' },
         { label: 'Grupos de Clientes', icon: <Network size={18} />, path: '/grupos-clientes' },
         { label: 'Representantes', icon: <Handshake size={18} />, path: '/representantes', comercial: true },
@@ -118,7 +120,8 @@ export function Sidebar() {
           (!item.admin || administrador) &&
           (!item.comercial || comercial) &&
           (!item.financeiro || financeiro) &&
-          (!item.semFinanceiro || !financeiro)
+          (!item.semFinanceiro || !financeiro) &&
+          (!item.comercialOuFinanceiro || comercial || financeiro)
       )
     }))
     .filter((group) => group.items.length > 0);

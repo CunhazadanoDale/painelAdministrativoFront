@@ -19,6 +19,9 @@ import { useNotaDetalhe } from './notas/useNotaDetalhe';
 import { useNotas } from './notas/useNotas';
 import { useTitulosDaNota } from './notas/useTitulosDaNota';
 import { usePedidos } from './pedidos/usePedidos';
+import { useDocumentoProposta } from './pedidos/useDocumentoProposta';
+import { useModelosVenda } from './pedidos/useModelosVenda';
+import { useHistoricoPrecos } from './precos/useHistoricoPrecos';
 import { useComissaoDoPedido } from './comissoes/useComissaoDoPedido';
 import { useFechamentoComissao } from './comissoes/useFechamentoComissao';
 import { useResumoComissoes } from './comissoes/useResumoComissoes';
@@ -155,6 +158,9 @@ describe('cancelamento das requisições ao desmontar', () => {
     ['useObrasCliente', () => useObrasCliente('cli-1', 0)],
     ['useClienteDoLead', () => useClienteDoLead('lead-1')],
     ['usePedidos', () => usePedidos()],
+    ['useModelosVenda', () => useModelosVenda()],
+    ['useDocumentoProposta', () => useDocumentoProposta('ped-1')],
+    ['useHistoricoPrecos', () => useHistoricoPrecos('prod-1', 'pronta_entrega')],
     ['useComissaoDoPedido', () => useComissaoDoPedido('ped-1', 0)],
     ['useFechamentoComissao', () => useFechamentoComissao('fec-1')],
     ['useResumoComissoes', () => useResumoComissoes('2026-10')],

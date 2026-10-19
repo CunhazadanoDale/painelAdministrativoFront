@@ -460,6 +460,33 @@ describe('roteamento do App', () => {
     expect(screen.getByTestId('caminho')).toHaveTextContent('/comissoes/fechamentos/fec-1');
   });
 
+  it('redireciona da tabela de preços quem não é comercial nem financeiro, sem a entrada', async () => {
+    gravarSessao(false);
+
+    renderizar('/tabela-precos');
+
+    await waitFor(() => expect(screen.getByTestId('caminho')).toHaveTextContent(/^\/$/));
+    expect(screen.queryByRole('link', { name: 'Tabela de Preços' })).toBeNull();
+  });
+
+  it('abre a tabela de preços para o financeiro, com a entrada na sidebar', async () => {
+    gravarSessaoFinanceiro();
+
+    renderizar('/tabela-precos');
+
+    expect(await screen.findByRole('heading', { name: 'Tabela de preços' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Tabela de Preços' })).toHaveAttribute('href', '/tabela-precos');
+  });
+
+  it('abre a página de impressão da proposta pela rota', async () => {
+    gravarSessao(false);
+
+    renderizar('/pedidos/ped-1/proposta');
+
+    expect(await screen.findByRole('link', { name: /Voltar ao pedido/ })).toHaveAttribute('href', '/pedidos/ped-1');
+    expect(screen.getByTestId('caminho')).toHaveTextContent('/pedidos/ped-1/proposta');
+  });
+
   it('redireciona /pagamentos para /solicitacoes', async () => {
     gravarSessao(false);
 
