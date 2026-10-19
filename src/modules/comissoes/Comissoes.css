@@ -454,3 +454,7 @@
   padding-left: var(--space-5);
   color: var(--danger-text);
 }
+
+.comissoes-negativo {
+  color: var(--danger-text);
+}

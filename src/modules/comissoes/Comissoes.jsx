@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAutenticacao } from '../../app/autenticacao/useAutenticacao';
 import { ApurarModal } from './ApurarModal';
 import { textoDaApuracao } from './comissoesUtils';
+import { ListaAjustes } from './ListaAjustes';
 import { ListaComissoes } from './ListaComissoes';
 import { PendenciasApuracao } from './PendenciasApuracao';
 import { Calculator } from 'lucide-react';
@@ -9,6 +10,7 @@ import './Comissoes.css';
 
 const ABAS = [
   { valor: 'comissoes', rotulo: 'Comissões' },
+  { valor: 'ajustes', rotulo: 'Ajustes' },
   { valor: 'pendencias', rotulo: 'Pendências de apuração', financeiro: true },
 ];
 
@@ -85,6 +87,7 @@ export default function Comissoes() {
         className="comissoes-painel"
       >
         {aba === 'comissoes' && <ListaComissoes key={geracao} financeiro={financeiro} />}
+        {aba === 'ajustes' && <ListaAjustes key={geracao} financeiro={financeiro} />}
         {aba === 'pendencias' && <PendenciasApuracao key={geracao} />}
       </div>
 
