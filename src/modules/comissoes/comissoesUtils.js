@@ -20,3 +20,8 @@ export function textoDaApuracao(resultado) {
   const jaExistentes = resultado?.ja_existentes ?? 0;
   return `Apuração: ${apuradas} entrega(s) apurada(s), ${jaExistentes} já apurada(s) antes.`;
 }
+
+export function mesAnterior(competencia) {
+  const [ano, mes] = competencia.split('-').map(Number);
+  return mes === 1 ? `${ano - 1}-12` : `${ano}-${String(mes - 1).padStart(2, '0')}`;
+}
