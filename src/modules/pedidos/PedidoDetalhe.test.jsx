@@ -235,6 +235,7 @@ describe('PedidoDetalhe', () => {
     await carregar();
 
     expect(screen.getByText('Proposta 12-R2')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Imprimir proposta' })).toHaveAttribute('href', '/pedidos/ped-12/proposta');
     expect(screen.getByText('03/11/2026')).toBeInTheDocument();
     expect(screen.getByText('CIF, estimado em R$ 180,00')).toBeInTheDocument();
     const item = (await screen.findByText('Cimento CP II 50')).closest('tr');

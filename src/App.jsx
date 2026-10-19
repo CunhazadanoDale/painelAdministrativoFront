@@ -35,6 +35,7 @@ import GruposClientes from './modules/clientes/GruposClientes';
 import Representantes from './modules/clientes/Representantes';
 import Pedidos from './modules/pedidos/Pedidos';
 import PedidoDetalhe from './modules/pedidos/PedidoDetalhe';
+import PropostaImpressao from './modules/pedidos/PropostaImpressao';
 import Entregas from './modules/pedidos/Entregas';
 import ConsultasPedidos from './modules/pedidos/ConsultasPedidos';
 import Comissoes from './modules/comissoes/Comissoes';
@@ -91,6 +92,7 @@ function App() {
             <Route path="/pedidos" element={<Pedidos />} />
             <Route path="/pedidos/consultas" element={<ConsultasPedidos />} />
             <Route path="/pedidos/:id" element={<PedidoDetalhe />} />
+            <Route path="/pedidos/:id/proposta" element={<PropostaImpressao />} />
             <Route path="/entregas" element={<Entregas />} />
             <Route path="/comissoes" element={<Comissoes />} />
             <Route path="/comissoes/fechamentos/:id" element={<FechamentoDetalhe />} />

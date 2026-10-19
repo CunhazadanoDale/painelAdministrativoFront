@@ -204,6 +204,9 @@ export default function PedidoDetalhe() {
           <StatusBadge status={situacao.cor} label={situacao.rotulo} />
         </div>
         <div className="pedidos-toolbar-acoes">
+          <Link className="filter-btn filter-btn-secondary pedidos-link-botao" style={BOTAO} to={`/pedidos/${pedido.id}/proposta`}>
+            {proposta ? 'Imprimir proposta' : 'Imprimir pedido'}
+          </Link>
           {comercial && proposta && (
             <>
               <button type="button" className="filter-btn filter-btn-secondary" style={BOTAO} onClick={() => setAcao('editar')}>

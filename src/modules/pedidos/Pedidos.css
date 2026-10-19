@@ -362,3 +362,9 @@
   align-items: center;
   gap: var(--space-1);
 }
+
+.pedidos-link-botao {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
