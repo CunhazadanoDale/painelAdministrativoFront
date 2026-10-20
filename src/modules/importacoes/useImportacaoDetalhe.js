@@ -85,8 +85,19 @@ export function useImportacaoDetalhe(id) {
     [executar, id, versao]
   );
 
+  const definirAlocacoes = useCallback(
+    (alocacoes) => executar(() => importacoesService.definirAlocacoes(id, { versao, alocacoes })),
+    [executar, id, versao]
+  );
+  const receber = useCallback(
+    (dados) => executar(() => importacoesService.receberImportacao(id, { ...dados, versao })),
+    [executar, id, versao]
+  );
+
   return {
     importacao,
+    definirAlocacoes,
+    receber,
     incluirParcela,
     atualizarParcela,
     removerParcela,

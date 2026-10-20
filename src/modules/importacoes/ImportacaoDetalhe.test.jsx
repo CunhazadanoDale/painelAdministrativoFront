@@ -16,7 +16,9 @@ vi.mock('../../services/empresas', () => ({ listarTodasEmpresas: vi.fn() }));
 vi.mock('../../services/locais', () => ({ listarTodosLocais: vi.fn() }));
 vi.mock('../../services/fornecedores', () => ({ listarFornecedores: vi.fn(), obterFornecedor: vi.fn() }));
 vi.mock('../../services/produtos', () => ({ listarProdutos: vi.fn(), obterProduto: vi.fn() }));
+vi.mock('../../services/pedidos', () => ({ listarTodasPendencias: vi.fn(async () => []) }));
 vi.mock('../../services/importacoes', () => ({
+  obterAlertasImportacao: vi.fn(async () => ({ dados: { sem_importacao: [] } })),
   obterImportacao: vi.fn(),
   atualizarImportacao: vi.fn(),
   embarcarImportacao: vi.fn(),

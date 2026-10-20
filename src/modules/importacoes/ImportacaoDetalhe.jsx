@@ -10,6 +10,8 @@ import { formatarData, formatarDataHora, formatarMoeda } from '../../lib/formata
 import * as fornecedoresService from '../../services/fornecedores';
 import * as produtosService from '../../services/produtos';
 import { CancelarImportacaoModal, DesembaracarModal, EmbarcarModal } from './AcoesDaImportacao';
+import { AlocacoesDaImportacao } from './AlocacoesDaImportacao';
+import { ReceberImportacaoModal } from './ReceberImportacaoModal';
 import { CustoPrevisto } from './CustoPrevisto';
 import { CustosDaImportacao } from './CustosDaImportacao';
 import { ParcelasDaImportacao } from './ParcelasDaImportacao';
@@ -123,7 +125,7 @@ function datasDa(importacao) {
 
 export default function ImportacaoDetalhe() {
   const { id } = useParams();
-  const { financeiro } = useAutenticacao();
+  const { comercial, financeiro } = useAutenticacao();
   const nomeEmpresa = useNomesEmpresas();
   const nomeLocal = useNomesLocais();
   const detalhe = useImportacaoDetalhe(id);
@@ -205,6 +207,11 @@ export default function ImportacaoDetalhe() {
                 Desembaraçar
               </button>
             )}
+            {status === 'desembaracada' && (
+              <button type="button" className="filter-btn filter-btn-primary" style={BOTAO} onClick={() => setAcao('receber')}>
+                Receber
+              </button>
+            )}
             {CANCELAVEIS.includes(status) && (
               <button type="button" className="filter-btn importacoes-perigo" style={BOTAO} onClick={() => setAcao('cancelar')}>
                 Cancelar importação
@@ -234,6 +241,17 @@ export default function ImportacaoDetalhe() {
 
       <Panel title="Itens">
         <ItensDaImportacao importacao={importacao} financeiro={financeiro} nomeProduto={nomeProduto} />
+      </Panel>
+
+      <Panel title="Pedidos alocados">
+        <AlocacoesDaImportacao
+          importacao={importacao}
+          geracao={geracao}
+          podeAlocar={comercial || financeiro}
+          nomeProduto={nomeProduto}
+          onDefinir={detalhe.definirAlocacoes}
+          onRecarregar={recarregar}
+        />
       </Panel>
 
       {financeiro && (
@@ -272,6 +290,15 @@ export default function ImportacaoDetalhe() {
       )}
       {acao === 'desembaracar' && (
         <DesembaracarModal importacao={importacao} onConfirmar={desembaracar} onFechar={fechar} onRecarregar={recarregar} />
+      )}
+      {acao === 'receber' && (
+        <ReceberImportacaoModal
+          importacao={importacao}
+          nomeProduto={nomeProduto}
+          onConfirmar={detalhe.receber}
+          onFechar={fechar}
+          onRecarregar={recarregar}
+        />
       )}
       {acao === 'cancelar' && (
         <CancelarImportacaoModal importacao={importacao} onConfirmar={cancelar} onFechar={fechar} onRecarregar={recarregar} />
