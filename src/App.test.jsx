@@ -487,6 +487,24 @@ describe('roteamento do App', () => {
     expect(screen.getByTestId('caminho')).toHaveTextContent('/pedidos/ped-1/proposta');
   });
 
+  it('redireciona do caixa quem não é financeiro, sem a entrada', async () => {
+    gravarSessao(false);
+
+    renderizar('/caixa');
+
+    await waitFor(() => expect(screen.getByTestId('caminho')).toHaveTextContent(/^\/$/));
+    expect(screen.queryByRole('link', { name: 'Caixa' })).toBeNull();
+  });
+
+  it('abre o caixa para o financeiro, com a entrada na sidebar', async () => {
+    gravarSessaoFinanceiro();
+
+    renderizar('/caixa');
+
+    expect(await screen.findByRole('heading', { name: 'Caixa' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Caixa' })).toHaveAttribute('href', '/caixa');
+  });
+
   it('redireciona /pagamentos para /solicitacoes', async () => {
     gravarSessao(false);
 

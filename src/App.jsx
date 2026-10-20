@@ -19,6 +19,7 @@ import DespesasRecorrentes from './modules/financeiro/DespesasRecorrentes';
 import ResumoContasAPagar from './modules/financeiro/ResumoContasAPagar';
 import ContasBancarias from './modules/financeiro/ContasBancarias';
 import PlanoContas from './modules/financeiro/PlanoContas';
+import Caixa from './modules/caixa/Caixa';
 import AntecipacaoDetalhe from './modules/receber/AntecipacaoDetalhe';
 import Antecipacoes from './modules/receber/Antecipacoes';
 import BoletosPendentes from './modules/receber/BoletosPendentes';
@@ -145,6 +146,7 @@ function App() {
               path="/contas-a-pagar/resumo"
               element={financeiro ? <ResumoContasAPagar /> : <Navigate to="/" replace />}
             />
+            <Route path="/caixa" element={financeiro ? <Caixa /> : <Navigate to="/" replace />} />
             <Route path="/titulos-receber" element={financeiro ? <Titulos /> : <Navigate to="/" replace />} />
             <Route
               path="/titulos-receber/:id"

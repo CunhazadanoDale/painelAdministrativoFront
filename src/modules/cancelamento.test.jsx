@@ -22,6 +22,9 @@ import { usePedidos } from './pedidos/usePedidos';
 import { useDocumentoProposta } from './pedidos/useDocumentoProposta';
 import { useModelosVenda } from './pedidos/useModelosVenda';
 import { useHistoricoPrecos } from './precos/useHistoricoPrecos';
+import { useMovimentoDiario } from './caixa/useMovimentoDiario';
+import { useProjecaoCaixa } from './caixa/useProjecaoCaixa';
+import { useSaldosCaixa } from './caixa/useSaldosCaixa';
 import { useComissaoDoPedido } from './comissoes/useComissaoDoPedido';
 import { useFechamentoComissao } from './comissoes/useFechamentoComissao';
 import { useResumoComissoes } from './comissoes/useResumoComissoes';
@@ -162,6 +165,9 @@ describe('cancelamento das requisições ao desmontar', () => {
     ['useDocumentoProposta', () => useDocumentoProposta('ped-1')],
     ['useHistoricoPrecos', () => useHistoricoPrecos('prod-1', 'pronta_entrega')],
     ['useComissaoDoPedido', () => useComissaoDoPedido('ped-1', 0)],
+    ['useSaldosCaixa', () => useSaldosCaixa()],
+    ['useProjecaoCaixa', () => useProjecaoCaixa({ empresa: '', ate: '' })],
+    ['useMovimentoDiario', () => useMovimentoDiario({ empresa: '', conta: '', de: '', ate: '' })],
     ['useFechamentoComissao', () => useFechamentoComissao('fec-1')],
     ['useResumoComissoes', () => useResumoComissoes('2026-10')],
     ['useNotas', () => useNotas()],
