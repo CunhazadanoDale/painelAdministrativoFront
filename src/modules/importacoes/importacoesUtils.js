@@ -84,6 +84,10 @@ export function rotuloAcaoHistorico(acao) {
   return ACOES_HISTORICO[acao] ?? acao;
 }
 
+export function nomeDoFornecedor(fornecedor) {
+  return fornecedor?.nome_fantasia || fornecedor?.nome;
+}
+
 export function paraCentesimos(texto) {
   return paraCentavos(texto);
 }

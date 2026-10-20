@@ -52,6 +52,7 @@ import { useTitulos } from './receber/useTitulos';
 import { useTitulosAntecipaveis } from './receber/useTitulosAntecipaveis';
 import { usePlanoContas } from './financeiro/usePlanoContas';
 import { useFornecedores } from './fornecedores/useFornecedores';
+import { useImportacoes } from './importacoes/useImportacoes';
 import { useFunis } from './funis/useFunis';
 import { useKanban } from './leads/useKanban';
 import { useLeadDetalhe } from './leads/useLeadDetalhe';
@@ -135,6 +136,7 @@ describe('cancelamento das requisições ao desmontar', () => {
     ['useDashboard', () => useDashboard()],
     ['useEmpresas', () => useEmpresas()],
     ['useFornecedores', () => useFornecedores()],
+    ['useImportacoes', () => useImportacoes()],
     ['useContasBancarias', () => useContasBancarias()],
     ['useDespesasRecorrentes', () => useDespesasRecorrentes()],
     ['useResumoContasAPagar', () => useResumoContasAPagar()],
