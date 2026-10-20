@@ -89,6 +89,9 @@ export const ORIGENS = [
   { valor: 'recorrencia', rotulo: 'Despesa recorrente' },
   { valor: 'recompra', rotulo: 'Recompra de título' },
   { valor: 'repasse_fomento', rotulo: 'Repasse ao fomento' },
+  { valor: 'comissao', rotulo: 'Comissão' },
+  { valor: 'importacao_parcela', rotulo: 'Parcela de importação' },
+  { valor: 'importacao_custo', rotulo: 'Custo de importação' },
 ];
 
 export function rotuloEvento(evento) {

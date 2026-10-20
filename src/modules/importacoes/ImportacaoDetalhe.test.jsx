@@ -23,6 +23,7 @@ vi.mock('../../services/importacoes', () => ({
   desembaracarImportacao: vi.fn(),
   cancelarImportacao: vi.fn(),
   listarHistoricoImportacao: vi.fn(),
+  obterCustoPrevisto: vi.fn(async () => ({ dados: null })),
 }));
 
 const svc = importacoesService;

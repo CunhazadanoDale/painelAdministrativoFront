@@ -56,8 +56,44 @@ export function useImportacaoDetalhe(id) {
     [executar, id, versao]
   );
 
+  const incluirParcela = useCallback(
+    (dados) => executar(() => importacoesService.incluirParcela(id, { ...dados, versao })),
+    [executar, id, versao]
+  );
+  const atualizarParcela = useCallback(
+    (parcelaId, dados) => executar(() => importacoesService.atualizarParcela(id, parcelaId, { ...dados, versao })),
+    [executar, id, versao]
+  );
+  const removerParcela = useCallback(
+    (parcelaId) => executar(() => importacoesService.removerParcela(id, parcelaId, versao)),
+    [executar, id, versao]
+  );
+  const fecharCambio = useCallback(
+    (parcelaId, dados) => executar(() => importacoesService.fecharCambio(id, parcelaId, { ...dados, versao })),
+    [executar, id, versao]
+  );
+  const reabrirParcela = useCallback(
+    (parcelaId) => executar(() => importacoesService.reabrirParcela(id, parcelaId, versao)),
+    [executar, id, versao]
+  );
+  const lancarCusto = useCallback(
+    (dados) => executar(() => importacoesService.lancarCusto(id, { ...dados, versao })),
+    [executar, id, versao]
+  );
+  const cancelarCusto = useCallback(
+    (custoId) => executar(() => importacoesService.cancelarCusto(id, custoId, versao)),
+    [executar, id, versao]
+  );
+
   return {
     importacao,
+    incluirParcela,
+    atualizarParcela,
+    removerParcela,
+    fecharCambio,
+    reabrirParcela,
+    lancarCusto,
+    cancelarCusto,
     carregando,
     erro,
     geracao: recarga,

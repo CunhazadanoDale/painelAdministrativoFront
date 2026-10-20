@@ -10,6 +10,9 @@ import { formatarData, formatarDataHora, formatarMoeda } from '../../lib/formata
 import * as fornecedoresService from '../../services/fornecedores';
 import * as produtosService from '../../services/produtos';
 import { CancelarImportacaoModal, DesembaracarModal, EmbarcarModal } from './AcoesDaImportacao';
+import { CustoPrevisto } from './CustoPrevisto';
+import { CustosDaImportacao } from './CustosDaImportacao';
+import { ParcelasDaImportacao } from './ParcelasDaImportacao';
 import { ImportacaoFormModal } from './ImportacaoFormModal';
 import {
   formatarCambio,
@@ -123,10 +126,10 @@ export default function ImportacaoDetalhe() {
   const { financeiro } = useAutenticacao();
   const nomeEmpresa = useNomesEmpresas();
   const nomeLocal = useNomesLocais();
-  const { importacao, carregando, erro, geracao, recarregar, atualizar, embarcar, desembaracar, cancelar } =
-    useImportacaoDetalhe(id);
+  const detalhe = useImportacaoDetalhe(id);
+  const { importacao, carregando, erro, geracao, recarregar, atualizar, embarcar, desembaracar, cancelar } = detalhe;
   const nomeFornecedor = useNomesPorId(
-    [importacao?.fornecedor_id],
+    [importacao?.fornecedor_id, ...(importacao?.custos ?? []).map((custo) => custo.fornecedor_id)],
     fornecedoresService.obterFornecedor,
     nomeDoFornecedor
   );
@@ -232,6 +235,27 @@ export default function ImportacaoDetalhe() {
       <Panel title="Itens">
         <ItensDaImportacao importacao={importacao} financeiro={financeiro} nomeProduto={nomeProduto} />
       </Panel>
+
+      {financeiro && (
+        <>
+          <Panel title="Parcelas ao fornecedor">
+            <ParcelasDaImportacao importacao={importacao} acoes={detalhe} onRecarregar={recarregar} />
+          </Panel>
+          <Panel title="Custos de nacionalização">
+            <CustosDaImportacao
+              importacao={importacao}
+              acoes={detalhe}
+              nomeFornecedor={nomeFornecedor}
+              onRecarregar={recarregar}
+            />
+          </Panel>
+          {CANCELAVEIS.includes(status) && (
+            <Panel title="Custo previsto">
+              <CustoPrevisto importacao={importacao} geracao={geracao} nomeProduto={nomeProduto} />
+            </Panel>
+          )}
+        </>
+      )}
 
       {acao === 'editar' && (
         <ImportacaoFormModal
