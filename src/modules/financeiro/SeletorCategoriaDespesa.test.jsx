@@ -96,4 +96,28 @@ describe('SeletorCategoriaDespesa', () => {
     expect(await screen.findByRole('option', { name: 'Juros recebidos' })).toBeInTheDocument();
     expect(screen.queryByRole('option', { name: 'Aluguel' })).toBeNull();
   });
+
+  it('com a linha da DRE oferece só as raízes daquela linha', async () => {
+    obterArvoreFinanceira.mockResolvedValue({
+      dados: [
+        { ...ARVORE[0], linha_dre: 'despesa_fixa' },
+        {
+          id: 'raiz-financeiras',
+          nome: 'Despesas financeiras',
+          natureza: 'despesa',
+          linha_dre: 'resultado_financeiro',
+          subcategorias: [{ id: 'sub-juros-pagos', nome: 'Juros de empréstimos', lancavel: true }],
+        },
+      ],
+    });
+    render(
+      <>
+        <label htmlFor="juros">Categoria de juros</label>
+        <SeletorCategoriaDespesa id="juros" linhaDre="resultado_financeiro" valor="" onAlterar={() => {}} />
+      </>
+    );
+
+    expect(await screen.findByRole('option', { name: 'Juros de empréstimos' })).toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: 'Aluguel' })).toBeNull();
+  });
 });
