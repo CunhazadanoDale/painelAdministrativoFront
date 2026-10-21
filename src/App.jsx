@@ -49,6 +49,9 @@ import Notas from './modules/notas/Notas';
 import AlertasImportacao from './modules/importacoes/AlertasImportacao';
 import ImportacaoDetalhe from './modules/importacoes/ImportacaoDetalhe';
 import Importacoes from './modules/importacoes/Importacoes';
+import DividaDetalhe from './modules/dividas/DividaDetalhe';
+import Dividas from './modules/dividas/Dividas';
+import ResumoDividas from './modules/dividas/ResumoDividas';
 import Perfil from './modules/perfil/Perfil';
 
 const Negociacoes = () => <div>Negociações Module</div>;
@@ -162,6 +165,9 @@ function App() {
               element={financeiro ? <ResumoContasAPagar /> : <Navigate to="/" replace />}
             />
             <Route path="/caixa" element={financeiro ? <Caixa /> : <Navigate to="/" replace />} />
+            <Route path="/dividas" element={financeiro ? <Dividas /> : <Navigate to="/" replace />} />
+            <Route path="/dividas/resumo" element={financeiro ? <ResumoDividas /> : <Navigate to="/" replace />} />
+            <Route path="/dividas/:id" element={financeiro ? <DividaDetalhe /> : <Navigate to="/" replace />} />
             <Route path="/titulos-receber" element={financeiro ? <Titulos /> : <Navigate to="/" replace />} />
             <Route
               path="/titulos-receber/:id"

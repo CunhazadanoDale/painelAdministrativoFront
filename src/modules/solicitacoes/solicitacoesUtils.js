@@ -92,6 +92,8 @@ export const ORIGENS = [
   { valor: 'comissao', rotulo: 'Comissão' },
   { valor: 'importacao_parcela', rotulo: 'Parcela de importação' },
   { valor: 'importacao_custo', rotulo: 'Custo de importação' },
+  { valor: 'divida_amortizacao', rotulo: 'Amortização de dívida' },
+  { valor: 'divida_juros', rotulo: 'Juros de dívida' },
 ];
 
 export function rotuloEvento(evento) {

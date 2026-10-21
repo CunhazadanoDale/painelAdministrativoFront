@@ -52,6 +52,10 @@ import { useTitulos } from './receber/useTitulos';
 import { useTitulosAntecipaveis } from './receber/useTitulosAntecipaveis';
 import { usePlanoContas } from './financeiro/usePlanoContas';
 import { useFornecedores } from './fornecedores/useFornecedores';
+import { useDividaDetalhe } from './dividas/useDividaDetalhe';
+import { useDividaHistorico } from './dividas/useDividaHistorico';
+import { useDividas } from './dividas/useDividas';
+import { useResumoDividas } from './dividas/useResumoDividas';
 import { useImportacoes } from './importacoes/useImportacoes';
 import { useImportacaoDetalhe } from './importacoes/useImportacaoDetalhe';
 import { useImportacaoHistorico } from './importacoes/useImportacaoHistorico';
@@ -149,6 +153,10 @@ describe('cancelamento das requisições ao desmontar', () => {
     ['usePedidosDaImportacao', () => usePedidosDaImportacao('emp-1', 0)],
     ['useAlertasImportacao', () => useAlertasImportacao('', '10')],
     ['useImportacoesDoPedido', () => useImportacoesDoPedido('ped-1', 0)],
+    ['useDividas', () => useDividas()],
+    ['useDividaDetalhe', () => useDividaDetalhe('div-1')],
+    ['useDividaHistorico', () => useDividaHistorico('div-1', 0)],
+    ['useResumoDividas', () => useResumoDividas('')],
     ['useContasBancarias', () => useContasBancarias()],
     ['useDespesasRecorrentes', () => useDespesasRecorrentes()],
     ['useResumoContasAPagar', () => useResumoContasAPagar()],
