@@ -505,6 +505,43 @@ describe('roteamento do App', () => {
     expect(screen.getByRole('link', { name: 'Caixa' })).toHaveAttribute('href', '/caixa');
   });
 
+  it('redireciona das importações quem não é comercial nem financeiro, sem as entradas', async () => {
+    gravarSessao(false);
+
+    renderizar('/importacoes/alertas');
+
+    await waitFor(() => expect(screen.getByTestId('caminho')).toHaveTextContent(/^\/$/));
+    expect(screen.queryByRole('link', { name: 'Importações' })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Alertas de Importação' })).toBeNull();
+  });
+
+  it('abre as importações, os alertas e o detalhe para o comercial, com as entradas na sidebar', async () => {
+    localStorage.setItem(
+      'mia.sessao',
+      JSON.stringify({
+        token: 'token-de-teste',
+        expira_em: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+        administrador: false,
+        comercial: true,
+        usuario: { usuario_id: 1, nome: 'Pessoa Teste', email: 'teste@exemplo.com' },
+      })
+    );
+    const { unmount } = renderizar('/importacoes');
+
+    expect(await screen.findByText('Nenhuma importação nas empresas do seu acesso.')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Importações' })).toHaveAttribute('href', '/importacoes');
+    expect(screen.getByRole('link', { name: 'Alertas de Importação' })).toHaveAttribute('href', '/importacoes/alertas');
+    unmount();
+
+    const alertas = renderizar('/importacoes/alertas');
+    expect(await screen.findByText('Alertas de importação')).toBeInTheDocument();
+    alertas.unmount();
+
+    renderizar('/importacoes/imp-1');
+    expect(await screen.findByRole('link', { name: /Voltar/ })).toHaveAttribute('href', '/importacoes');
+    expect(screen.getByTestId('caminho')).toHaveTextContent('/importacoes/imp-1');
+  });
+
   it('redireciona /pagamentos para /solicitacoes', async () => {
     gravarSessao(false);
 
