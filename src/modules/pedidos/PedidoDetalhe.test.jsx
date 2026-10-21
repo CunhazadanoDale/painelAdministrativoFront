@@ -9,6 +9,7 @@ import * as clientesService from '../../services/clientes';
 import * as comissoesService from '../../services/comissoes';
 import * as contasService from '../../services/contasBancarias';
 import * as empresasService from '../../services/empresas';
+import * as importacoesService from '../../services/importacoes';
 import * as pedidosService from '../../services/pedidos';
 import * as produtosService from '../../services/produtos';
 import * as representantesService from '../../services/representantes';
@@ -42,6 +43,7 @@ vi.mock('../../services/pedidos', () => ({
 vi.mock('../../services/tabelaPrecos', () => ({ listarPrecosVigentes: vi.fn(async () => ({ dados: [] })) }));
 vi.mock('../../services/titulosReceber', () => ({ listarTitulos: vi.fn() }));
 vi.mock('../../services/contasBancarias', () => ({ listarTodasContasBancarias: vi.fn() }));
+vi.mock('../../services/importacoes', () => ({ listarImportacoesDoPedido: vi.fn() }));
 vi.mock('../../services/comissoes', () => ({ obterComissaoDoPedido: vi.fn(), definirComissaoDoPedido: vi.fn() }));
 
 const svc = pedidosService;
@@ -136,6 +138,7 @@ beforeEach(() => {
   svc.listarEntregasDoPedido.mockResolvedValue({ dados: [] });
   svc.gerarTituloEntrada.mockResolvedValue({ dados: { id: 'tit-9' } });
   titulosService.listarTitulos.mockResolvedValue({ dados: [] });
+  importacoesService.listarImportacoesDoPedido.mockResolvedValue({ dados: [] });
   comissoesService.obterComissaoDoPedido.mockResolvedValue({
     dados: { pedido_id: 'ped-12', representante_id: 'rep-jose', percentual_bp: 300, origem: 'padrao', definido: false, versao: null },
   });
@@ -454,5 +457,50 @@ describe('PedidoDetalhe', () => {
 
     expect(await screen.findByText('Nenhuma entrega programada.')).toBeInTheDocument();
     expect(svc.listarEntregasDoPedido).toHaveBeenCalledWith('ped-12', expect.anything());
+  });
+  it('no pedido de importação mostra as importações que o atendem', async () => {
+    svc.obterPedido.mockResolvedValue({ dados: IMPORTACAO });
+    importacoesService.listarImportacoesDoPedido.mockResolvedValue({
+      dados: [
+        {
+          importacao_id: 'imp-3',
+          importacao_numero: 3,
+          importacao_status: 'embarcada',
+          chegada_prevista: '2026-11-18',
+          recebida_em: null,
+          pedido_item_id: 'item-1',
+          produto_id: 'prod-cimento',
+          quantidade: 40,
+          reservada: null,
+        },
+      ],
+    });
+
+    await carregar();
+
+    const link = await screen.findByRole('link', { name: 'Importação 3' });
+    expect(link).toHaveAttribute('href', '/importacoes/imp-3');
+    const linha = link.closest('tr');
+    expect(within(linha).getByText('Embarcada')).toBeInTheDocument();
+    expect(within(linha).getByText('18/11/2026')).toBeInTheDocument();
+    expect(within(linha).getByText('40')).toBeInTheDocument();
+    expect(importacoesService.listarImportacoesDoPedido).toHaveBeenCalledWith('ped-12', expect.anything());
+  });
+
+  it('não consulta importações na pronta entrega', async () => {
+    await carregar();
+
+    expect(screen.queryByText('Importações')).toBeNull();
+    expect(importacoesService.listarImportacoesDoPedido).not.toHaveBeenCalled();
+  });
+
+  it('não consulta importações para quem não é comercial nem financeiro', async () => {
+    perfil({ comercial: false });
+    svc.obterPedido.mockResolvedValue({ dados: IMPORTACAO });
+
+    await carregar();
+
+    expect(screen.queryByText('Importações')).toBeNull();
+    expect(importacoesService.listarImportacoesDoPedido).not.toHaveBeenCalled();
   });
 });
