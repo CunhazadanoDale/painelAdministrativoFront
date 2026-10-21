@@ -6,6 +6,7 @@ import {
   corStatus,
   hojeISO,
   rotuloFormaPagamento,
+  rotuloOrigem,
   rotuloStatus,
   statusPermitidosNoEscopo,
 } from './solicitacoesUtils';
@@ -98,5 +99,14 @@ describe('arquivoPermitido', () => {
 describe('hojeISO', () => {
   it('devolve a data local no formato AAAA-MM-DD', () => {
     expect(hojeISO()).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+});
+
+describe('rotuloOrigem', () => {
+  it('nomeia as origens sistêmicas da comissão e da importação', () => {
+    expect(rotuloOrigem('comissao')).toBe('Comissão');
+    expect(rotuloOrigem('importacao_parcela')).toBe('Parcela de importação');
+    expect(rotuloOrigem('importacao_custo')).toBe('Custo de importação');
+    expect(rotuloOrigem('manual')).toBe('Manual');
   });
 });

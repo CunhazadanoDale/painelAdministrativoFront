@@ -38,7 +38,9 @@ import {
   MailWarning,
   FileText,
   PackageX,
-  FileWarning
+  FileWarning,
+  Ship,
+  AlarmClock
 } from 'lucide-react';
 import { useAutenticacao } from '../autenticacao/useAutenticacao';
 import { usePendenciasSolicitacao } from '../../modules/solicitacoes/usePendenciasSolicitacao';
@@ -77,6 +79,8 @@ export function Sidebar() {
       items: [
         { label: 'Solicitações', icon: <CreditCard size={18} />, path: '/solicitacoes', contador: pendencias },
         { label: 'Fornecedores', icon: <Truck size={18} />, path: '/fornecedores' },
+        { label: 'Importações', icon: <Ship size={18} />, path: '/importacoes', end: true, comercialOuFinanceiro: true },
+        { label: 'Alertas de Importação', icon: <AlarmClock size={18} />, path: '/importacoes/alertas', comercialOuFinanceiro: true },
         { label: 'Contas Bancárias', icon: <Landmark size={18} />, path: '/contas-bancarias', financeiro: true },
         { label: 'Plano de Contas', icon: <ListTree size={18} />, path: '/plano-de-contas' },
         { label: 'Despesas Recorrentes', icon: <Repeat size={18} />, path: '/despesas-recorrentes', financeiro: true },

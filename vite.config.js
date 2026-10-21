@@ -44,6 +44,7 @@ function politicaDeSegurancaNoBuild(urlApi) {
 
 export default defineConfig(({ mode }) => {
   const ambiente = loadEnv(mode, process.cwd(), 'VITE_')
+  if (mode === 'test') process.env.TZ = 'America/Sao_Paulo'
 
   return {
     plugins: [react(), politicaDeSegurancaNoBuild(ambiente.VITE_API_BASE_URL)],
@@ -58,7 +59,6 @@ export default defineConfig(({ mode }) => {
       pool: 'vmThreads',
       setupFiles: ['./src/test/setup.js'],
       testTimeout: 15000,
-      env: { TZ: 'America/Sao_Paulo' },
     },
   }
 })

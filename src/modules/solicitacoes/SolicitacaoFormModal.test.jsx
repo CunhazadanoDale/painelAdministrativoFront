@@ -190,7 +190,7 @@ describe('SolicitacaoFormModal', () => {
     expect(screen.queryByLabelText(/Anexos/)).toBeNull();
     expect(screen.getByLabelText('Valor *')).toHaveValue('1500,00');
     expect(screen.getByLabelText('Valor estimado')).toBeChecked();
-    expect(await screen.findByRole('option', { name: 'Imobiliária Sol' })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: 'Imobiliária Sol (11.222.333/0001-81)' })).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText('Observação *'), { target: { value: 'Aluguel de outubro do galpão' } });
     fireEvent.click(screen.getByRole('button', { name: 'Salvar' }));
 

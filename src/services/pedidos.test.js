@@ -13,6 +13,7 @@ import {
   listarHistoricoPedido,
   listarPedidos,
   listarPendencias,
+  listarTodasPendencias,
   listarPrazos,
   marcarEntregue,
   marcarSaida,
@@ -208,5 +209,18 @@ describe('consultas de pedidos', () => {
 
     await listarCancelamentos();
     expect(consulta().has('com_devolucao')).toBe(false);
+  });
+});
+
+describe('pendências completas', () => {
+  it('percorre as páginas de pendências da empresa com o sinal', async () => {
+    const controle = new AbortController();
+    fetchMock.mockResolvedValueOnce({ ok: true, status: 200, text: async () => JSON.stringify({ dados: [] }) });
+
+    await listarTodasPendencias({ empresa: 'emp-1', sinal: controle.signal });
+
+    expect(ultimaChamada().url).toContain('/api/v1/pedidos/pendencias?');
+    expect(Object.fromEntries(consulta())).toEqual({ empresa: 'emp-1', pagina: '1', tamanho: '100' });
+    expect(ultimaChamada().sinal).toBe(controle.signal);
   });
 });

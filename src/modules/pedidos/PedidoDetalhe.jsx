@@ -29,6 +29,7 @@ import { usePedidoHistorico } from './usePedidoHistorico';
 import { useTituloDeEntrada } from './useTituloDeEntrada';
 import { numeroDoTitulo, statusDoTitulo } from '../receber/receberUtils';
 import { ComissaoDoPedido } from '../comissoes/ComissaoDoPedido';
+import { ImportacoesDoPedido } from '../importacoes/ImportacoesDoPedido';
 import { AlertCircle, ChevronLeft } from 'lucide-react';
 import '../../app/components/DataGrid.css';
 import './Pedidos.css';
@@ -303,6 +304,12 @@ export default function PedidoDetalhe() {
           Total: <strong>{formatarMoeda(pedido.valor_total_centavos)}</strong>
         </div>
       </Panel>
+
+      {(comercial || financeiro) && pedido.modelo === 'importacao' && (
+        <Panel title="Importações">
+          <ImportacoesDoPedido pedidoId={pedido.id} geracao={geracao} nomeProduto={nomeProduto} />
+        </Panel>
+      )}
 
       <Panel title="Entregas">
         <EntregasDoPedido

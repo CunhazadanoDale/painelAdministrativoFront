@@ -46,6 +46,9 @@ import EntregasSemNota from './modules/notas/EntregasSemNota';
 import ItensSemProduto from './modules/notas/ItensSemProduto';
 import NotaDetalhe from './modules/notas/NotaDetalhe';
 import Notas from './modules/notas/Notas';
+import AlertasImportacao from './modules/importacoes/AlertasImportacao';
+import ImportacaoDetalhe from './modules/importacoes/ImportacaoDetalhe';
+import Importacoes from './modules/importacoes/Importacoes';
 import Perfil from './modules/perfil/Perfil';
 
 const Negociacoes = () => <div>Negociações Module</div>;
@@ -133,6 +136,18 @@ function App() {
               element={administrador ? <Empresas /> : <Navigate to="/" replace />}
             />
             <Route path="/fornecedores" element={<Fornecedores />} />
+            <Route
+              path="/importacoes"
+              element={comercial || financeiro ? <Importacoes /> : <Navigate to="/" replace />}
+            />
+            <Route
+              path="/importacoes/alertas"
+              element={comercial || financeiro ? <AlertasImportacao /> : <Navigate to="/" replace />}
+            />
+            <Route
+              path="/importacoes/:id"
+              element={comercial || financeiro ? <ImportacaoDetalhe /> : <Navigate to="/" replace />}
+            />
             <Route
               path="/contas-bancarias"
               element={financeiro ? <ContasBancarias /> : <Navigate to="/" replace />}

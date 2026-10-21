@@ -1,4 +1,4 @@
-import { montarConsulta, requisitar } from '../lib/api';
+import { listarTodas, montarConsulta, requisitar } from '../lib/api';
 
 const CAMINHO = '/api/v1/pedidos';
 const ENTREGAS = '/api/v1/entregas';
@@ -84,6 +84,10 @@ export function cancelarEntrega(id, versao) {
 
 export function listarPendencias({ pagina = 1, tamanho = 20, empresa = '', cliente = '', produto = '', sinal } = {}) {
   return requisitar(`${CAMINHO}/pendencias${montarConsulta({ pagina, tamanho, empresa, cliente, produto })}`, { sinal });
+}
+
+export function listarTodasPendencias({ empresa = '', produto = '', sinal } = {}) {
+  return listarTodas(`${CAMINHO}/pendencias`, { empresa, produto }, { sinal });
 }
 
 export function listarPrazos({ pagina = 1, tamanho = 20, empresa = '', situacao = '', dias = '', sinal } = {}) {
