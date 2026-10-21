@@ -106,6 +106,8 @@ describe('rotuloOrigem', () => {
   it('nomeia as origens sistêmicas da comissão e da importação', () => {
     expect(rotuloOrigem('comissao')).toBe('Comissão');
     expect(rotuloOrigem('importacao_parcela')).toBe('Parcela de importação');
+    expect(rotuloOrigem('divida_amortizacao')).toBe('Amortização de dívida');
+    expect(rotuloOrigem('divida_juros')).toBe('Juros de dívida');
     expect(rotuloOrigem('importacao_custo')).toBe('Custo de importação');
     expect(rotuloOrigem('manual')).toBe('Manual');
   });

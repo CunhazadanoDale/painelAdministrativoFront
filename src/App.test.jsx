@@ -542,6 +542,30 @@ describe('roteamento do App', () => {
     expect(screen.getByTestId('caminho')).toHaveTextContent('/importacoes/imp-1');
   });
 
+  it('redireciona das dívidas quem não é financeiro, sem as entradas', async () => {
+    gravarSessao(false);
+
+    renderizar('/dividas/resumo');
+
+    await waitFor(() => expect(screen.getByTestId('caminho')).toHaveTextContent(/^\/$/));
+    expect(screen.queryByRole('link', { name: 'Dívidas' })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Resumo de Dívidas' })).toBeNull();
+  });
+
+  it('abre as dívidas e o detalhe para o financeiro, com as entradas na sidebar', async () => {
+    gravarSessaoFinanceiro();
+    const { unmount } = renderizar('/dividas');
+
+    expect(await screen.findByText('Nenhuma dívida nas empresas do seu acesso.')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Dívidas' })).toHaveAttribute('href', '/dividas');
+    expect(screen.getByRole('link', { name: 'Resumo de Dívidas' })).toHaveAttribute('href', '/dividas/resumo');
+    unmount();
+
+    renderizar('/dividas/div-1');
+    expect(await screen.findByRole('link', { name: /Voltar/ })).toHaveAttribute('href', '/dividas');
+    expect(screen.getByTestId('caminho')).toHaveTextContent('/dividas/div-1');
+  });
+
   it('redireciona /pagamentos para /solicitacoes', async () => {
     gravarSessao(false);
 

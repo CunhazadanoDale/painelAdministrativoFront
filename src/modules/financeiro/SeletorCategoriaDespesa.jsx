@@ -2,15 +2,16 @@ import React, { useEffect, useState } from 'react';
 import * as categoriasService from '../../services/categoriasFinanceiras';
 import '../../app/components/SeletorRemoto.css';
 
-function gruposDaNatureza(arvore, natureza) {
+function gruposDaNatureza(arvore, natureza, linhaDre) {
   return (arvore || [])
-    .filter((raiz) => raiz.natureza === natureza)
+    .filter((raiz) => raiz.natureza === natureza && (!linhaDre || raiz.linha_dre === linhaDre))
     .map((raiz) => ({ ...raiz, subcategorias: (raiz.subcategorias || []).filter((sub) => sub.lancavel) }))
     .filter((raiz) => raiz.subcategorias.length > 0);
 }
 
 export function SeletorCategoriaLancavel({
   natureza,
+  linhaDre,
   id,
   valor,
   onAlterar,
@@ -26,14 +27,14 @@ export function SeletorCategoriaLancavel({
     categoriasService
       .obterArvoreFinanceira({ ativas: true, sinal: controle.signal })
       .then((resposta) => {
-        if (!controle.signal.aborted) setEstado({ grupos: gruposDaNatureza(resposta?.dados, natureza), erro: null });
+        if (!controle.signal.aborted) setEstado({ grupos: gruposDaNatureza(resposta?.dados, natureza, linhaDre), erro: null });
       })
       .catch((e) => {
         if (controle.signal.aborted) return;
         setEstado({ grupos: null, erro: (e && e.message) || 'Erro ao carregar o plano de contas.' });
       });
     return () => controle.abort();
-  }, [natureza]);
+  }, [natureza, linhaDre]);
 
   const { grupos, erro } = estado;
   const conhecida = (grupos || []).some((grupo) => grupo.subcategorias.some((sub) => sub.id === valor));

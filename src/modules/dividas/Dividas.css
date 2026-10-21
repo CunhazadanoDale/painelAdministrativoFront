@@ -1,0 +1,361 @@
+.dividas-container,
+.dividas-detalhe {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.dividas-container {
+  height: 100%;
+}
+
+.dividas-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-panel);
+}
+
+.dividas-toolbar-titulo {
+  font-weight: 600;
+  font-size: var(--font-size-xl);
+}
+
+.dividas-toolbar-acoes {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.dividas-filtro {
+  width: auto;
+}
+
+.dividas-filtro-fornecedor {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 640px;
+}
+
+.dividas-busca {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.dividas-conteudo {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.dividas-status {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-size: var(--font-size-md);
+  padding: var(--space-6);
+  text-align: center;
+}
+
+.dividas-paginacao {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-top: none;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+
+.dividas-paginacao button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.dividas-paginacao-texto {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.dividas-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.dividas-form-linha {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-3);
+}
+
+.dividas-form-campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.dividas-form-erro-api {
+  padding: var(--space-2);
+  background-color: var(--danger-bg);
+  color: var(--danger-text);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+.dividas-form-erros {
+  margin: 0;
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-5);
+  background-color: var(--danger-bg);
+  color: var(--danger-text);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+.dividas-form-ajuda,
+.dividas-secundario {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.dividas-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  cursor: pointer;
+}
+
+.dividas-itens {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.dividas-itens-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dividas-itens-produto {
+  min-width: 260px;
+  white-space: normal;
+  vertical-align: top;
+}
+
+.dividas-numero {
+  width: 130px;
+}
+
+.dividas-itens-total {
+  align-self: flex-end;
+  font-size: var(--font-size-md);
+}
+
+.dividas-detalhe-titulo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.dividas-detalhe-titulo h1 {
+  margin: 0;
+}
+
+.dividas-detalhe-paineis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.dividas-detalhe-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.dividas-detalhe-lista dt {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.dividas-detalhe-lista dd {
+  margin: 0;
+  font-size: var(--font-size-md);
+}
+
+.dividas-detalhe-observacoes {
+  margin: var(--space-3) 0 0;
+  white-space: pre-wrap;
+  color: var(--text-secondary);
+}
+
+.dividas-historico {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.dividas-historico li {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--font-size-sm);
+}
+
+.dividas-historico-data {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.dividas-texto {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.dividas-alerta {
+  color: var(--warning-text);
+  font-weight: 600;
+}
+
+.dividas-perigo {
+  background-color: var(--danger-text);
+  color: var(--primary-text);
+}
+
+.dividas-voltar {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  align-self: flex-start;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: var(--font-size-md);
+}
+
+.dividas-voltar:hover {
+  color: var(--primary);
+}
+
+.dividas-acoes-linha {
+  display: flex;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+}
+
+.dividas-painel-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.dividas-selo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+@media (max-width: 900px) {
+  .dividas-toolbar {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .dividas-filtro-fornecedor {
+    flex-wrap: wrap;
+  }
+}
+
+.dividas-relatorio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  background-color: var(--info-bg);
+  color: var(--info-text);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+.dividas-relatorio ul {
+  margin: 0;
+  padding-left: var(--space-4);
+}
+
+.dividas-vencido {
+  color: var(--danger-text);
+  font-weight: 600;
+}
+
+.dividas-parcela-cancelada td {
+  opacity: 0.55;
+}
+
+.dividas-soma-ok {
+  color: var(--success-text);
+}
+
+.dividas-soma-diferente {
+  color: var(--danger-text);
+  font-weight: 600;
+}
+
+.dividas-totais {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-3);
+}
+
+.dividas-total {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+.dividas-total-rotulo {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.dividas-total-valor {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+}
+
+.dividas-form-campo-botao {
+  justify-content: flex-end;
+}
