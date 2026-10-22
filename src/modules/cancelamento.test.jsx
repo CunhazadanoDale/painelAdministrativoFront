@@ -55,6 +55,8 @@ import { useFornecedores } from './fornecedores/useFornecedores';
 import { useDividaDetalhe } from './dividas/useDividaDetalhe';
 import { useDividaHistorico } from './dividas/useDividaHistorico';
 import { useDividas } from './dividas/useDividas';
+import { useConsultaDre } from './dre/useConsultaDre';
+import * as dreService from '../services/dre';
 import { useResumoDividas } from './dividas/useResumoDividas';
 import { useImportacoes } from './importacoes/useImportacoes';
 import { useImportacaoDetalhe } from './importacoes/useImportacaoDetalhe';
@@ -157,6 +159,7 @@ describe('cancelamento das requisições ao desmontar', () => {
     ['useDividaDetalhe', () => useDividaDetalhe('div-1')],
     ['useDividaHistorico', () => useDividaHistorico('div-1', 0)],
     ['useResumoDividas', () => useResumoDividas('')],
+    ['useConsultaDre', () => useConsultaDre(dreService.obterResumoDre, { de: '', ate: '', empresa: '' }, 'erro')],
     ['useContasBancarias', () => useContasBancarias()],
     ['useDespesasRecorrentes', () => useDespesasRecorrentes()],
     ['useResumoContasAPagar', () => useResumoContasAPagar()],

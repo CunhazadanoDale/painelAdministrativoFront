@@ -52,11 +52,13 @@ import Importacoes from './modules/importacoes/Importacoes';
 import DividaDetalhe from './modules/dividas/DividaDetalhe';
 import Dividas from './modules/dividas/Dividas';
 import ResumoDividas from './modules/dividas/ResumoDividas';
+import Dre from './modules/dre/Dre';
+import Faturamento from './modules/dre/Faturamento';
+import RelatorioSemanal from './modules/dre/RelatorioSemanal';
 import Perfil from './modules/perfil/Perfil';
 
 const Negociacoes = () => <div>Negociações Module</div>;
 const Formularios = () => <div>Formulários Module</div>;
-const Relatorios = () => <div>Relatórios Module</div>;
 const Configuracoes = () => <div>Configurações Module</div>;
 
 function destinoDepoisDoLogin(origem) {
@@ -168,6 +170,12 @@ function App() {
             <Route path="/dividas" element={financeiro ? <Dividas /> : <Navigate to="/" replace />} />
             <Route path="/dividas/resumo" element={financeiro ? <ResumoDividas /> : <Navigate to="/" replace />} />
             <Route path="/dividas/:id" element={financeiro ? <DividaDetalhe /> : <Navigate to="/" replace />} />
+            <Route path="/dre" element={financeiro ? <Dre /> : <Navigate to="/" replace />} />
+            <Route path="/dre/faturamento" element={financeiro ? <Faturamento /> : <Navigate to="/" replace />} />
+            <Route
+              path="/dre/relatorio-semanal"
+              element={financeiro ? <RelatorioSemanal /> : <Navigate to="/" replace />}
+            />
             <Route path="/titulos-receber" element={financeiro ? <Titulos /> : <Navigate to="/" replace />} />
             <Route
               path="/titulos-receber/:id"
@@ -191,7 +199,7 @@ function App() {
             <Route path="/produtos/:id" element={<ProdutoDetalhe />} />
             <Route path="/categorias" element={<Categorias />} />
             <Route path="/locais-estoque" element={<Locais />} />
-            <Route path="/relatorios" element={<Relatorios />} />
+            <Route path="/relatorios" element={<Navigate to="/dre/relatorio-semanal" replace />} />
             <Route path="/configuracoes" element={<Configuracoes />} />
             <Route path="/perfil" element={<Perfil />} />
             <Route path="*" element={<Navigate to="/" replace />} />
