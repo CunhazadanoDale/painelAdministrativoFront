@@ -42,7 +42,9 @@ import {
   Ship,
   AlarmClock,
   Banknote,
-  ChartPie
+  ChartPie,
+  ReceiptText,
+  TrendingUp
 } from 'lucide-react';
 import { useAutenticacao } from '../autenticacao/useAutenticacao';
 import { usePendenciasSolicitacao } from '../../modules/solicitacoes/usePendenciasSolicitacao';
@@ -90,6 +92,8 @@ export function Sidebar() {
         { label: 'Caixa', icon: <Wallet size={18} />, path: '/caixa', financeiro: true },
         { label: 'Dívidas', icon: <Banknote size={18} />, path: '/dividas', end: true, financeiro: true },
         { label: 'Resumo de Dívidas', icon: <ChartPie size={18} />, path: '/dividas/resumo', financeiro: true },
+        { label: 'DRE', icon: <ReceiptText size={18} />, path: '/dre', end: true, financeiro: true },
+        { label: 'Faturamento', icon: <TrendingUp size={18} />, path: '/dre/faturamento', financeiro: true },
         { label: 'Contas a Receber', icon: <HandCoins size={18} />, path: '/titulos-receber', financeiro: true },
         { label: 'Antecipações', icon: <BadgePercent size={18} />, path: '/antecipacoes', financeiro: true },
         { label: 'Resumo a Receber', icon: <CalendarClock size={18} />, path: '/contas-a-receber/resumo', financeiro: true },
@@ -113,7 +117,7 @@ export function Sidebar() {
     {
       title: 'Sistema',
       items: [
-        { label: 'Relatórios', icon: <BarChart2 size={18} />, path: '/relatorios' },
+        { label: 'Relatórios', icon: <BarChart2 size={18} />, path: '/dre/relatorio-semanal', financeiro: true },
         { label: 'Empresas', icon: <Building2 size={18} />, path: '/empresas', admin: true },
         { label: 'Usuários', icon: <UserCog size={18} />, path: '/usuarios', admin: true },
         { label: 'Cargos', icon: <BadgeCheck size={18} />, path: '/cargos', admin: true },

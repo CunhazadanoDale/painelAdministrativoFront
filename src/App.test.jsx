@@ -566,6 +566,36 @@ describe('roteamento do App', () => {
     expect(screen.getByTestId('caminho')).toHaveTextContent('/dividas/div-1');
   });
 
+  it('redireciona da DRE quem não é financeiro, sem as entradas', async () => {
+    gravarSessao(false);
+
+    renderizar('/dre/faturamento');
+
+    await waitFor(() => expect(screen.getByTestId('caminho')).toHaveTextContent(/^\/$/));
+    expect(screen.queryByRole('link', { name: 'DRE' })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Faturamento' })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Relatórios' })).toBeNull();
+  });
+
+  it('abre a DRE, o faturamento e o relatório semanal para o financeiro, com as entradas na sidebar', async () => {
+    gravarSessaoFinanceiro();
+    const { unmount } = renderizar('/dre');
+
+    expect(await screen.findByText('DRE', { selector: '.dre-toolbar-titulo' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'DRE' })).toHaveAttribute('href', '/dre');
+    expect(screen.getByRole('link', { name: 'Faturamento' })).toHaveAttribute('href', '/dre/faturamento');
+    expect(screen.getByRole('link', { name: 'Relatórios' })).toHaveAttribute('href', '/dre/relatorio-semanal');
+    unmount();
+
+    const faturamento = renderizar('/dre/faturamento');
+    expect(await screen.findByText('Faturamento', { selector: '.dre-toolbar-titulo' })).toBeInTheDocument();
+    faturamento.unmount();
+
+    renderizar('/relatorios');
+    expect(await screen.findByText('Relatório semanal', { selector: '.dre-toolbar-titulo' })).toBeInTheDocument();
+    expect(screen.getByTestId('caminho')).toHaveTextContent('/dre/relatorio-semanal');
+  });
+
   it('redireciona /pagamentos para /solicitacoes', async () => {
     gravarSessao(false);
 
