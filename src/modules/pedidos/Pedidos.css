@@ -333,6 +333,7 @@
 
 .pedidos-abas {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-1);
 }
 
@@ -367,4 +368,10 @@
   display: inline-flex;
   align-items: center;
   text-decoration: none;
+}
+
+@media (max-width: 600px) {
+  .pedidos-form-linha {
+    grid-template-columns: 1fr;
+  }
 }

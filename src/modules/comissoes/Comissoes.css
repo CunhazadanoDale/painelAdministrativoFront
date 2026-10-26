@@ -333,6 +333,7 @@
 
 .comissoes-abas {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-1);
 }
 
@@ -465,4 +466,16 @@ h1.comissoes-toolbar-titulo {
 
 .comissoes-total {
   align-self: flex-end;
+}
+
+@media (max-width: 600px) {
+  .comissoes-form-linha {
+    grid-template-columns: 1fr;
+  }
+
+  .comissoes-filtro-campo,
+  .comissoes-filtro-chave {
+    min-width: 0;
+    flex: 1 1 100%;
+  }
 }

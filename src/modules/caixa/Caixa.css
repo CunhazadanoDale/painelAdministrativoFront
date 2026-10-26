@@ -333,6 +333,7 @@
 
 .caixa-abas {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-1);
 }
 
@@ -495,4 +496,16 @@ h1.caixa-toolbar-titulo {
 
 .caixa-total strong {
   font-size: var(--font-size-xl);
+}
+
+@media (max-width: 600px) {
+  .caixa-form-linha {
+    grid-template-columns: 1fr;
+  }
+
+  .caixa-filtro-campo,
+  .caixa-filtro-chave {
+    min-width: 0;
+    flex: 1 1 100%;
+  }
 }

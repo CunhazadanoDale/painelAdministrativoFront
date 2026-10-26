@@ -333,6 +333,7 @@
 
 .notas-abas {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-1);
 }
 
@@ -410,4 +411,16 @@
 .notas-chave {
   font-family: var(--font-mono, monospace);
   word-break: break-all;
+}
+
+@media (max-width: 600px) {
+  .notas-form-linha {
+    grid-template-columns: 1fr;
+  }
+
+  .notas-filtro-campo,
+  .notas-filtro-chave {
+    min-width: 0;
+    flex: 1 1 100%;
+  }
 }

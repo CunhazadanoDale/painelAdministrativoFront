@@ -131,3 +131,9 @@
   font-size: var(--font-size-xs);
   color: var(--text-muted);
 }
+
+@media (max-width: 600px) {
+  .empresas-form-linha {
+    grid-template-columns: 1fr;
+  }
+}

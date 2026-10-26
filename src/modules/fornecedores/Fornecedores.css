@@ -155,3 +155,9 @@
     flex-wrap: wrap;
   }
 }
+
+@media (max-width: 600px) {
+  .fornecedores-form-linha {
+    grid-template-columns: 1fr;
+  }
+}

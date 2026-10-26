@@ -268,3 +268,9 @@
 .clientes-importacao-motivo {
   white-space: normal;
 }
+
+@media (max-width: 600px) {
+  .clientes-form-linha {
+    grid-template-columns: 1fr;
+  }
+}

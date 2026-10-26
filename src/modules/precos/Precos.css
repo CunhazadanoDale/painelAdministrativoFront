@@ -333,6 +333,7 @@
 
 .precos-abas {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-1);
 }
 
@@ -465,4 +466,16 @@ h1.precos-toolbar-titulo {
 
 .precos-total {
   align-self: flex-end;
+}
+
+@media (max-width: 600px) {
+  .precos-form-linha {
+    grid-template-columns: 1fr;
+  }
+
+  .precos-filtro-campo,
+  .precos-filtro-chave {
+    min-width: 0;
+    flex: 1 1 100%;
+  }
 }

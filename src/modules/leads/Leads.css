@@ -385,3 +385,30 @@
   color: var(--text-muted);
   white-space: nowrap;
 }
+
+@media (max-width: 768px) {
+  .leads-container {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .leads-container > .filter-panel {
+    order: -1;
+  }
+
+  .leads-toolbar {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+}
+
+@media (max-width: 600px) {
+  .lead-form {
+    grid-template-columns: 1fr;
+  }
+
+  .leads-funil-select {
+    min-width: 0;
+    flex: 1 1 100%;
+  }
+}

@@ -333,6 +333,7 @@
 
 .receber-abas {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-1);
 }
 
@@ -384,4 +385,15 @@
 .receber-selecao {
   max-height: 260px;
   overflow-y: auto;
+}
+
+@media (max-width: 600px) {
+  .receber-form-linha {
+    grid-template-columns: 1fr;
+  }
+
+  .receber-filtro-campo {
+    min-width: 0;
+    flex: 1 1 100%;
+  }
 }

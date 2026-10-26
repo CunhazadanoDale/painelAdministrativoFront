@@ -515,3 +515,25 @@
   gap: var(--space-1);
   flex-wrap: wrap;
 }
+
+@media (max-width: 600px) {
+  .solicitacoes-form {
+    grid-template-columns: 1fr;
+  }
+
+  .solicitacoes-filtro-campo {
+    min-width: 0;
+    flex: 1 1 100%;
+  }
+
+  .solicitacoes-status-filtro {
+    flex-wrap: wrap;
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .solicitacoes-status-filtro .filter-select {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+}

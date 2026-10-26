@@ -183,3 +183,9 @@
     display: none;
   }
 }
+
+@media (max-width: 600px) {
+  .categorias-form-linha {
+    grid-template-columns: 1fr;
+  }
+}

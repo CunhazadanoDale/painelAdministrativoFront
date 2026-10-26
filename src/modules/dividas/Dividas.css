@@ -359,3 +359,9 @@
 .dividas-form-campo-botao {
   justify-content: flex-end;
 }
+
+@media (max-width: 600px) {
+  .dividas-form-linha {
+    grid-template-columns: 1fr;
+  }
+}

@@ -187,3 +187,9 @@
   color: var(--text-secondary);
   cursor: pointer;
 }
+
+@media (max-width: 600px) {
+  .usuarios-toolbar-acoes .usuarios-busca {
+    width: 100%;
+  }
+}

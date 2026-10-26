@@ -284,3 +284,10 @@
   justify-content: space-between;
   font-size: var(--font-size-sm);
 }
+
+@media (max-width: 600px) {
+  .financeiro-form-linha,
+  .financeiro-form-linha-numero {
+    grid-template-columns: 1fr;
+  }
+}

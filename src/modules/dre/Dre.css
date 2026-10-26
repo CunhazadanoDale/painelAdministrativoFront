@@ -428,3 +428,9 @@
     display: block;
   }
 }
+
+@media (max-width: 600px) {
+  .dre-form-linha {
+    grid-template-columns: 1fr;
+  }
+}

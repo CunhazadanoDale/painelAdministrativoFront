@@ -482,3 +482,19 @@
   gap: var(--space-1);
   cursor: pointer;
 }
+
+@media (max-width: 768px) {
+  .produtos-corpo {
+    flex-direction: column;
+  }
+
+  .produtos-corpo > .filter-panel {
+    order: -1;
+  }
+}
+
+@media (max-width: 600px) {
+  .produtos-form-linha {
+    grid-template-columns: 1fr;
+  }
+}
