@@ -55,6 +55,21 @@ describe('TopBar', () => {
     expect(screen.queryByRole('button', { name: /notifica/i })).toBeNull();
     expect(screen.getByRole('button', { name: 'Sair' })).toHaveAttribute('type', 'button');
   });
+
+  it('o botão de menu pede para abrir a navegação', () => {
+    const onAbrirMenu = vi.fn();
+    render(
+      <MemoryRouter>
+        <AutenticacaoProvider>
+          <TopBar onAbrirMenu={onAbrirMenu} />
+        </AutenticacaoProvider>
+      </MemoryRouter>
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir menu' }));
+
+    expect(onAbrirMenu).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('index.html', () => {

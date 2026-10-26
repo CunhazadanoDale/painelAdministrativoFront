@@ -142,3 +142,72 @@
 .sidebar.collapsed .sidebar-contador {
   display: none;
 }
+
+.sidebar-marca-movel,
+.sidebar-fechar {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .sidebar,
+  .sidebar.collapsed {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: min(280px, 85vw);
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    box-shadow: var(--shadow-dropdown);
+  }
+
+  .sidebar.aberto {
+    transform: translateX(0);
+  }
+
+  .sidebar-header {
+    justify-content: space-between;
+  }
+
+  .sidebar-marca,
+  .sidebar-footer {
+    display: none;
+  }
+
+  .sidebar-marca-movel {
+    display: inline;
+  }
+
+  .sidebar-fechar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    border-radius: var(--radius-md);
+  }
+
+  .sidebar.collapsed .sidebar-group-title {
+    text-align: left;
+    padding: 0 var(--space-4);
+    opacity: 1;
+    font-size: var(--font-size-xs);
+  }
+
+  .sidebar.collapsed .sidebar-icon {
+    margin-right: var(--space-3);
+  }
+
+  .sidebar.collapsed .sidebar-label,
+  .sidebar.collapsed .sidebar-contador {
+    display: inline;
+  }
+
+  .sidebar-link {
+    padding: var(--space-3) var(--space-4);
+  }
+}

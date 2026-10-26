@@ -44,13 +44,14 @@ import {
   Banknote,
   ChartPie,
   ReceiptText,
-  TrendingUp
+  TrendingUp,
+  X
 } from 'lucide-react';
 import { useAutenticacao } from '../autenticacao/useAutenticacao';
 import { usePendenciasSolicitacao } from '../../modules/solicitacoes/usePendenciasSolicitacao';
 import './Sidebar.css';
 
-export function Sidebar() {
+export function Sidebar({ aberto = false, onFechar = () => {} }) {
   const [collapsed, setCollapsed] = useState(false);
   const { administrador, comercial, financeiro } = useAutenticacao();
   const pendencias = usePendenciasSolicitacao();
@@ -141,9 +142,13 @@ export function Sidebar() {
     .filter((group) => group.items.length > 0);
 
   return (
-    <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
+    <aside className={`sidebar ${collapsed ? 'collapsed' : ''} ${aberto ? 'aberto' : ''}`}>
       <div className="sidebar-header">
-        {collapsed ? 'M' : 'MiaConstrutora'}
+        <span className="sidebar-marca">{collapsed ? 'M' : 'MiaConstrutora'}</span>
+        <span className="sidebar-marca-movel">MiaConstrutora</span>
+        <button type="button" className="sidebar-fechar" aria-label="Fechar menu" onClick={onFechar}>
+          <X size={18} aria-hidden="true" />
+        </button>
       </div>
 
       <div className="sidebar-content">
@@ -159,6 +164,7 @@ export function Sidebar() {
                     to={item.path}
                     end={item.end}
                     className={({ isActive }) => isActive ? 'sidebar-link active' : 'sidebar-link'}
+                    onClick={onFechar}
                   >
                     <span className="sidebar-icon">{item.icon}</span>
                     <span className="sidebar-label">{item.label}</span>

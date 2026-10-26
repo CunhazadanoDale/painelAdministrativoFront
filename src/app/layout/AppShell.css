@@ -1,7 +1,8 @@
 .app-shell {
   display: flex;
   height: 100vh;
-  width: 100vw;
+  height: 100dvh;
+  width: 100%;
   overflow: hidden;
 }
 
@@ -20,4 +21,22 @@
   padding: var(--space-4);
   display: flex;
   flex-direction: column;
+}
+
+.app-shell-fundo {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .app-shell-fundo {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(9, 30, 66, 0.54);
+    z-index: 40;
+  }
+
+  .app-content {
+    padding: var(--space-2);
+  }
 }

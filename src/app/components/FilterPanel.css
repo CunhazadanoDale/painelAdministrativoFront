@@ -96,3 +96,9 @@
 .filter-btn-secondary:hover {
   background-color: var(--bg-panel-hover);
 }
+
+@media (max-width: 768px) {
+  .filter-panel {
+    width: 100%;
+  }
+}

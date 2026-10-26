@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -55,5 +55,22 @@ describe('Sidebar', () => {
 
     await waitFor(() => expect(obterPendencias).toHaveBeenCalled());
     expect(screen.getByRole('link', { name: /Solicitações/ })).toBeInTheDocument();
+  });
+
+  it('aberta no celular, fecha ao navegar ou ao tocar em fechar', async () => {
+    obterPendencias.mockResolvedValue({ dados: {} });
+    const onFechar = vi.fn();
+    const { container } = render(
+      <MemoryRouter>
+        <Sidebar aberto onFechar={onFechar} />
+      </MemoryRouter>
+    );
+
+    expect(container.querySelector('.sidebar')).toHaveClass('aberto');
+    fireEvent.click(screen.getByRole('link', { name: /Caixa/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Fechar menu' }));
+
+    await waitFor(() => expect(obterPendencias).toHaveBeenCalled());
+    expect(onFechar).toHaveBeenCalledTimes(2);
   });
 });

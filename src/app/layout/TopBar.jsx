@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Search, LogOut } from 'lucide-react';
+import { Search, LogOut, Menu } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAutenticacao } from '../autenticacao/useAutenticacao';
 import './TopBar.css';
 
-export function TopBar() {
+export function TopBar({ onAbrirMenu = () => {} }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { usuario, administrador, comercial, sair } = useAutenticacao();
@@ -33,6 +33,9 @@ export function TopBar() {
   return (
     <header className="topbar">
       <div className="topbar-left">
+        <button type="button" className="topbar-action-btn topbar-menu-btn" aria-label="Abrir menu" onClick={onAbrirMenu}>
+          <Menu size={20} aria-hidden="true" />
+        </button>
         <div className="topbar-module-title">{currentModule}</div>
       </div>
 

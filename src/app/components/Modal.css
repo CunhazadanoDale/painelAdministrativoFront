@@ -62,3 +62,25 @@
   padding: var(--space-3) var(--space-4);
   border-top: 1px solid var(--border-color);
 }
+
+@media (max-width: 600px) {
+  .modal-overlay {
+    padding: var(--space-2);
+    align-items: center;
+  }
+
+  .modal-caixa {
+    margin-top: 0;
+    max-width: 100%;
+    max-height: calc(100dvh - var(--space-2) * 2);
+  }
+
+  .modal-corpo {
+    padding: var(--space-3);
+  }
+
+  .modal-rodape {
+    flex-wrap: wrap;
+    padding: var(--space-2) var(--space-3);
+  }
+}
