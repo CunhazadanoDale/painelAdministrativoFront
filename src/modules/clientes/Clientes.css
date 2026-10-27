@@ -242,33 +242,6 @@
   color: var(--primary);
 }
 
-.clientes-importacao-cabecalho {
-  display: block;
-  padding: var(--space-2);
-  background-color: var(--bg-panel-hover);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-xs);
-  overflow-x: auto;
-  white-space: nowrap;
-}
-
-.clientes-importacao-relatorio {
-  padding: var(--space-2);
-  background-color: var(--info-bg);
-  color: var(--info-text);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-}
-
-.clientes-importacao-rejeitadas {
-  max-height: 320px;
-  overflow-y: auto;
-}
-
-.clientes-importacao-motivo {
-  white-space: normal;
-}
-
 @media (max-width: 600px) {
   .clientes-form-linha {
     grid-template-columns: 1fr;

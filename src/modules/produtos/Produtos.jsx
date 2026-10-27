@@ -5,6 +5,7 @@ import { StatusBadge } from '../../app/components/StatusBadge';
 import { FilterPanel, FilterGroup } from '../../app/components/FilterPanel';
 import { useAutenticacao } from '../../app/autenticacao/useAutenticacao';
 import { formatarMoeda } from '../../lib/formatar';
+import { ImportacaoProdutosModal } from './ImportacaoProdutosModal';
 import { ProdutoFormModal } from './ProdutoFormModal';
 import { useProdutos, FILTROS_PADRAO } from './useProdutos';
 import {
@@ -18,6 +19,7 @@ import {
   AlertCircle,
   ChevronLeft,
   ChevronRight,
+  Upload,
 } from 'lucide-react';
 import './Produtos.css';
 
@@ -51,6 +53,7 @@ export default function Produtos() {
   const [buscaRascunho, setBuscaRascunho] = useState('');
   const [filtrosRascunho, setFiltrosRascunho] = useState(FILTROS_PADRAO);
   const [produtoModal, setProdutoModal] = useState(undefined);
+  const [importando, setImportando] = useState(false);
   const [erroAcao, setErroAcao] = useState(null);
 
   const aplicar = () => aplicarFiltros({ ...filtrosRascunho, busca: buscaRascunho.trim() });
@@ -217,6 +220,16 @@ export default function Produtos() {
           >
             <Search size={14} /> Buscar
           </button>
+          {administrador && (
+            <button
+              type="button"
+              className="filter-btn filter-btn-secondary"
+              style={{ flex: 'none', width: 'auto', padding: '4px 12px', display: 'flex', alignItems: 'center', gap: 4 }}
+              onClick={() => setImportando(true)}
+            >
+              <Upload size={16} /> Importar CSV
+            </button>
+          )}
           {administrador && (
             <button
               type="button"
@@ -395,6 +408,8 @@ export default function Produtos() {
           )}
         </div>
       </div>
+
+      {importando && <ImportacaoProdutosModal onFechar={() => setImportando(false)} onImportado={recarregar} />}
 
       {produtoModal !== undefined && (
         <ProdutoFormModal

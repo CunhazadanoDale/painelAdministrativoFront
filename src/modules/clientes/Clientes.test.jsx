@@ -22,6 +22,7 @@ vi.mock('../../services/clientes', () => ({
   desativarCliente: vi.fn(),
   removerCliente: vi.fn(),
   importarClientes: vi.fn(),
+  baixarModeloImportacao: vi.fn(),
 }));
 
 const { listarClientes, criarCliente, atualizarCliente, ativarCliente, desativarCliente, removerCliente } =

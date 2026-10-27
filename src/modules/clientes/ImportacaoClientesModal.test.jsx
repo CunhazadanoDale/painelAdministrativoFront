@@ -6,7 +6,7 @@ import * as clientesService from '../../services/clientes';
 import { CABECALHO_IMPORTACAO } from './clientesUtils';
 import { ImportacaoClientesModal } from './ImportacaoClientesModal';
 
-vi.mock('../../services/clientes', () => ({ importarClientes: vi.fn() }));
+vi.mock('../../services/clientes', () => ({ importarClientes: vi.fn(), baixarModeloImportacao: vi.fn() }));
 
 const { importarClientes } = clientesService;
 

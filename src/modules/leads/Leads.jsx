@@ -5,6 +5,7 @@ import { DataGrid } from '../../app/components/DataGrid';
 import { FilterPanel, FilterGroup } from '../../app/components/FilterPanel';
 import { StatusBadge } from '../../app/components/StatusBadge';
 import { Modal } from '../../app/components/Modal';
+import { ImportacaoLeadsModal } from './ImportacaoLeadsModal';
 import { LeadFormModal } from './LeadFormModal';
 import { LeadsKanban } from './LeadsKanban';
 import { useLeads, TAMANHO_PAGINA } from './useLeads';
@@ -20,6 +21,7 @@ import {
   List,
   LayoutGrid,
   Eye,
+  Upload,
 } from 'lucide-react';
 
 export default function Leads() {
@@ -54,6 +56,7 @@ export default function Leads() {
   const [etapaRascunho, setEtapaRascunho] = useState('');
 
   const [modalAberto, setModalAberto] = useState(false);
+  const [importando, setImportando] = useState(false);
   const [leadEditando, setLeadEditando] = useState(null);
   const [leadParaExcluir, setLeadParaExcluir] = useState(null);
   const [excluindo, setExcluindo] = useState(false);
@@ -230,6 +233,14 @@ export default function Leads() {
 
             <button
               type="button"
+              className="filter-btn filter-btn-secondary"
+              style={{ flex: 'none', width: 'auto', padding: '4px 12px', display: 'flex', alignItems: 'center', gap: 4 }}
+              onClick={() => setImportando(true)}
+            >
+              <Upload size={16} /> Importar CSV
+            </button>
+            <button
+              type="button"
               className="filter-btn filter-btn-primary"
               style={{ flex: 'none', width: 'auto', padding: '4px 12px', display: 'flex', alignItems: 'center', gap: 4 }}
               onClick={abrirCriacao}
@@ -342,6 +353,18 @@ export default function Leads() {
             {q && <span>Busca: “{q}”</span>}
           </div>
         </FilterPanel>
+      )}
+
+      {importando && (
+        <ImportacaoLeadsModal
+          funis={funis}
+          etapas={etapas}
+          onFechar={() => setImportando(false)}
+          onImportado={() => {
+            recarregar();
+            kanban.recarregar();
+          }}
+        />
       )}
 
       {modalAberto && (
