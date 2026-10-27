@@ -14,6 +14,7 @@ export function SeletorRemoto({
   disabled = false,
   invalido = false,
   selecionarUnica = true,
+  preferido = '',
 }) {
   const [recarga, setRecarga] = useState(0);
   const [estado, setEstado] = useState({ fonte: null, recarga: -1, itens: null, erro: null });
@@ -52,8 +53,10 @@ export function SeletorRemoto({
       onAlterar('');
     } else if (!valor && selecionarUnica && opcoes.length === 1) {
       onAlterar(opcoes[0].valor);
+    } else if (!valor && selecionarUnica && preferido && opcoes.some((opcao) => opcao.valor === preferido)) {
+      onAlterar(preferido);
     }
-  }, [itens, opcoes, valor, onAlterar, selecionarUnica]);
+  }, [itens, opcoes, valor, onAlterar, selecionarUnica, preferido]);
 
   if (erro) {
     return (
