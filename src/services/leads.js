@@ -1,4 +1,5 @@
 import { montarConsulta, requisitar } from '../lib/api';
+import { baixarDoCaminho } from './arquivos';
 
 const CAMINHO_LEADS = '/api/v1/leads';
 const CAMINHO_FUNILS = '/api/v1/funils';
@@ -44,4 +45,16 @@ export function listarHistoricoDoLead(leadId, { pagina = 1, tamanho = 20, sinal 
   return requisitar(`${CAMINHO_LEADS}/${leadId}/historico${montarConsulta({ pagina, tamanho })}`, {
     sinal,
   });
+}
+
+export function importarLeads(arquivo, { etapaId, simular = false } = {}) {
+  return requisitar(`${CAMINHO_LEADS}/importacao${montarConsulta({ etapa_id: etapaId, simular: simular ? 'true' : 'false' })}`, {
+    metodo: 'POST',
+    corpo: arquivo,
+    tipoConteudo: 'text/csv',
+  });
+}
+
+export function baixarModeloImportacao() {
+  return baixarDoCaminho(`${CAMINHO_LEADS}/importacao/modelo`, 'modelo-leads.csv');
 }

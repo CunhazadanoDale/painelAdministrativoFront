@@ -1,0 +1,57 @@
+.importacao-csv {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.importacao-csv-campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.importacao-csv-ajuda {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.importacao-csv-cabecalho {
+  display: block;
+  padding: var(--space-2);
+  background-color: var(--bg-panel-hover);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.importacao-csv-modelo {
+  align-self: flex-start;
+  flex: none;
+  padding: 6px 12px;
+}
+
+.importacao-csv-erro {
+  padding: var(--space-2);
+  background-color: var(--danger-bg);
+  color: var(--danger-text);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+.importacao-csv-relatorio {
+  padding: var(--space-2);
+  background-color: var(--info-bg);
+  color: var(--info-text);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+.importacao-csv-rejeitadas {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.importacao-csv-motivo {
+  white-space: normal;
+}

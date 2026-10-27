@@ -1,4 +1,5 @@
 import { montarConsulta, requisitar } from '../lib/api';
+import { baixarDoCaminho } from './arquivos';
 
 const CAMINHO = '/api/v1/tabela-precos';
 
@@ -26,4 +27,16 @@ export function listarPrecosVigentes({
 
 export function excluirPreco(id) {
   return requisitar(`${CAMINHO}/${id}`, { metodo: 'DELETE' });
+}
+
+export function importarTabelaPrecos(arquivo, { simular = false } = {}) {
+  return requisitar(`${CAMINHO}/importacao${montarConsulta({ simular: simular ? 'true' : 'false' })}`, {
+    metodo: 'POST',
+    corpo: arquivo,
+    tipoConteudo: 'text/csv',
+  });
+}
+
+export function baixarModeloImportacao() {
+  return baixarDoCaminho(`${CAMINHO}/importacao/modelo`, 'modelo-tabela-precos.csv');
 }

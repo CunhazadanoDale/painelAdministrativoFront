@@ -1,4 +1,5 @@
 import { montarConsulta, requisitar } from '../lib/api';
+import { baixarDoCaminho } from './arquivos';
 
 const CAMINHO = '/api/v1/fornecedores';
 
@@ -39,4 +40,16 @@ export function desativarFornecedor(id, versao) {
 
 export function removerFornecedor(id) {
   return requisitar(`${CAMINHO}/${id}`, { metodo: 'DELETE' });
+}
+
+export function importarFornecedores(arquivo, { simular = false } = {}) {
+  return requisitar(`${CAMINHO}/importacao${montarConsulta({ simular: simular ? 'true' : 'false' })}`, {
+    metodo: 'POST',
+    corpo: arquivo,
+    tipoConteudo: 'text/csv',
+  });
+}
+
+export function baixarModeloImportacao() {
+  return baixarDoCaminho(`${CAMINHO}/importacao/modelo`, 'modelo-fornecedores.csv');
 }

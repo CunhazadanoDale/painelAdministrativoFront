@@ -6,6 +6,7 @@ import { Modal } from '../../app/components/Modal';
 import { StatusBadge } from '../../app/components/StatusBadge';
 import { ehConflitoDeConcorrencia } from '../../lib/api';
 import { FornecedorFormModal } from './FornecedorFormModal';
+import { ImportacaoFornecedoresModal } from './ImportacaoFornecedoresModal';
 import { MOEDAS, identificacaoDe } from './fornecedoresUtils';
 import { useFornecedores } from './useFornecedores';
 import {
@@ -18,6 +19,7 @@ import {
   PowerOff,
   Search,
   Trash2,
+  Upload,
 } from 'lucide-react';
 import './Fornecedores.css';
 
@@ -43,6 +45,7 @@ export default function Fornecedores() {
 
   const [termo, setTermo] = useState('');
   const [fornecedorModal, setFornecedorModal] = useState(undefined);
+  const [importando, setImportando] = useState(false);
   const [fornecedorParaExcluir, setFornecedorParaExcluir] = useState(null);
   const [excluindo, setExcluindo] = useState(false);
   const [erroExclusao, setErroExclusao] = useState(null);
@@ -241,6 +244,16 @@ export default function Fornecedores() {
           {financeiro && (
             <button
               type="button"
+              className="filter-btn filter-btn-secondary"
+              style={{ flex: 'none', width: 'auto', padding: '4px 12px', display: 'flex', alignItems: 'center', gap: 4 }}
+              onClick={() => setImportando(true)}
+            >
+              <Upload size={16} /> Importar CSV
+            </button>
+          )}
+          {financeiro && (
+            <button
+              type="button"
               className="filter-btn filter-btn-primary"
               style={{ flex: 'none', width: 'auto', padding: '4px 12px', display: 'flex', alignItems: 'center', gap: 4 }}
               onClick={() => setFornecedorModal(null)}
@@ -318,6 +331,8 @@ export default function Fornecedores() {
           </div>
         )}
       </div>
+
+      {importando && <ImportacaoFornecedoresModal onFechar={() => setImportando(false)} onImportado={recarregar} />}
 
       {fornecedorModal !== undefined && (
         <FornecedorFormModal

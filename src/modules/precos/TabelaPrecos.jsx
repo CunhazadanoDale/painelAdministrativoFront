@@ -8,8 +8,9 @@ import { Paginacao } from '../notas/Paginacao';
 import { MODELOS } from '../pedidos/pedidosUtils';
 import { useConsulta } from '../pedidos/useConsulta';
 import { HistoricoPrecosModal } from './HistoricoPrecosModal';
+import { ImportacaoPrecosModal } from './ImportacaoPrecosModal';
 import { LancarPrecoModal } from './LancarPrecoModal';
-import { AlertCircle, Plus, Search } from 'lucide-react';
+import { AlertCircle, Plus, Search, Upload } from 'lucide-react';
 import './Precos.css';
 
 const FILTROS = { modelo: 'pronta_entrega', data: '', busca: '' };
@@ -28,6 +29,7 @@ export default function TabelaPrecos() {
   const [termo, setTermo] = useState('');
   const [historico, setHistorico] = useState(null);
   const [lancando, setLancando] = useState(null);
+  const [importando, setImportando] = useState(false);
 
   const buscar = (evento) => {
     evento.preventDefault();
@@ -129,6 +131,16 @@ export default function TabelaPrecos() {
           {administrador && (
             <button
               type="button"
+              className="filter-btn filter-btn-secondary"
+              style={{ flex: 'none', width: 'auto', padding: '4px 12px', display: 'flex', alignItems: 'center', gap: 4 }}
+              onClick={() => setImportando(true)}
+            >
+              <Upload size={16} /> Importar CSV
+            </button>
+          )}
+          {administrador && (
+            <button
+              type="button"
               className="filter-btn filter-btn-primary"
               style={{ flex: 'none', width: 'auto', padding: '4px 12px', display: 'flex', alignItems: 'center', gap: 4 }}
               onClick={() => setLancando({ produto: null })}
@@ -176,6 +188,7 @@ export default function TabelaPrecos() {
           onFechar={() => setHistorico(null)}
         />
       )}
+      {importando && <ImportacaoPrecosModal onFechar={() => setImportando(false)} onImportado={recarregar} />}
       {lancando && (
         <LancarPrecoModal
           produto={lancando.produto}

@@ -1,4 +1,5 @@
 import { montarConsulta, requisitar } from '../lib/api';
+import { baixarDoCaminho } from './arquivos';
 
 const CAMINHO = '/api/v1/produtos';
 
@@ -91,4 +92,16 @@ export function removerImagem(id, imagemId) {
 
 export function obterResumo({ sinal } = {}) {
   return requisitar('/api/v1/estoque/resumo', { sinal });
+}
+
+export function importarProdutos(arquivo, { simular = false } = {}) {
+  return requisitar(`${CAMINHO}/importacao${montarConsulta({ simular: simular ? 'true' : 'false' })}`, {
+    metodo: 'POST',
+    corpo: arquivo,
+    tipoConteudo: 'text/csv',
+  });
+}
+
+export function baixarModeloImportacao() {
+  return baixarDoCaminho(`${CAMINHO}/importacao/modelo`, 'modelo-produtos.csv');
 }

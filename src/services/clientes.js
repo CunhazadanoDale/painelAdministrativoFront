@@ -1,4 +1,5 @@
 import { montarConsulta, requisitar } from '../lib/api';
+import { baixarDoCaminho } from './arquivos';
 
 const CAMINHO = '/api/v1/clientes';
 
@@ -77,4 +78,8 @@ export function ativarObra(id) {
 
 export function desativarObra(id) {
   return requisitar(`/api/v1/obras/${id}/desativar`, { metodo: 'PATCH' });
+}
+
+export function baixarModeloImportacao() {
+  return baixarDoCaminho(`${CAMINHO}/importacao/modelo`, 'modelo-clientes.csv');
 }
