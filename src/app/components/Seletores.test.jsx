@@ -1,6 +1,8 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React, { useState } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { PREFERENCIAS_PADRAO } from '../preferencias/armazenamento';
+import { PreferenciasContexto } from '../preferencias/preferenciasContexto';
 import * as empresasService from '../../services/empresas';
 import * as locaisService from '../../services/locais';
 import { SeletorEmpresa } from './SeletorEmpresa';
@@ -19,6 +21,11 @@ const { listarTodosLocais } = locaisService;
 
 const MIA = { id: 'e-mia', nome_fantasia: 'MIA', ativa: true };
 const GIGANTE = { id: 'e-gigante', nome_fantasia: 'Gigante', ativa: true };
+
+function ComEmpresaPadrao({ empresa, children }) {
+  const valor = { preferencias: { ...PREFERENCIAS_PADRAO, empresaPadrao: empresa }, alterar: () => {} };
+  return <PreferenciasContexto.Provider value={valor}>{children}</PreferenciasContexto.Provider>;
+}
 
 function Controlado({ Componente, inicial = '', aoAlterar = () => {}, ...props }) {
   const [valor, setValor] = useState(inicial);
@@ -85,6 +92,61 @@ describe('SeletorEmpresa', () => {
     expect(screen.getByRole('option', { name: 'Todas' })).toBeInTheDocument();
     expect(screen.getByTestId('valor')).toBeEmptyDOMElement();
     expect(listarTodasEmpresas).toHaveBeenCalledWith(expect.objectContaining({ ativas: '' }));
+  });
+
+  it('já vem com a empresa padrão do usuário nos formulários', async () => {
+    listarTodasEmpresas.mockResolvedValue([MIA, GIGANTE]);
+
+    render(
+      <ComEmpresaPadrao empresa="e-gigante">
+        <Controlado Componente={SeletorEmpresa} />
+      </ComEmpresaPadrao>
+    );
+
+    await waitFor(() => expect(screen.getByTestId('valor')).toHaveTextContent('e-gigante'));
+  });
+
+  it('não troca a empresa já escolhida pela padrão', async () => {
+    listarTodasEmpresas.mockResolvedValue([MIA, GIGANTE]);
+
+    render(
+      <ComEmpresaPadrao empresa="e-gigante">
+        <Controlado Componente={SeletorEmpresa} inicial="e-mia" />
+      </ComEmpresaPadrao>
+    );
+
+    await screen.findByRole('option', { name: 'MIA' });
+    await act(async () => {
+      await new Promise((resolver) => setTimeout(resolver, 20));
+    });
+    expect(screen.getByTestId('valor')).toHaveTextContent('e-mia');
+  });
+
+  it('ignora a empresa padrão em filtros e quando ela saiu do acesso', async () => {
+    listarTodasEmpresas.mockResolvedValue([MIA, GIGANTE]);
+
+    const { unmount } = render(
+      <ComEmpresaPadrao empresa="e-gigante">
+        <Controlado Componente={SeletorEmpresa} selecionarUnica={false} placeholder="Todas" />
+      </ComEmpresaPadrao>
+    );
+    await screen.findByRole('option', { name: 'MIA' });
+    await act(async () => {
+      await new Promise((resolver) => setTimeout(resolver, 20));
+    });
+    expect(screen.getByTestId('valor')).toBeEmptyDOMElement();
+    unmount();
+
+    render(
+      <ComEmpresaPadrao empresa="e-removida">
+        <Controlado Componente={SeletorEmpresa} />
+      </ComEmpresaPadrao>
+    );
+    await screen.findByRole('option', { name: 'MIA' });
+    await act(async () => {
+      await new Promise((resolver) => setTimeout(resolver, 20));
+    });
+    expect(screen.getByTestId('valor')).toBeEmptyDOMElement();
   });
 
   it('avisa quando não há empresa no acesso', async () => {

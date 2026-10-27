@@ -326,7 +326,7 @@
 .dre-subtotal th,
 .dre-subtotal td {
   font-weight: 700;
-  background-color: var(--bg-hover, rgba(0, 0, 0, 0.03));
+  background-color: var(--bg-hover);
 }
 
 .dre-item th[scope='row'] {

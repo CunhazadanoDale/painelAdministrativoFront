@@ -146,7 +146,7 @@
 }
 
 .usuarios-excluir-confirmar:hover {
-  background-color: #9d1f00;
+  background-color: var(--danger-hover);
 }
 
 .usuarios-acesso-status {

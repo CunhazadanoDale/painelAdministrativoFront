@@ -3,6 +3,7 @@ import { MemoryRouter, useLocation } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
 import { AutenticacaoProvider } from './app/autenticacao/AutenticacaoProvider';
+import { PreferenciasProvider } from './app/preferencias/PreferenciasProvider';
 
 function Observador() {
   const localizacao = useLocation();
@@ -18,8 +19,10 @@ function renderizar(caminho) {
   return render(
     <MemoryRouter initialEntries={[caminho]}>
       <AutenticacaoProvider>
-        <Observador />
-        <App />
+        <PreferenciasProvider>
+          <Observador />
+          <App />
+        </PreferenciasProvider>
       </AutenticacaoProvider>
     </MemoryRouter>
   );
@@ -637,6 +640,59 @@ describe('roteamento do App', () => {
     await waitFor(() =>
       expect(screen.getByTestId('caminho-completo')).toHaveTextContent('/solicitacoes?escopo=minhas')
     );
+  });
+
+  describe('tela inicial preferida', () => {
+    function simularLogin(perfil) {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(async (url) => ({
+          ok: true,
+          status: 200,
+          text: async () =>
+            JSON.stringify(
+              String(url).includes('/usuarios/autenticar')
+                ? { dados: { token: 'token-novo', ...perfil, usuario: { id: 'u-1', nome: 'Pessoa Teste' } } }
+                : { dados: [] }
+            ),
+        }))
+      );
+    }
+
+    async function entrar(caminho) {
+      renderizar(caminho);
+      fireEvent.change(await screen.findByLabelText('E-mail'), { target: { value: 'pessoa@exemplo.com' } });
+      fireEvent.change(screen.getByLabelText('Senha'), { target: { value: 'segredo' } });
+      fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
+    }
+
+    beforeEach(() => {
+      localStorage.setItem('mia.preferencias.u-1', JSON.stringify({ telaInicial: '/caixa' }));
+    });
+
+    it('sem link de origem leva para a tela inicial escolhida', async () => {
+      simularLogin({ financeiro: true });
+
+      await entrar('/');
+
+      await waitFor(() => expect(screen.getByTestId('caminho-completo')).toHaveTextContent(/^\/caixa$/));
+    });
+
+    it('o link de origem tem prioridade sobre a tela inicial', async () => {
+      simularLogin({ financeiro: true });
+
+      await entrar('/fornecedores');
+
+      await waitFor(() => expect(screen.getByTestId('caminho-completo')).toHaveTextContent(/^\/fornecedores$/));
+    });
+
+    it('volta para a raiz quando a tela escolhida saiu do perfil', async () => {
+      simularLogin({ comercial: true });
+
+      await entrar('/login');
+
+      await waitFor(() => expect(screen.getByTestId('caminho-completo')).toHaveTextContent(/^\/$/));
+    });
   });
 
   it('sem link de origem o login leva para a raiz', async () => {

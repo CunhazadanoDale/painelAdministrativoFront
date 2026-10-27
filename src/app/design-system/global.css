@@ -45,11 +45,11 @@ input, select, textarea {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #c1c7d0;
+  background: var(--scrollbar-thumb);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #a5adba;
+  background: var(--scrollbar-thumb-hover);
 }
 
 .leads-erro {

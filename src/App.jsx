@@ -2,6 +2,8 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AppShell } from './app/layout/AppShell';
 import { ErrorBoundary } from './app/components/ErrorBoundary';
 import { useAutenticacao } from './app/autenticacao/useAutenticacao';
+import { telasPermitidas } from './app/layout/navegacao';
+import { usePreferencias } from './app/preferencias/usePreferencias';
 
 import Login from './modules/login/Login';
 import Dashboard from './modules/dashboard/Dashboard';
@@ -56,20 +58,26 @@ import Dre from './modules/dre/Dre';
 import Faturamento from './modules/dre/Faturamento';
 import RelatorioSemanal from './modules/dre/RelatorioSemanal';
 import Perfil from './modules/perfil/Perfil';
+import Configuracoes from './modules/configuracoes/Configuracoes';
 
 const Negociacoes = () => <div>Negociações Module</div>;
 const Formularios = () => <div>Formulários Module</div>;
-const Configuracoes = () => <div>Configurações Module</div>;
 
-function destinoDepoisDoLogin(origem) {
-  if (!origem || typeof origem.pathname !== 'string' || !origem.pathname.startsWith('/')) return '/';
-  if (origem.pathname === '/login') return '/';
+function destinoDepoisDoLogin(origem, telaInicial) {
+  if (!origem || typeof origem.pathname !== 'string' || !origem.pathname.startsWith('/')) return telaInicial;
+  if (origem.pathname === '/login' || origem.pathname === '/') return telaInicial;
   return `${origem.pathname}${origem.search || ''}${origem.hash || ''}`;
 }
 
 function App() {
   const localizacao = useLocation();
   const { autenticado, administrador, comercial, financeiro } = useAutenticacao();
+  const { preferencias } = usePreferencias();
+  const telaInicial = telasPermitidas({ administrador, comercial, financeiro }).some(
+    (tela) => tela.path === preferencias.telaInicial
+  )
+    ? preferencias.telaInicial
+    : '/';
 
   if (!autenticado) {
     return (
@@ -89,7 +97,7 @@ function App() {
           <Routes>
             <Route
               path="/login"
-              element={<Navigate to={destinoDepoisDoLogin(localizacao.state && localizacao.state.de)} replace />}
+              element={<Navigate to={destinoDepoisDoLogin(localizacao.state && localizacao.state.de, telaInicial)} replace />}
             />
             <Route path="/" element={<Dashboard />} />
             <Route path="/leads" element={comercial ? <Leads /> : <Navigate to="/" replace />} />
