@@ -377,7 +377,7 @@
 }
 
 .solicitacoes-acao-perigo:hover:not(:disabled) {
-  background-color: #9d1f00;
+  background-color: var(--danger-hover);
 }
 
 .solicitacoes-lista {
