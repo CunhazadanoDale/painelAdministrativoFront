@@ -9,6 +9,7 @@
 
 .produtos-toolbar {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   gap: var(--space-3);
@@ -26,6 +27,7 @@
 
 .produtos-toolbar-acoes {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
 }
@@ -245,6 +247,7 @@
 
 .produtos-detalhe-toolbar {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   gap: var(--space-3);
