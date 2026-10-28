@@ -371,7 +371,9 @@ export default function Leads() {
         <LeadFormModal
           key={leadEditando?.id ?? 'novo'}
           lead={leadEditando}
-          etapas={visao === 'kanban' ? kanban.etapas : etapas}
+          funis={funis}
+          etapas={etapas}
+          funilInicialId={visao === 'kanban' ? kanban.funilId : ''}
           onFechar={() => setModalAberto(false)}
           onSalvar={salvar}
         />
