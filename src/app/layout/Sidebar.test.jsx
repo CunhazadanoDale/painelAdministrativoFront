@@ -11,12 +11,16 @@ vi.mock('../../services/solicitacoes', () => ({ obterPendencias: vi.fn() }));
 
 const { obterPendencias } = solicitacoesService;
 
-function renderizar() {
+function renderizar(caminho = '/') {
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={[caminho]}>
       <Sidebar />
     </MemoryRouter>
   );
+}
+
+function area(nome) {
+  return screen.getByRole('button', { name: new RegExp(`^${nome}`) });
 }
 
 beforeEach(() => {
@@ -39,7 +43,8 @@ describe('Sidebar', () => {
   it('soma aprovação e financeiro e não mostra contador zerado', async () => {
     obterPendencias.mockResolvedValueOnce({ dados: { aprovacao: 4, financeiro: 3, vencidas: 0 } });
     const { unmount } = renderizar();
-    expect(await screen.findByText('7')).toHaveAttribute('title', '4 para aprovar · 3 para pagar');
+    const link = screen.getByRole('link', { name: /Solicitações/ });
+    expect(await within(link).findByText('7')).toHaveAttribute('title', '4 para aprovar · 3 para pagar');
     unmount();
 
     obterPendencias.mockResolvedValueOnce({ dados: { aprovacao: 0, financeiro: null, vencidas: null } });
@@ -72,5 +77,67 @@ describe('Sidebar', () => {
 
     await waitFor(() => expect(obterPendencias).toHaveBeenCalled());
     expect(onFechar).toHaveBeenCalledTimes(2);
+  });
+
+  it('abre só a área da tela atual', async () => {
+    obterPendencias.mockResolvedValue({ dados: {} });
+
+    renderizar('/dividas/resumo');
+
+    await waitFor(() => expect(obterPendencias).toHaveBeenCalled());
+    expect(area('Financeiro')).toHaveAttribute('aria-expanded', 'true');
+    expect(area('Comercial')).toHaveAttribute('aria-expanded', 'false');
+    expect(area('Início')).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('abre e fecha a área no clique e lembra a escolha', async () => {
+    obterPendencias.mockResolvedValue({ dados: {} });
+    const { unmount } = renderizar('/caixa');
+    await waitFor(() => expect(obterPendencias).toHaveBeenCalled());
+
+    fireEvent.click(area('Financeiro'));
+    fireEvent.click(area('Comercial'));
+
+    expect(area('Financeiro')).toHaveAttribute('aria-expanded', 'false');
+    expect(area('Comercial')).toHaveAttribute('aria-expanded', 'true');
+    unmount();
+
+    renderizar('/');
+    await waitFor(() => expect(obterPendencias).toHaveBeenCalledTimes(2));
+    expect(area('Financeiro')).toHaveAttribute('aria-expanded', 'false');
+    expect(area('Comercial')).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('ignora preferência de áreas corrompida', async () => {
+    obterPendencias.mockResolvedValue({ dados: {} });
+    localStorage.setItem('mia.menu.areas', '{quebrado');
+
+    renderizar('/caixa');
+
+    await waitFor(() => expect(obterPendencias).toHaveBeenCalled());
+    expect(area('Financeiro')).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('agrupa os itens em seções e esconde a seção sem itens para o perfil', async () => {
+    obterPendencias.mockResolvedValue({ dados: {} });
+    useAutenticacao.mockReturnValue({ administrador: false, comercial: false, financeiro: false });
+
+    renderizar('/fornecedores');
+
+    await waitFor(() => expect(obterPendencias).toHaveBeenCalled());
+    expect(screen.getByText('A pagar')).toBeInTheDocument();
+    expect(screen.getByText('Fiscal')).toBeInTheDocument();
+    expect(screen.queryByText('Tesouraria')).toBeNull();
+    expect(screen.queryByText('A receber')).toBeNull();
+  });
+
+  it('mostra o contador de solicitações no título da área fechada', async () => {
+    obterPendencias.mockResolvedValue({ dados: { aprovacao: null, financeiro: 7, vencidas: 2 } });
+
+    renderizar('/');
+
+    expect(await within(area('Financeiro')).findByText('7')).toHaveAttribute('title', '7 para pagar · 2 vencidas');
+    fireEvent.click(area('Financeiro'));
+    expect(within(area('Financeiro')).queryByText('7')).toBeNull();
   });
 });
