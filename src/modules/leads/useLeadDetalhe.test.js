@@ -62,4 +62,16 @@ describe('useLeadDetalhe', () => {
     await waitFor(() => expect(result.current.carregando).toBe(false));
     expect(result.current.erroEstrutura).toBeNull();
   });
+
+  it('entrega o funil do lead para o formulário de edição', async () => {
+    obterLead.mockResolvedValue({ dados: LEAD });
+    listarFunis.mockResolvedValue([
+      { funil_id: 'f1', nome: 'Vendas' },
+      { funil_id: 'f2', nome: 'Obras' },
+    ]);
+    const { result } = renderHook(() => useLeadDetalhe('lead-1'));
+    await waitFor(() => expect(result.current.carregando).toBe(false));
+
+    expect(result.current.funisEditaveis).toEqual([{ funil_id: 'f1', nome: 'Vendas' }]);
+  });
 });

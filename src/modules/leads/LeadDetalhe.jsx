@@ -16,6 +16,7 @@ export default function LeadDetalhe() {
     lead,
     etapaMap,
     etapasEditaveis,
+    funisEditaveis,
     movimentacoes,
     temProxima,
     carregando,
@@ -248,6 +249,7 @@ export default function LeadDetalhe() {
         <LeadFormModal
           key={lead.id}
           lead={lead}
+          funis={funisEditaveis}
           etapas={etapasEditaveis}
           onFechar={() => setModalAberto(false)}
           onSalvar={async (dados) => {

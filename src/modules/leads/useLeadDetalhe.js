@@ -6,6 +6,7 @@ export const TAMANHO_HISTORICO = 20;
 
 export function useLeadDetalhe(leadId) {
   const [lead, setLead] = useState(null);
+  const [funis, setFunis] = useState([]);
   const [etapas, setEtapas] = useState([]);
   const [estruturaOk, setEstruturaOk] = useState(false);
 
@@ -45,6 +46,7 @@ export function useLeadDetalhe(leadId) {
           listaFunis.map((funil) => funisService.listarEtapasDoFunil(funil.funil_id, { sinal: controle.signal }))
         );
         if (controle.signal.aborted) return;
+        setFunis(listaFunis);
         setEtapas(respostasEtapas.flatMap((resposta) => resposta?.dados ?? []));
         setEstruturaOk(true);
         setFalhaEstrutura(null);
@@ -131,11 +133,20 @@ export function useLeadDetalhe(leadId) {
     [etapas]
   );
 
-  const etapasEditaveis = useMemo(() => {
-    const etapaAtual = etapas.find((etapa) => etapa.etapa_id === lead?.etapa_id);
-    if (!etapaAtual) return etapas;
-    return etapas.filter((etapa) => etapa.funil_id === etapaAtual.funil_id);
-  }, [etapas, lead]);
+  const funilDoLeadId = useMemo(
+    () => etapas.find((etapa) => etapa.etapa_id === lead?.etapa_id)?.funil_id ?? null,
+    [etapas, lead]
+  );
+
+  const etapasEditaveis = useMemo(
+    () => (funilDoLeadId ? etapas.filter((etapa) => etapa.funil_id === funilDoLeadId) : etapas),
+    [etapas, funilDoLeadId]
+  );
+
+  const funisEditaveis = useMemo(
+    () => (funilDoLeadId ? funis.filter((funil) => funil.funil_id === funilDoLeadId) : funis),
+    [funis, funilDoLeadId]
+  );
 
   const recarregar = useCallback(() => {
     setPagina(1);
@@ -166,6 +177,7 @@ export function useLeadDetalhe(leadId) {
     lead,
     etapaMap,
     etapasEditaveis,
+    funisEditaveis,
     movimentacoes,
     temProxima,
     carregando: carregandoLead || carregandoEstrutura,
